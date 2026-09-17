@@ -1,0 +1,21 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local tooling and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*.log
+*.tsbuildinfo
+
+# Local design/reference screenshots
+Codex 圖像 *.png
