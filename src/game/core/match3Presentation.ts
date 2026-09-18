@@ -1,8 +1,8 @@
 export const MATCH3_CLEAR_EFFECT_DURATION_MS = 560
-export const MATCH3_PRESENTATION_BUFFER_MS = 120
-export const MATCH3_FALL_ANIMATION_DURATION_MS = 420
-export const MATCH3_FALL_STAGGER_MS = 180
-export const MATCH3_FALL_PRESENTATION_BUFFER_MS = 30
+export const MATCH3_PRESENTATION_BUFFER_MS = 70
+export const MATCH3_FALL_ANIMATION_DURATION_MS = 360
+export const MATCH3_FALL_STAGGER_MS = 60
+export const MATCH3_FALL_PRESENTATION_BUFFER_MS = 20
 
 export function getMatch3ComboLabel(cascades: number): string | undefined {
   const count = normalizeCascadeCount(cascades)

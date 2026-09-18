@@ -264,7 +264,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
               disabled={!tile || isResolving}
               style={{
                 '--match3-delay': fallRows ? `${getMatch3FallDelay(x, y, height)}ms` : '0ms',
-                '--match3-fall-distance': fallRows ? `-${fallRows * 100}%` : '0%'
+                '--match3-fall-distance': fallRows ? `calc(-${fallRows * 100}% - ${fallRows * 3}px)` : '0%'
               } as React.CSSProperties}
               onPointerDown={(event) => tile && handlePointerDown(event, point)}
               onPointerMove={tile ? handlePointerMove : undefined}
@@ -374,11 +374,16 @@ function getFallOffsets(previous: Match3BoardState, next: Match3BoardState): Map
   }))
 
   const offsets = new Map<string, number>()
+  // Keep new cats spaced one cell apart above the board, rather than
+  // starting every new cat at the same position just above the first row.
+  const newTilesPerColumn = next[0].map((_, x) =>
+    next.reduce((count, row) => count + (row[x] && !previousPositions.has(row[x]!.id) ? 1 : 0), 0)
+  )
   next.forEach((row, y) => row.forEach((tile, x) => {
     if (!tile) return
     const previousPoint = previousPositions.get(tile.id)
     const rowsFallen = previousPoint?.x === x ? y - previousPoint.y : undefined
-    const fallRows = rowsFallen && rowsFallen > 0 ? rowsFallen : previousPoint ? 0 : y + 1
+    const fallRows = rowsFallen && rowsFallen > 0 ? rowsFallen : previousPoint ? 0 : newTilesPerColumn[x]
     if (fallRows > 0) offsets.set(`${x}:${y}`, fallRows)
   }))
   return offsets

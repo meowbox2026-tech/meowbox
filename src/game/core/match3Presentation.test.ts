@@ -24,7 +24,7 @@ describe('match-3 presentation timing', () => {
   })
 
   it('keeps the falling animation alive through its travel and stagger', () => {
-    expect(getMatch3FallPresentationDuration(8)).toBe(630)
-    expect(getMatch3FallPresentationDuration(1)).toBeLessThanOrEqual(630)
+    expect(getMatch3FallPresentationDuration(8)).toBe(440)
+    expect(getMatch3FallPresentationDuration(1)).toBeLessThanOrEqual(440)
   })
 })
