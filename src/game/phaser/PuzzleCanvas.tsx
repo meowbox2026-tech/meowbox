@@ -1,10 +1,12 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
-import Phaser from 'phaser'
-import { PuzzleScene, type PuzzleCommand, type PuzzleFeedback } from './PuzzleScene'
+import { forwardRef, useImperativeHandle, useRef } from 'react'
+import { CatPlacementArea, type CatPlacementAreaHandle } from './CatPlacementArea'
+import { PuzzleFloor } from './PuzzleFloor'
+import type { PuzzleCommand, PuzzleFeedback } from './PuzzleScene'
 import type { LevelDefinition, PuzzleState } from '../types'
 
 export interface PuzzleCanvasHandle {
   dispatch: (command: PuzzleCommand) => void
+  placeAtScreenPoint: (clientX: number, clientY: number) => void
 }
 
 interface PuzzleCanvasProps {
@@ -17,39 +19,17 @@ export const PuzzleCanvas = forwardRef<PuzzleCanvasHandle, PuzzleCanvasProps>(fu
   { level, onStateChange, onFeedback },
   forwardedRef
 ) {
-  const hostRef = useRef<HTMLDivElement>(null)
-  const sceneRef = useRef<PuzzleScene | null>(null)
+  const placementRef = useRef<CatPlacementAreaHandle>(null)
 
   useImperativeHandle(forwardedRef, () => ({
-    dispatch: (command) => sceneRef.current?.dispatch(command)
+    dispatch: (command) => placementRef.current?.dispatch(command),
+    placeAtScreenPoint: (clientX, clientY) => placementRef.current?.placeAtScreenPoint(clientX, clientY)
   }), [])
 
-  useEffect(() => {
-    if (!hostRef.current) return undefined
-    const scene = new PuzzleScene({ level, onStateChange, onFeedback })
-    sceneRef.current = scene
-    const game = new Phaser.Game({
-      type: Phaser.AUTO,
-      parent: hostRef.current,
-      transparent: true,
-      // The UI owns its tiny WebAudio feedback; Phaser's global audio mixer is unused.
-      // Disabling it avoids creating a suspended context on mobile browsers.
-      audio: { noAudio: true },
-      render: { antialias: true, pixelArt: false },
-      scale: {
-        mode: Phaser.Scale.RESIZE,
-        width: '100%',
-        height: '100%',
-        autoCenter: Phaser.Scale.CENTER_BOTH
-      },
-      scene: [scene]
-    })
-
-    return () => {
-      sceneRef.current = null
-      game.destroy(true)
-    }
-  }, [level, onFeedback, onStateChange])
-
-  return <div className="puzzle-canvas" ref={hostRef} aria-label="貓咪裝箱拼圖棋盤" />
+  return (
+    <div className="puzzle-canvas">
+      <PuzzleFloor level={level} />
+      <CatPlacementArea ref={placementRef} level={level} onStateChange={onStateChange} onFeedback={onFeedback} />
+    </div>
+  )
 })

@@ -1,4 +1,4 @@
-import type { CatDefinition, CatPlacement, GridPoint } from '../types'
+import type { CatDefinition, CatPlacement, CatShape, GridPoint, OccupancyMask } from '../types'
 
 const BASE_SHAPES: Record<string, GridPoint[]> = {
   dot: [{ x: 0, y: 0 }],
@@ -11,12 +11,26 @@ const BASE_SHAPES: Record<string, GridPoint[]> = {
   z: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }]
 }
 
+export function getOccupancyMaskForShape(shape: CatShape): OccupancyMask {
+  const cells = BASE_SHAPES[shape]
+  const width = Math.max(...cells.map((cell) => cell.x)) + 1
+  const height = Math.max(...cells.map((cell) => cell.y)) + 1
+
+  return Array.from({ length: height }, (_, y) => (
+    Array.from({ length: width }, (_, x) => cells.some((cell) => cell.x === x && cell.y === y) ? 1 : 0)
+  ))
+}
+
 export function getShapeCells(cat: CatDefinition, placement?: CatPlacement): GridPoint[] {
   const cells = cat.type === 'stretch'
     ? getStretchCells(placement?.stretchLength ?? cat.stretchLengths?.[0] ?? 2)
-    : BASE_SHAPES[cat.shape]
+    : maskToCells(cat.occupancyMask)
 
   return rotateCells(cells, placement?.rotation ?? 0)
+}
+
+function maskToCells(mask: OccupancyMask): GridPoint[] {
+  return mask.flatMap((row, y) => row.flatMap((occupied, x) => occupied ? [{ x, y }] : []))
 }
 
 export function getPlacedCells(cat: CatDefinition, placement: CatPlacement): GridPoint[] {

@@ -18,14 +18,18 @@ npm run build
 ## 已完成的功能
 
 - 首頁、關卡選擇、遊戲、收藏、商店、設定、每日獎勵。
-- Phaser 棋盤：拖放、Grid Snap、托盤左右滑動、已放置貓咪調整、Undo、Restart、Hint、Auto Place、旋轉。
+- Phaser 棋盤：拖放、Grid Snap、獨立貓咪選擇區、已放置貓咪調整、Undo、Restart、Hint、Auto Place、旋轉。
+- 第一關是 3×3 自由放置關：9 隻 1×1 貓咪素材分成每組 4 隻，放滿一組後自動顯示下一組。
 - 資料驅動的 30 關導入順序，涵蓋障礙格、睡覺貓、黏黏貓、伸縮貓、箱蓋與限步挑戰。
 - 獎勵廣告測試閘道：Hint、Auto Place、+3 Moves、叫醒睡覺貓、雙倍過關與每日雙倍。
-- Local Save、設定、貨幣、星星、收藏與每日獎勵；原生 Preferences / Haptics 橋接已接入。
+- Local Save、設定、貨幣、星星、收藏與每日獎勵；貓幣與生命值 UI 目前暫時隱藏，原生 Preferences / Haptics 橋接已接入。
 - 雲端存檔以可替換 provider 介面實作合併策略，保留 iCloud / Google Play Games 的原生接入點。
 - `ArtworkButton` 專責將素材 WebP 做為按鈕外觀，文字則保持 HTML，兼顧可讀性、無障礙與未來多語系；首頁、遊戲操作、暫停與獎勵視窗皆已套用。生命值控制使用 `life.webp`，UI 素材與五張房間背景皆使用 WebP。
 - `ResultModal` 將過關標題、星星、獎勵操作與「關卡／下一關／重玩」固定在同一個畫面；領取後只更新按鈕狀態，不切換第二個彈窗。
 - 遊戲頂部關卡卡使用 `levelcard.webp`，暫停面板使用 `paused.webp` 並提供對齊圖片的可點擊文字按鈕；暫停面板的「設定」可直接進入設定頁，商店金幣格使用 `coins.webp`、`collect.webp`、`gift.webp`。
+- 正式貓咪素材改為 12 張透明 PNG（傲嬌、太陽、愛魚、三種普通色、獨處、睡覺、紙箱、調皮、貓老大、黏人），所有關卡共用這組圖片；每個 `CatDefinition` 同時保存 `occupancyMask`、`anchor`、`offset` 與 `bleed`，碰撞只讀邏輯遮罩，不讀圖片 alpha。
+- 第一關將 `PuzzleFloor` 地板元件、`CatPlacementArea` 貓咪放置元件與 `CatSelectionTray` 選擇區分開；3×3 地板使用 9 張 `boxes/modular/floor.png`，後續關卡仍可沿用完整紙箱模組。
+- Phaser 紙箱使用多層紙板邊緣、內凹腔體、格子高低光、折角、前緣遮擋與接觸陰影；貓咪放下時會先下落，再產生輕微下沉與 squash/settle 回彈。
 
 ## 分層
 

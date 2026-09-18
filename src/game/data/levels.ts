@@ -1,7 +1,20 @@
+import { getCatVisualSpec } from './catAssets'
+import { getOccupancyMaskForShape } from '../core/shapes'
 import type { CatAsset, CatDefinition, CatPlacement, CatSkin, LevelDefinition, LevelDifficulty, ObstacleKind } from '../types'
 
 const DEFAULT_BOARD = { width: 4, height: 4, blockedCells: [] }
 const LINE_SOLUTIONS: CatPlacement[] = [0, 1, 2, 3].map((y) => ({ origin: { x: 0, y }, rotation: 0 }))
+const INTRO_CAT_SHOWCASE: Array<{ suffix: string; name: string; skin: CatSkin; asset: CatAsset }> = [
+  { suffix: 'a', name: '傲嬌貓', skin: 'white', asset: 'arrogant' },
+  { suffix: 'b', name: '太陽貓', skin: 'calico', asset: 'sunny' },
+  { suffix: 'c', name: '愛魚貓', skin: 'orange', asset: 'fishLover' },
+  { suffix: 'd', name: '普通橘色貓', skin: 'orange', asset: 'orange' },
+  { suffix: 'e', name: '普通白貓', skin: 'white', asset: 'white' },
+  { suffix: 'f', name: '普通藍貓', skin: 'gray', asset: 'blue' },
+  { suffix: 'g', name: '獨處貓', skin: 'black', asset: 'alone' },
+  { suffix: 'h', name: '睡覺貓', skin: 'gray', asset: 'sleeping' },
+  { suffix: 'i', name: '紙箱貓', skin: 'orange', asset: 'box' }
+]
 
 function cat(
   id: string,
@@ -10,15 +23,28 @@ function cat(
   type: CatDefinition['type'] = 'normal',
   extra: Partial<CatDefinition> = {}
 ): CatDefinition {
-  return { id, name: `${skin} cat`, skin, shape, type, ...extra }
+  const visualSpec = getCatVisualSpec(extra.visualAsset)
+
+  return {
+    id,
+    name: `${skin} cat`,
+    skin,
+    shape,
+    type,
+    ...extra,
+    occupancyMask: extra.occupancyMask ?? getOccupancyMaskForShape(shape),
+    anchor: extra.anchor ?? visualSpec.anchor,
+    offset: extra.offset ?? visualSpec.offset,
+    bleed: extra.bleed ?? visualSpec.bleed
+  }
 }
 
 function createRowLevel(id: number, prefix: string, tutorial?: string): LevelDefinition {
-  const artwork: CatAsset[] = id === 1
-    ? ['orangeLounge', 'grayStretch', 'calicoStretch', 'tabbyLounge']
-    : id === 2
-      ? ['orangeLounge', 'brownCurl', 'grayCurl', 'whiteCurl']
-      : ['tabbyLounge', 'calicoStretch', 'grayStretch', 'orangeLounge']
+  if (id === 1) return createIntroLevel(id, prefix, tutorial)
+
+  const artwork: CatAsset[] = id === 2
+    ? ['orange', 'white', 'blue', 'alone']
+    : ['arrogant', 'sunny', 'fishLover', 'box']
   const cats = [
     cat(`${prefix}-row-a`, 'orange', 'line4', 'normal', { visualAsset: artwork[0] }),
     cat(`${prefix}-row-b`, 'gray', 'line4', 'normal', { visualAsset: artwork[1] }),
@@ -29,12 +55,38 @@ function createRowLevel(id: number, prefix: string, tutorial?: string): LevelDef
   return levelFromPairs(id, `溫馨紙箱 ${id}`, 'normal', DEFAULT_BOARD, cats, LINE_SOLUTIONS, tutorial, 0, 1)
 }
 
+function createIntroLevel(id: number, prefix: string, tutorial?: string): LevelDefinition {
+  const board = {
+    width: 8,
+    height: 8,
+    blockedCells: []
+  }
+  const cats = INTRO_CAT_SHOWCASE.map(({ suffix, name, skin, asset }) => cat(
+    `${prefix}-row-${suffix}`,
+    skin,
+    'dot',
+    'normal',
+    { name, visualAsset: asset }
+  ))
+  const solutions = INTRO_CAT_SHOWCASE.map((_, index) => ({
+    origin: { x: index % 3, y: Math.floor(index / 3) },
+    rotation: 0
+  }))
+
+  return {
+    ...levelFromPairs(id, `溫馨紙箱 ${id}`, 'normal', board, cats, solutions, tutorial ?? '交換相鄰貓咪，三隻相同花色即可消除。', 0, 1),
+    match3: {
+      tileAssets: ['alone', 'blue', 'fishLover', 'orange', 'white']
+    }
+  }
+}
+
 function createObstacleLevel(id: number, prefix: string): LevelDefinition {
   const artwork: CatAsset[] = id === 4
-    ? ['orangeLounge', 'amberSit', 'sphynxStretch', 'grayStretch', 'calicoStretch']
+    ? ['sticky', 'mischievous', 'boss', 'sleeping', 'fishLover']
     : id === 5
-      ? ['tabbyLounge', 'spottedSit', 'brownCurl', 'grayStretch', 'calicoStretch']
-      : ['orangeLounge', 'ragdollSit', 'siameseStretch', 'grayCurl', 'tabbyLounge']
+      ? ['alone', 'box', 'arrogant', 'sunny', 'orange']
+      : ['white', 'blue', 'sticky', 'mischievous', 'boss']
   const obstacleKind: ObstacleKind = id === 4 ? 'tape' : id === 5 ? 'yarn' : 'toy'
   const cats = [
     cat(`${prefix}-top`, 'orange', 'line4', 'normal', { visualAsset: artwork[0] }),
@@ -60,8 +112,8 @@ function createObstacleLevel(id: number, prefix: string): LevelDefinition {
 
 function createSleepingLevel(id: number, prefix: string): LevelDefinition {
   const artwork: CatAsset[] = id % 2 === 1
-    ? ['whiteCurl', 'brownCurl', 'grayCurl', 'orangeLounge']
-    : ['grayCurl', 'whiteCurl', 'orangeLounge', 'calicoStretch']
+    ? ['sleeping', 'white', 'alone', 'sunny']
+    : ['blue', 'sleeping', 'orange', 'arrogant']
   const cats = [
     cat(`${prefix}-orange`, 'orange', 'line4', 'sleeping', { visualAsset: artwork[0] }),
     cat(`${prefix}-gray`, 'gray', 'line4', 'normal', { visualAsset: artwork[1] }),
@@ -73,8 +125,8 @@ function createSleepingLevel(id: number, prefix: string): LevelDefinition {
 
 function createStickyLevel(id: number, prefix: string): LevelDefinition {
   const artwork: CatAsset[] = id % 2 === 1
-    ? ['blackPaws', 'whiteCurl', 'orangeLounge', 'tabbyLounge', 'calicoStretch']
-    : ['brownCurl', 'grayCurl', 'grayStretch', 'orangeLounge', 'calicoStretch']
+    ? ['sticky', 'orange', 'fishLover', 'box', 'mischievous']
+    : ['boss', 'alone', 'white', 'sunny', 'sticky']
   const cats = [
     cat(`${prefix}-left`, 'black', 'line2', 'sticky', { stickyGroup: `${prefix}-pair`, visualAsset: artwork[0] }),
     cat(`${prefix}-right`, 'orange', 'line2', 'sticky', { stickyGroup: `${prefix}-pair`, visualAsset: artwork[1] }),
@@ -94,8 +146,8 @@ function createStickyLevel(id: number, prefix: string): LevelDefinition {
 
 function createStretchLevel(id: number, prefix: string): LevelDefinition {
   const artwork: CatAsset[] = id % 2 === 0
-    ? ['sphynxStretch', 'siameseStretch', 'grayStretch', 'orangeLounge', 'tabbyLounge']
-    : ['siameseStretch', 'sphynxStretch', 'tabbyLounge', 'calicoStretch', 'grayStretch']
+    ? ['mischievous', 'blue', 'sleeping', 'orange', 'boss']
+    : ['sunny', 'arrogant', 'box', 'sticky', 'fishLover']
   const cats = [
     cat(`${prefix}-tabby`, 'orange', 'line2', 'stretch', { stretchLengths: [2, 3, 4], visualAsset: artwork[0] }),
     cat(`${prefix}-pair`, 'black', 'line2', 'normal', { visualAsset: artwork[1] }),
@@ -115,8 +167,8 @@ function createStretchLevel(id: number, prefix: string): LevelDefinition {
 
 function createLidLevel(id: number, prefix: string): LevelDefinition {
   const artwork: CatAsset[] = id % 2 === 1
-    ? ['orangeLounge', 'calicoStretch', 'grayStretch', 'tabbyLounge']
-    : ['orangeLounge', 'calicoStretch', 'whiteCurl', 'brownCurl']
+    ? ['orange', 'boss', 'blue', 'box']
+    : ['fishLover', 'sticky', 'white', 'alone']
   const cats = [
     cat(`${prefix}-top-a`, 'orange', 'line4', 'normal', { visualAsset: artwork[0] }),
     cat(`${prefix}-top-b`, 'black', 'line4', 'normal', { visualAsset: artwork[1] }),
@@ -136,8 +188,8 @@ function createLidLevel(id: number, prefix: string): LevelDefinition {
 
 function createChallengeLevel(id: number, prefix: string): LevelDefinition {
   const artwork: CatAsset[] = id % 2 === 0
-    ? ['brownCurl', 'siameseStretch', 'sphynxStretch', 'blackPaws', 'whiteCurl', 'grayStretch', 'ragdollSit']
-    : ['whiteCurl', 'amberSit', 'calicoStretch', 'grayCurl', 'orangeLounge', 'spottedSit', 'tabbyLounge']
+    ? ['sleeping', 'box', 'mischievous', 'sticky', 'boss', 'sunny', 'arrogant']
+    : ['white', 'alone', 'fishLover', 'orange', 'blue', 'box', 'sticky']
   const cats = [
     cat(`${prefix}-sleeper`, 'orange', 'line4', 'sleeping', { visualAsset: artwork[0] }),
     cat(`${prefix}-vertical`, 'black', 'line4', 'normal', { visualAsset: artwork[1] }),
@@ -198,7 +250,7 @@ function levelFromPairs(
 }
 
 export const LEVELS: LevelDefinition[] = [
-  createRowLevel(1, 'basic', '把所有貓咪拖進紙箱，試著填滿每一列。'),
+  createRowLevel(1, 'basic', '交換相鄰貓咪，三隻相同花色即可消除。'),
   createRowLevel(2, 'warm'),
   createRowLevel(3, 'cozy'),
   createObstacleLevel(4, 'obstacle'),

@@ -1,6 +1,7 @@
 import { ArtworkButton } from '../components/ArtworkButton'
 import { GameImage } from '../components/GameImage'
 import { TopBar } from '../components/TopBar'
+import { ECONOMY_UI_ENABLED } from '../config'
 import { usePlayer } from '../../state/PlayerContext'
 
 interface HomeScreenProps {
@@ -16,10 +17,10 @@ export function HomeScreen({ onStart, onNavigate, onDailyReward }: HomeScreenPro
   return (
     <main className="screen screen--home">
       <TopBar coins={player.pawCoins} onSettings={() => onNavigate('settings')} />
-      <div className="home-lives" aria-label="生命值 5，已滿">
+      {ECONOMY_UI_ENABLED && <div className="home-lives" aria-label="生命值 5，已滿">
         <GameImage asset="life" className="home-lives__art" alt="" aria-hidden="true" />
         <strong>5</strong><small>已滿</small>
-      </div>
+      </div>}
       <section className="home-brand" aria-label="Meow Box 貓咪裝箱拼圖">
         <GameImage asset="meowlogo" className="home-brand__logo" alt="MEOW BOX" />
         <p>貓咪裝箱拼圖</p>

@@ -176,7 +176,28 @@ export function getPlacedCatCells(level: LevelDefinition, state: PuzzleState, ca
 
 export function isPuzzleComplete(level: LevelDefinition, state: PuzzleState): boolean {
   if (Object.keys(state.placements).length !== level.cats.length) return false
+  if (!level.cats.every((cat) => catRuleIsSatisfied(level, cat, getPlacedCatCells(level, state, cat.id)))) return false
   return stickyGroupsAreConnected(level, state)
+}
+
+export function getCatRuleTargetCells(level: LevelDefinition, cat: CatDefinition): GridPoint[] {
+  if (!cat.rule || cat.rule.kind !== 'adjacent-to-special') return []
+
+  const activeCellKeys = getActiveCellKeys(level)
+  const blockedCellKeys = getBlockedCellKeys(level)
+  const targetCells = level.board.specialCells
+    ?.filter((specialCell) => specialCell.kind === cat.rule?.specialCellKind)
+    .flatMap(({ cell }) => [
+      { x: cell.x, y: cell.y - 1 },
+      { x: cell.x + 1, y: cell.y },
+      { x: cell.x, y: cell.y + 1 },
+      { x: cell.x - 1, y: cell.y }
+    ]) ?? []
+
+  const uniqueCells = new Map(targetCells.map((cell) => [pointKey(cell), cell]))
+  return [...uniqueCells.values()].filter((cell) => (
+    activeCellKeys.has(pointKey(cell)) && !blockedCellKeys.has(pointKey(cell))
+  ))
 }
 
 function getRequiredLevel(state: PuzzleState): LevelDefinition {
@@ -219,7 +240,16 @@ function validatePlacement(
     if (occupied.has(pointKey(cell))) return 'occupied'
   }
 
+  if (!catRuleIsSatisfied(level, cat, cells)) return 'preferred-cell'
+
   return undefined
+}
+
+function catRuleIsSatisfied(level: LevelDefinition, cat: CatDefinition, cells: GridPoint[]): boolean {
+  if (!cat.rule) return true
+
+  const targetKeys = new Set(getCatRuleTargetCells(level, cat).map(pointKey))
+  return cells.some((cell) => targetKeys.has(pointKey(cell)))
 }
 
 function getActiveCellKeys(level: LevelDefinition): Set<string> {

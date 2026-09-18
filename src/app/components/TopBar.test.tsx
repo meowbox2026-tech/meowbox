@@ -12,5 +12,6 @@ describe('TopBar', () => {
     expect(screen.getByText('關卡')).toBeInTheDocument()
     expect(screen.getByText('3')).toBeInTheDocument()
     expect(container.querySelector('img[src="/assets/levelcard.webp"]')).toBeInTheDocument()
+    expect(screen.queryByLabelText(/Paw Coins/)).not.toBeInTheDocument()
   })
 })

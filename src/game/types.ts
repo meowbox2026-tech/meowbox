@@ -5,19 +5,50 @@ export type CatShape = 'dot' | 'line2' | 'line3' | 'line4' | 'square2' | 'l' | '
 export type CatType = 'normal' | 'sleeping' | 'sticky' | 'stretch'
 
 export type CatAsset =
-  | 'amberSit'
-  | 'spottedSit'
-  | 'blackPaws'
-  | 'calicoStretch'
-  | 'sphynxStretch'
-  | 'grayStretch'
-  | 'brownCurl'
-  | 'orangeLounge'
-  | 'ragdollSit'
-  | 'grayCurl'
-  | 'siameseStretch'
-  | 'tabbyLounge'
-  | 'whiteCurl'
+  | 'arrogant'
+  | 'sunny'
+  | 'fishLover'
+  | 'orange'
+  | 'white'
+  | 'blue'
+  | 'alone'
+  | 'sleeping'
+  | 'box'
+  | 'mischievous'
+  | 'boss'
+  | 'sticky'
+
+export type OccupancyMask = readonly (readonly number[])[]
+
+export interface CatVisualPoint {
+  x: number
+  y: number
+}
+
+export interface CatVisualBleed {
+  top: number
+  right: number
+  bottom: number
+  left: number
+}
+
+export interface CatVisualSpec {
+  anchor: CatVisualPoint
+  offset: CatVisualPoint
+  bleed: CatVisualBleed
+}
+
+export type BoardSpecialCellKind = 'food'
+
+export interface BoardSpecialCell {
+  cell: GridPoint
+  kind: BoardSpecialCellKind
+}
+
+export type CatPlacementRule = {
+  kind: 'adjacent-to-special'
+  specialCellKind: BoardSpecialCellKind
+}
 
 export type ObstacleKind = 'tape' | 'yarn' | 'toy' | 'divider'
 
@@ -36,7 +67,12 @@ export interface CatDefinition {
   skin: CatSkin
   shape: CatShape
   type: CatType
+  occupancyMask: OccupancyMask
+  anchor: CatVisualPoint
+  offset: CatVisualPoint
+  bleed: CatVisualBleed
   visualAsset?: CatAsset
+  rule?: CatPlacementRule
   stickyGroup?: string
   stretchLengths?: number[]
 }
@@ -56,6 +92,7 @@ export interface BoardDefinition {
   height: number
   activeCells?: GridPoint[]
   blockedCells: GridPoint[]
+  specialCells?: BoardSpecialCell[]
   obstacles?: BoardObstacle[]
   lidZones?: LidZone[]
 }
@@ -74,10 +111,15 @@ export interface LevelDefinition {
   difficulty: LevelDifficulty
   board: BoardDefinition
   cats: CatDefinition[]
+  match3?: Match3LevelDefinition
   moves: number
   targetMoves?: number
   solution: Record<string, CatPlacement>
   tutorial?: string
+}
+
+export interface Match3LevelDefinition {
+  tileAssets: CatAsset[]
 }
 
 export interface PuzzleSnapshot {
@@ -117,6 +159,7 @@ export type PlacementFailure =
   | 'inactive'
   | 'blocked'
   | 'occupied'
+  | 'preferred-cell'
   | 'sleeping'
   | 'lid-closed'
   | 'game-over'

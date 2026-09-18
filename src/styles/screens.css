@@ -101,10 +101,6 @@
   .home-nav__button { font-size: 12px; }
 }
 
-@media (min-height: 761px) {
-  .home-start { margin-top: 107px; }
-}
-
 .star-progress > img { width: 30px; height: 30px; object-fit: contain; }
 .star-progress__treasure { width: 38px !important; height: 38px !important; }
 .levels-back { position: relative; display: grid; width: 144px; min-height: 60px; margin: -1px auto 0; font-size: 13px; }
@@ -151,4 +147,64 @@
   font-size: clamp(10px, 2.8vw, 12px);
   font-weight: 900;
   white-space: nowrap;
+}
+
+/* Inspector handoff: iPhone 15 Pro is the visual baseline; shorter phones adapt through container units. */
+.screen--home {
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+  flex-direction: column;
+  translate: min(0.074cqw, 0.2775px) min(0.262cqw, 0.9825px);
+  --home-brand-tall-shift: clamp(0px, calc((100cqh - 667px) * .235), 43.459px);
+  --home-progress-tall-shift: clamp(0px, calc((100cqh - 667px) * .234), 42.834px);
+  --home-start-tall-shift: clamp(0px, calc((100cqh - 667px) * .85), 157.228px);
+}
+.screen--home .home-brand { scale: 0.958157 0.871296; }
+.screen--home .coin-pill {
+  scale: 0.994005 0.905694;
+  translate: min(3.499cqw, 13.750976px) min(0.859cqh, 7.320755px);
+}
+.screen--home .home-lives { translate: 0 max(-0.14px, -0.037cqw); }
+.screen--home .home-brand {
+  width: min(82cqw, 307.5px);
+  height: min(50cqw, 187.5px);
+  margin-top: min(9.1cqw, 34.125px);
+  transform-origin: top center;
+  translate: min(0.733cqw, 2.88025px) calc(24.525px + var(--home-brand-tall-shift));
+}
+.screen--home .home-brand p { font-size: clamp(14px, min(4.5cqw, 16.875px), 21px); }
+.screen--home .home-progress {
+  width: min(37.333cqw, 140px);
+  height: min(37.333cqw, 140px);
+  margin-top: max(-40px, -10.667cqw);
+  translate: min(5.65cqw, 22.197875px) calc(44.205px + var(--home-progress-tall-shift));
+}
+.screen--home .home-progress > span { font-size: clamp(10px, min(3cqw, 11.25px), 13px); }
+.screen--home .home-progress > strong { font-size: clamp(20px, min(6cqw, 22.5px), 27px); }
+.screen--home .home-progress > small { font-size: clamp(7px, min(2cqw, 7.5px), 9px); }
+.screen--home .home-start {
+  width: min(89cqw, 333.75px);
+  min-height: min(25cqw, 93.75px);
+  margin-top: max(-7.5px, -2cqw);
+  font-size: clamp(25px, min(7.2cqw, 27px), 34px);
+  translate: min(3.184cqw, 12.512451px) calc(79.38px + var(--home-start-tall-shift));
+}
+.screen--home .home-nav {
+  position: static;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  width: min(290.5px, calc(100% - 24px));
+  margin: auto auto max(24px, env(safe-area-inset-bottom) + 12px);
+}
+.screen--home .home-nav .app-button { min-height: 0; }
+.screen--home .home-nav__button { font-size: clamp(12px, min(3.6cqw, 13.5px), 16px); }
+.screen--home .top-bar__right .top-bar__round { translate: min(1.34cqw, 5.025px) min(2.165cqw, 8.119px); }
+.screen--home .top-bar__round {
+  width: min(10.667cqw, 40px);
+  height: min(10.667cqw, 40px);
+  min-width: min(10.667cqw, 40px);
+  min-height: min(10.667cqw, 40px);
+  flex-basis: min(10.667cqw, 40px);
 }

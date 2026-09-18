@@ -3,6 +3,7 @@ import {
   addChallengeMoves,
   autoPlaceCat,
   createPuzzleState,
+  getCatRuleTargetCells,
   moveCatOnLevel,
   restartPuzzle,
   revealHint,
@@ -10,9 +11,10 @@ import {
   undoLastAction,
   wakeSleepingCat
 } from '../core/puzzleEngine'
-import { getPlacedCells, getShapeCells, pointKey } from '../core/shapes'
+import { getPlacedCells, pointKey } from '../core/shapes'
 import { getCatAssetPath, getCatTextureKey } from '../data/catAssets'
 import type { CatDefinition, GridPoint, LevelDefinition, PlacementFailure, PuzzleState } from '../types'
+import { getPuzzleMetrics, type BoardMetrics } from './puzzleLayout'
 
 export type PuzzleCommand =
   | { type: 'undo' }
@@ -23,6 +25,7 @@ export type PuzzleCommand =
   | { type: 'wake'; catId: string }
   | { type: 'stretch'; catId: string }
   | { type: 'rotate' }
+  | { type: 'select-cat'; catId: string }
 
 export interface PuzzleFeedback {
   type: 'placement' | 'selection'
@@ -36,14 +39,6 @@ export interface PuzzleSceneOptions {
   level: LevelDefinition
   onStateChange: (state: PuzzleState) => void
   onFeedback: (feedback: PuzzleFeedback) => void
-}
-
-interface BoardMetrics {
-  x: number
-  y: number
-  cell: number
-  trayY: number
-  trayHeight: number
 }
 
 interface MotionState {
@@ -68,7 +63,6 @@ export class PuzzleScene extends Phaser.Scene {
   private selectedRotation = 0
   private dragStart?: Phaser.Math.Vector2
   private previewOrigin?: GridPoint
-  private trayStartIndex = 0
   private isReady = false
   private queuedCommands: PuzzleCommand[] = []
   private readonly dropAnimations = new Map<string, MotionState>()
@@ -128,6 +122,7 @@ export class PuzzleScene extends Phaser.Scene {
     if (command.type === 'wake') this.commit(wakeSleepingCat(this.state, command.catId))
     if (command.type === 'stretch') this.commit(toggleStretchLength(this.state, command.catId))
     if (command.type === 'rotate') this.rotateSelectedCat()
+    if (command.type === 'select-cat') this.selectCat(command.catId)
   }
 
   private handleAutoPlace(): void {
@@ -139,17 +134,6 @@ export class PuzzleScene extends Phaser.Scene {
 
   private handlePointerDown(pointer: Phaser.Input.Pointer): void {
     if (this.state.phase !== 'playing' || !this.metrics) return
-    const trayAction = this.getTrayAction(pointer)
-    if (trayAction === 'previous' || trayAction === 'next') {
-      this.shiftTray(trayAction)
-      return
-    }
-    if (trayAction) {
-      this.selectCat(trayAction)
-      this.dragStart = new Phaser.Math.Vector2(pointer.x, pointer.y)
-      return
-    }
-
     const placedCatId = this.getPlacedCatAt(pointer)
     if (placedCatId) {
       this.selectCat(placedCatId)
@@ -171,14 +155,21 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private handlePointerUp(pointer: Phaser.Input.Pointer): void {
-    const horizontalTravel = this.dragStart ? pointer.x - this.dragStart.x : 0
-    if (Math.abs(horizontalTravel) > 44 && !this.isInsideBoard(pointer)) {
-      this.shiftTray(horizontalTravel > 0 ? 'previous' : 'next')
-    }
-
     if (this.selectedCatId && this.dragStart && this.isInsideBoard(pointer)) {
       const point = this.getGridPoint(pointer)
       this.tryPlaceSelectedCat(point)
+    }
+
+    this.dragStart = undefined
+    this.previewOrigin = undefined
+    this.renderPuzzle()
+  }
+
+  placeAtCanvasPoint(x: number, y: number): void {
+    if (!this.isReady || !this.metrics || this.state.phase !== 'playing') return
+
+    if (this.selectedCatId && this.isInsideBoard({ x, y })) {
+      this.tryPlaceSelectedCat(this.getGridPoint({ x, y }))
     }
 
     this.dragStart = undefined
@@ -199,6 +190,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.state = result.state
     this.selectedCatId = undefined
     this.selectedRotation = 0
+    this.options.onFeedback({ type: 'selection', catId: undefined })
     this.commit(this.state)
     this.playPlacementAnimation(catId)
   }
@@ -229,6 +221,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.boardJolt.y = 0
     this.selectedCatId = undefined
     this.selectedRotation = 0
+    this.options.onFeedback({ type: 'selection', catId: undefined })
     this.commit(nextState)
   }
 
@@ -308,26 +301,23 @@ export class PuzzleScene extends Phaser.Scene {
     this.children.removeAll(true)
     this.metrics = this.getMetrics()
     this.drawBoard()
+    this.drawSpecialCells()
+    this.drawInvalidCell()
     this.drawPlacedCats()
     this.drawBoardFrontLip()
     this.drawHint()
-    this.drawTray()
   }
 
   private getMetrics(): BoardMetrics {
-    const width = this.scale.width
-    const height = this.scale.height
-    const board = this.options.level.board
-    const cell = Math.max(28, Math.min((width * 0.84) / board.width, (height * 0.58) / board.height))
-    const boardWidth = cell * board.width
-    const boardHeight = cell * board.height
-    const x = (width - boardWidth) / 2
-    const y = Math.max(18, height * 0.035)
-    const trayY = Math.min(y + boardHeight + 18, height - 122)
-    return { x, y, cell, trayY, trayHeight: Math.max(110, height - trayY - 10) }
+    return getPuzzleMetrics(this.scale.width, this.scale.height, this.options.level.board, this.isIntroLevel())
   }
 
   private drawBoard(): void {
+    if (this.isIntroLevel()) return
+    this.drawLegacyBoard()
+  }
+
+  private drawLegacyBoard(): void {
     const metrics = this.metrics!
     const { board } = this.options.level
     const graphics = this.add.graphics()
@@ -374,16 +364,10 @@ export class PuzzleScene extends Phaser.Scene {
       })
     })
 
-    if (this.invalidCell && this.invalidCellAlpha > 0) {
-      const left = boardX + this.invalidCell.x * metrics.cell + 3
-      const top = boardY + this.invalidCell.y * metrics.cell + 3
-      graphics.fillStyle(0xe75e65, 0.24 * this.invalidCellAlpha).fillRoundedRect(left, top, metrics.cell - 7, metrics.cell - 9, 8)
-      graphics.lineStyle(3, 0xe75e65, 0.9 * this.invalidCellAlpha).strokeRoundedRect(left, top, metrics.cell - 7, metrics.cell - 9, 8)
-    }
   }
 
   private drawObstacle(left: number, top: number, cell: number, kind: NonNullable<LevelDefinition['board']['obstacles']>[number]['kind']): void {
-    const graphics = this.add.graphics()
+    const graphics = this.add.graphics().setDepth(2)
     const centerX = left + cell * 0.5
     const centerY = top + cell * 0.52
     const shadowY = top + cell * 0.78
@@ -418,13 +402,100 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private drawBlockedCell(left: number, top: number, cell: number): void {
-    const graphics = this.add.graphics()
+    const graphics = this.add.graphics().setDepth(2)
     graphics.lineStyle(Math.max(3, cell * 0.08), 0x4d3b3d, 0.76)
     graphics.lineBetween(left + cell * 0.24, top + cell * 0.24, left + cell * 0.76, top + cell * 0.76)
     graphics.lineBetween(left + cell * 0.76, top + cell * 0.24, left + cell * 0.24, top + cell * 0.76)
   }
 
   private drawBoardFrontLip(): void {
+    if (this.isIntroLevel()) return
+
+    this.drawLegacyBoardFrontLip()
+  }
+
+  private drawSpecialCells(): void {
+    const metrics = this.metrics!
+    const board = this.options.level.board
+
+    board.specialCells?.forEach((specialCell) => {
+      const left = metrics.x + this.boardJolt.x + specialCell.cell.x * metrics.cell
+      const top = metrics.y + this.boardJolt.y + specialCell.cell.y * metrics.cell
+      const graphics = this.add.graphics().setDepth(3)
+      graphics.fillStyle(0xffdc79, 0.96).fillRoundedRect(
+        left + metrics.cell * 0.16,
+        top + metrics.cell * 0.16,
+        metrics.cell * 0.68,
+        metrics.cell * 0.68,
+        14
+      )
+      graphics.lineStyle(2, 0xd68c38, 0.86).strokeRoundedRect(
+        left + metrics.cell * 0.16,
+        top + metrics.cell * 0.16,
+        metrics.cell * 0.68,
+        metrics.cell * 0.68,
+        14
+      )
+
+      if (specialCell.kind === 'food') {
+        this.add.text(left + metrics.cell * 0.5, top + metrics.cell * 0.48, '🐟', {
+          fontFamily: 'Apple Color Emoji, Segoe UI Emoji, sans-serif',
+          fontSize: `${Math.max(22, metrics.cell * 0.34)}px`
+        }).setOrigin(0.5).setDepth(4)
+      }
+    })
+
+    this.drawPlacementGuide()
+  }
+
+  private drawPlacementGuide(): void {
+    if (!this.selectedCatId) return
+    const cat = this.findCat(this.selectedCatId)
+    if (!cat?.rule) return
+
+    const targetCells = getCatRuleTargetCells(this.options.level, cat)
+    const occupiedCells = new Set<string>()
+    this.options.level.cats.forEach((placedCat) => {
+      if (placedCat.id === cat.id) return
+      const placement = this.state.placements[placedCat.id]
+      if (!placement) return
+      getPlacedCells(placedCat, placement).forEach((cell) => occupiedCells.add(pointKey(cell)))
+    })
+
+    const graphics = this.add.graphics().setDepth(3.5)
+    targetCells.forEach((cell) => {
+      const left = this.metrics!.x + this.boardJolt.x + cell.x * this.metrics!.cell + 5
+      const top = this.metrics!.y + this.boardJolt.y + cell.y * this.metrics!.cell + 5
+      const isOccupied = occupiedCells.has(pointKey(cell))
+      graphics.fillStyle(isOccupied ? 0xc9b8a2 : 0xffe36f, isOccupied ? 0.16 : 0.3)
+        .fillRoundedRect(left, top, this.metrics!.cell - 10, this.metrics!.cell - 10, 12)
+      graphics.lineStyle(3, isOccupied ? 0xb89d88 : 0xffc13e, isOccupied ? 0.35 : 0.95)
+        .strokeRoundedRect(left, top, this.metrics!.cell - 10, this.metrics!.cell - 10, 12)
+      if (!isOccupied) {
+        this.add.text(left + this.metrics!.cell * 0.5 - 5, top + this.metrics!.cell * 0.5 - 4, '✓', {
+          fontFamily: 'Arial Rounded MT Bold, sans-serif',
+          fontSize: `${Math.max(16, this.metrics!.cell * 0.24)}px`,
+          color: '#b86d27',
+          stroke: '#fff5cf',
+          strokeThickness: 3
+        }).setOrigin(0.5).setDepth(5)
+      }
+    })
+  }
+
+  private drawInvalidCell(): void {
+    if (!this.invalidCell || this.invalidCellAlpha <= 0) return
+    const board = this.options.level.board
+    if (this.invalidCell.x < 0 || this.invalidCell.y < 0 || this.invalidCell.x >= board.width || this.invalidCell.y >= board.height) return
+
+    const left = this.metrics!.x + this.boardJolt.x + this.invalidCell.x * this.metrics!.cell + 3
+    const top = this.metrics!.y + this.boardJolt.y + this.invalidCell.y * this.metrics!.cell + 3
+    const graphics = this.add.graphics().setDepth(7)
+    graphics.fillStyle(0xe75e65, 0.24 * this.invalidCellAlpha).fillRoundedRect(left, top, this.metrics!.cell - 7, this.metrics!.cell - 9, 8)
+    graphics.lineStyle(3, 0xe75e65, 0.9 * this.invalidCellAlpha).strokeRoundedRect(left, top, this.metrics!.cell - 7, this.metrics!.cell - 9, 8)
+  }
+
+  private drawLegacyBoardFrontLip(): void {
     const metrics = this.metrics!
     const board = this.options.level.board
     const boardWidth = board.width * metrics.cell
@@ -456,6 +527,27 @@ export class PuzzleScene extends Phaser.Scene {
         graphics.fillStyle(0xd4884c, 0.82).fillRoundedRect(cellLeft, cellTop, metrics.cell - 9, Math.max(2, edgeHeight * 0.35), 3)
       }
     }
+  }
+
+  private drawReferenceBoardFrontLip(): void {
+    const metrics = this.metrics!
+    const board = this.options.level.board
+    const boardWidth = board.width * metrics.cell
+    const boardHeight = board.height * metrics.cell
+    const left = metrics.x + this.boardJolt.x - 6
+    const top = metrics.y + this.boardJolt.y + boardHeight - metrics.cell * 0.2
+    const graphics = this.add.graphics().setDepth(6)
+    const backWallTop = metrics.y + this.boardJolt.y - metrics.cell * 0.18
+    graphics.fillStyle(0x714329, 0.3).fillRoundedRect(left + 4, backWallTop + 5, boardWidth + 12, metrics.cell * 0.22, 7)
+    graphics.fillStyle(0xb66c3b, 1).fillRoundedRect(left, backWallTop, boardWidth + 12, metrics.cell * 0.18, 7)
+    graphics.fillStyle(0xe4a66b, 0.75).fillRoundedRect(left + 2, backWallTop + 2, boardWidth + 8, Math.max(2, metrics.cell * 0.04), 3)
+    graphics.lineStyle(1.5, 0x7e472c, 0.68).strokeRoundedRect(left, backWallTop, boardWidth + 12, metrics.cell * 0.18, 7)
+    graphics.fillStyle(0x704127, 0.26).fillRoundedRect(left + 4, top + 6, boardWidth + 12, metrics.cell * 0.24, 8)
+    graphics.fillStyle(0xa96137, 1).fillRoundedRect(left, top, boardWidth + 12, metrics.cell * 0.2, 7)
+    graphics.fillStyle(0xe2a163, 0.7).fillRoundedRect(left + 2, top + 2, boardWidth + 8, Math.max(2, metrics.cell * 0.045), 3)
+    graphics.lineStyle(1.5, 0x7e472c, 0.68).strokeRoundedRect(left, top, boardWidth + 12, metrics.cell * 0.2, 7)
+    graphics.fillStyle(0x8c512f, 0.8).fillRoundedRect(left, backWallTop, metrics.cell * 0.12, boardHeight + metrics.cell * 0.18, 5)
+    graphics.fillStyle(0x8c512f, 0.8).fillRoundedRect(left + boardWidth + 12 - metrics.cell * 0.12, backWallTop, metrics.cell * 0.12, boardHeight + metrics.cell * 0.18, 5)
   }
 
   private drawPlacedCats(): void {
@@ -492,26 +584,23 @@ export class PuzzleScene extends Phaser.Scene {
     const boardY = metrics.y + this.boardJolt.y
     const headX = boardX + (head.x + 0.5) * metrics.cell
     const headY = boardY + (head.y + 0.5) * metrics.cell
-    const centerX = boardX + (minX + widthInCells / 2) * metrics.cell
-    const centerY = boardY + (minY + heightInCells / 2) * metrics.cell
     const motion = this.dropAnimations.get(cat.id)
     const dropProgress = motion?.progress ?? 1
     const easedProgress = 1 - Math.pow(1 - dropProgress, 3)
-    const dropOffsetY = (1 - easedProgress) * -metrics.cell * 0.78
-    const bounceScale = 0.92 + easedProgress * 0.08 + Math.sin(dropProgress * Math.PI) * 0.06
+    const legacyDropOffsetY = (1 - easedProgress) * -metrics.cell * 0.78
+    const legacyBounceScale = 0.92 + easedProgress * 0.08 + Math.sin(dropProgress * Math.PI) * 0.06
     const textureKey = cat.visualAsset ? getCatTextureKey(cat.visualAsset) : undefined
 
     if (textureKey && this.textures.exists(textureKey)) {
-      const baseCells = getShapeCells(cat, { origin: { x: 0, y: 0 }, rotation: 0, stretchLength })
-      const baseWidthInCells = Math.max(...baseCells.map((cell) => cell.x)) + 1
-      const baseHeightInCells = Math.max(...baseCells.map((cell) => cell.y)) + 1
-      const visualWidth = baseWidthInCells * metrics.cell * 0.94
-      const visualHeight = Math.max(baseHeightInCells * metrics.cell * 0.94, metrics.cell * 1.32)
+      const visualWidth = widthInCells * metrics.cell * 0.94
+      const visualHeight = Math.max(heightInCells * metrics.cell * 0.94, metrics.cell * 1.32)
+      const centerX = boardX + (minX + widthInCells / 2) * metrics.cell
+      const centerY = boardY + (minY + heightInCells / 2) * metrics.cell
       this.add.ellipse(centerX, centerY + metrics.cell * 0.37, visualWidth * 0.5, Math.max(5, metrics.cell * 0.13), 0x43261f, alpha * 0.22)
         .setScale(0.7 + easedProgress * 0.3, 1)
         .setDepth(3)
-      this.add.image(centerX, centerY + dropOffsetY, textureKey)
-        .setDisplaySize(visualWidth * bounceScale, visualHeight * bounceScale)
+      this.add.image(centerX, centerY + legacyDropOffsetY, textureKey)
+        .setDisplaySize(visualWidth * legacyBounceScale, visualHeight * legacyBounceScale)
         .setAngle(rotation * 90)
         .setAlpha(alpha)
         .setDepth(4)
@@ -520,23 +609,31 @@ export class PuzzleScene extends Phaser.Scene {
       const color = SKIN_COLORS[cat.skin]
       cells.forEach((cell) => {
         const left = boardX + cell.x * metrics.cell + 5
-        const top = boardY + cell.y * metrics.cell + 5 + dropOffsetY
+        const top = boardY + cell.y * metrics.cell + 5 + legacyDropOffsetY
         graphics.fillStyle(color, alpha).fillRoundedRect(left, top, metrics.cell - 10, metrics.cell - 10, 12)
         graphics.lineStyle(2, 0xffffff, alpha * 0.6).strokeRoundedRect(left, top, metrics.cell - 10, metrics.cell - 10, 12)
       })
     }
 
     if (!textureKey || !this.textures.exists(textureKey)) {
-      this.add.text(headX, headY + dropOffsetY, 'ᵔᴥᵔ', {
+      this.add.text(headX, headY + legacyDropOffsetY, 'ᵔᴥᵔ', {
         fontFamily: 'Arial Rounded MT Bold, sans-serif',
         fontSize: `${Math.max(13, metrics.cell * 0.28)}px`,
         color: cat.skin === 'black' ? '#fff4db' : '#61382d'
       }).setOrigin(0.5).setAlpha(alpha).setDepth(5)
     }
 
-    const badge = cat.type === 'sleeping' && locked ? 'zZ' : cat.type === 'sticky' ? '♡' : cat.type === 'stretch' ? '↔' : ''
+    const badge = cat.type === 'sleeping' && locked
+      ? 'zZ'
+      : cat.type === 'sticky'
+        ? '♡'
+        : cat.type === 'stretch'
+          ? '↔'
+          : cat.rule?.kind === 'adjacent-to-special'
+            ? '🐟'
+            : ''
     if (badge) {
-      this.add.text(headX + metrics.cell * 0.27, headY - metrics.cell * 0.3 + dropOffsetY, badge, {
+      this.add.text(headX + metrics.cell * 0.27, headY - metrics.cell * 0.3 + legacyDropOffsetY, badge, {
         fontFamily: 'Arial Rounded MT Bold, sans-serif',
         fontSize: `${Math.max(12, metrics.cell * 0.23)}px`,
         color: '#76402c', stroke: '#fff8e6', strokeThickness: 3
@@ -549,7 +646,7 @@ export class PuzzleScene extends Phaser.Scene {
     if (!hint) return
     const cat = this.findCat(hint.catId)
     if (!cat) return
-    const graphics = this.add.graphics()
+    const graphics = this.add.graphics().setDepth(7)
     getPlacedCells(cat, hint).forEach((cell) => {
       const left = this.metrics!.x + this.boardJolt.x + cell.x * this.metrics!.cell + 4
       const top = this.metrics!.y + this.boardJolt.y + cell.y * this.metrics!.cell + 4
@@ -557,77 +654,7 @@ export class PuzzleScene extends Phaser.Scene {
     })
   }
 
-  private drawTray(): void {
-    const metrics = this.metrics!
-    const width = this.scale.width
-    const graphics = this.add.graphics()
-    graphics.fillStyle(0xfff4e3, 0.97).fillRoundedRect(18, metrics.trayY, width - 36, metrics.trayHeight, 20)
-    graphics.lineStyle(2, 0xd39565, 0.76).strokeRoundedRect(18, metrics.trayY, width - 36, metrics.trayHeight, 20)
-    const visibleCats = this.options.level.cats.slice(this.trayStartIndex, this.trayStartIndex + 4)
-    const cardWidth = (width - 86) / 4
-    visibleCats.forEach((cat, index) => {
-      const left = 34 + index * cardWidth
-      const isSelected = cat.id === this.selectedCatId
-      const isPlaced = Boolean(this.state.placements[cat.id])
-      graphics.fillStyle(isSelected ? 0xffe58a : 0xf6e3cc, isPlaced ? 0.52 : 1)
-      graphics.fillRoundedRect(left, metrics.trayY + 14, cardWidth - 8, metrics.trayHeight - 28, 13)
-      graphics.lineStyle(isSelected ? 3 : 1.5, isSelected ? 0xf1a033 : 0xd3ab86, 0.9)
-      graphics.strokeRoundedRect(left, metrics.trayY + 14, cardWidth - 8, metrics.trayHeight - 28, 13)
-      this.drawTrayCat(cat, left + (cardWidth - 8) / 2, metrics.trayY + metrics.trayHeight * 0.47, cardWidth - 34, isPlaced)
-      if (isPlaced) this.add.text(left + (cardWidth - 8) / 2, metrics.trayY + metrics.trayHeight - 24, '已放入', {
-        fontFamily: 'Arial Rounded MT Bold, sans-serif', fontSize: '11px', color: '#84513b'
-      }).setOrigin(0.5)
-    })
-
-    this.drawTrayArrow(24, metrics.trayY + metrics.trayHeight / 2, '‹')
-    this.drawTrayArrow(width - 24, metrics.trayY + metrics.trayHeight / 2, '›')
-  }
-
-  private drawTrayCat(cat: CatDefinition, centerX: number, centerY: number, maxWidth: number, dimmed: boolean): void {
-    const textureKey = cat.visualAsset ? getCatTextureKey(cat.visualAsset) : undefined
-    if (textureKey && this.textures.exists(textureKey)) {
-      this.add.image(centerX, centerY, textureKey)
-        .setDisplaySize(Math.min(maxWidth, 74), Math.min(maxWidth, 74))
-        .setAlpha(dimmed ? 0.45 : 1)
-        .setDepth(4)
-      return
-    }
-
-    const cells = getPlacedCells(cat, { origin: { x: 0, y: 0 }, rotation: 0, stretchLength: this.state.stretchLengths[cat.id] })
-    const minX = Math.min(...cells.map((cell) => cell.x))
-    const maxX = Math.max(...cells.map((cell) => cell.x))
-    const minY = Math.min(...cells.map((cell) => cell.y))
-    const maxY = Math.max(...cells.map((cell) => cell.y))
-    const size = Math.min(maxWidth / (maxX - minX + 1), 26)
-    const graphics = this.add.graphics()
-    cells.forEach((cell) => {
-      const left = centerX + (cell.x - minX - (maxX - minX + 1) / 2) * size
-      const top = centerY + (cell.y - minY - (maxY - minY + 1) / 2) * size
-      graphics.fillStyle(SKIN_COLORS[cat.skin], dimmed ? 0.45 : 1).fillRoundedRect(left, top, size - 2, size - 2, 7)
-      graphics.lineStyle(1, 0xffffff, 0.6).strokeRoundedRect(left, top, size - 2, size - 2, 7)
-    })
-    this.add.text(centerX, centerY, 'ᵔᴥᵔ', {
-      fontFamily: 'Arial Rounded MT Bold, sans-serif', fontSize: `${Math.max(10, size * 0.45)}px`, color: cat.skin === 'black' ? '#fff5e8' : '#61382d'
-    }).setOrigin(0.5).setAlpha(dimmed ? 0.56 : 1)
-  }
-
-  private drawTrayArrow(x: number, y: number, label: string): void {
-    this.add.text(x, y, label, {
-      fontFamily: 'Arial Rounded MT Bold, sans-serif',
-      fontSize: '42px', color: '#c27b39', stroke: '#fff4e3', strokeThickness: 5
-    }).setOrigin(0.5)
-  }
-
-  private getTrayAction(pointer: Phaser.Input.Pointer): string | undefined {
-    const metrics = this.metrics!
-    if (pointer.y < metrics.trayY || pointer.y > metrics.trayY + metrics.trayHeight) return undefined
-    if (pointer.x < 42) return 'previous'
-    if (pointer.x > this.scale.width - 42) return 'next'
-    const index = Math.floor((pointer.x - 34) / ((this.scale.width - 86) / 4))
-    return this.options.level.cats[this.trayStartIndex + index]?.id
-  }
-
-  private getPlacedCatAt(pointer: Phaser.Input.Pointer): string | undefined {
+  private getPlacedCatAt(pointer: { x: number; y: number }): string | undefined {
     const point = this.getGridPoint(pointer)
     return [...this.options.level.cats].reverse().find((cat) => {
       const placement = this.state.placements[cat.id]
@@ -635,7 +662,7 @@ export class PuzzleScene extends Phaser.Scene {
     })?.id
   }
 
-  private getGridPoint(pointer: Phaser.Input.Pointer): GridPoint {
+  private getGridPoint(pointer: { x: number; y: number }): GridPoint {
     const metrics = this.metrics!
     return {
       x: Math.floor((pointer.x - metrics.x) / metrics.cell),
@@ -643,20 +670,18 @@ export class PuzzleScene extends Phaser.Scene {
     }
   }
 
-  private isInsideBoard(pointer: Phaser.Input.Pointer): boolean {
+  private isInsideBoard(pointer: { x: number; y: number }): boolean {
     const metrics = this.metrics!
     const board = this.options.level.board
     return pointer.x >= metrics.x && pointer.x <= metrics.x + board.width * metrics.cell
       && pointer.y >= metrics.y && pointer.y <= metrics.y + board.height * metrics.cell
   }
 
-  private shiftTray(direction: 'previous' | 'next'): void {
-    const maxStart = Math.max(0, this.options.level.cats.length - 4)
-    this.trayStartIndex = Phaser.Math.Clamp(this.trayStartIndex + (direction === 'next' ? 1 : -1), 0, maxStart)
-    this.renderPuzzle()
-  }
-
   private findCat(catId: string): CatDefinition | undefined {
     return this.options.level.cats.find((cat) => cat.id === catId)
+  }
+
+  private isIntroLevel(): boolean {
+    return this.options.level.id === 1
   }
 }

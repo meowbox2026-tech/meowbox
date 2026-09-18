@@ -4,6 +4,7 @@ import {
   addChallengeMoves,
   autoPlaceCat,
   createPuzzleState,
+  getCatRuleTargetCells,
   getHint,
   moveCat,
   moveCatOnLevel,
@@ -15,6 +16,73 @@ import {
 import type { LevelDefinition } from '../types'
 
 describe('puzzle engine', () => {
+  it('computes orthogonal target cells for a special-cell placement rule', () => {
+    const source = getLevelById(1)
+    const level: LevelDefinition = {
+      ...source,
+      board: {
+        ...source.board,
+        specialCells: [{ cell: { x: 1, y: 1 }, kind: 'food' }]
+      },
+      cats: source.cats.map((cat, index) => index === 0
+        ? { ...cat, rule: { kind: 'adjacent-to-special', specialCellKind: 'food' } }
+        : cat)
+    }
+    const state = createPuzzleState(level)
+
+    expect(getCatRuleTargetCells(level, level.cats[0])).toEqual([
+      { x: 1, y: 0 },
+      { x: 2, y: 1 },
+      { x: 1, y: 2 },
+      { x: 0, y: 1 }
+    ])
+
+    const onFood = moveCatOnLevel(level, state, 'basic-row-a', { x: 1, y: 1 })
+    const besideFood = moveCatOnLevel(level, state, 'basic-row-a', { x: 0, y: 1 })
+
+    expect(onFood.accepted).toBe(false)
+    expect(onFood.reason).toBe('preferred-cell')
+    expect(besideFood.accepted).toBe(true)
+  })
+
+  it('keeps completion semantics independent of the first-level visual preview roster', () => {
+    const source = getLevelById(1)
+    const cats = source.cats.slice(0, 4)
+    const level: LevelDefinition = {
+      ...source,
+      cats,
+      solution: Object.fromEntries(cats.map((cat, index) => [cat.id, {
+        origin: { x: index % 3, y: Math.floor(index / 3) },
+        rotation: 0
+      }]))
+    }
+    const first = moveCatOnLevel(level, createPuzzleState(level), 'basic-row-a', { x: 0, y: 0 }).state
+    const second = moveCatOnLevel(level, first, 'basic-row-b', { x: 1, y: 0 }).state
+    const third = moveCatOnLevel(level, second, 'basic-row-c', { x: 2, y: 0 }).state
+    const completed = moveCatOnLevel(level, third, 'basic-row-d', { x: 0, y: 1 }).state
+
+    expect(completed.phase).toBe('completed')
+    expect(Object.keys(completed.placements)).toHaveLength(4)
+  })
+
+  it('lets the nine first-level cats use any distinct cells without extra placement rules', () => {
+    const level = getLevelById(1)
+    const cells = Array.from({ length: 9 }, (_, index) => ({
+      x: index % 3,
+      y: Math.floor(index / 3)
+    }))
+    let state = createPuzzleState(level)
+
+    level.cats.forEach((cat, index) => {
+      const result = moveCatOnLevel(level, state, cat.id, cells[(index + 3) % cells.length])
+      expect(result.accepted).toBe(true)
+      state = result.state
+    })
+
+    expect(state.phase).toBe('completed')
+    expect(Object.keys(state.placements)).toHaveLength(9)
+  })
+
   it('rejects a cat placed over an obstacle without changing the state', () => {
     const level = getLevelById(4)
     const state = createPuzzleState(level)
@@ -43,9 +111,9 @@ describe('puzzle engine', () => {
   it('reports outside, occupied, and unknown placements distinctly', () => {
     const level = getLevelById(1)
     const initial = createPuzzleState(level)
-    const outside = moveCat(initial, 'basic-row-a', { x: 2, y: 0 })
-    const placed = moveCat(initial, 'basic-row-a', { x: 0, y: 0 }).state
-    const occupied = moveCat(placed, 'basic-row-b', { x: 0, y: 0 })
+    const outside = moveCat(initial, 'basic-row-a', { x: 8, y: 0 })
+    const placed = moveCat(initial, 'basic-row-a', { x: 0, y: 1 }).state
+    const occupied = moveCat(placed, 'basic-row-b', { x: 0, y: 1 })
     const unknown = moveCat(initial, 'not-a-cat', { x: 0, y: 0 })
 
     expect(outside.reason).toBe('outside')

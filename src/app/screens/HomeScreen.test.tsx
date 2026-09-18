@@ -17,6 +17,7 @@ describe('HomeScreen responsive controls', () => {
     render(<HomeScreen onStart={vi.fn()} onNavigate={vi.fn()} onDailyReward={vi.fn()} />)
 
     expect(screen.getByRole('button', { name: '設定' })).toHaveClass('top-bar__round')
+    expect(screen.queryByLabelText('生命值 5，已滿')).not.toBeInTheDocument()
     expect(screen.getByRole('complementary', { name: '目前進度，第 4 關' })).toHaveClass('home-progress')
 
     const navigation = screen.getByRole('navigation', { name: '主選單' })
