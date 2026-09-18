@@ -67,7 +67,7 @@ npx cap sync ios
 open ios/App/App.xcworkspace
 ```
 
-在 Xcode 選取 `App` target、連接已信任的 iPhone，確認 Signing Team 後按 Run。App Store Connect 的 Privacy Policy URL 請填部署後的 `https://你的 Pages 網域/privacy.html`，Support URL 請填 `/support.html`。
+在 Xcode 選取 `App` target、連接已信任的 iPhone，確認 Signing Team 後按 Run。App Store Connect 網址如下：Privacy Policy：`https://meowbox.pages.dev/privacy.html`、Terms of Use：`https://meowbox.pages.dev/terms.html`、Support：`https://meowbox.pages.dev/support.html`。
 
 ## 原生上架前設定
 
