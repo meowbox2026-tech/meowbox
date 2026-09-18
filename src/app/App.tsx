@@ -5,11 +5,13 @@ import { HomeScreen } from './screens/HomeScreen'
 import { LevelSelectScreen } from './screens/LevelSelectScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { ShopScreen } from './screens/ShopScreen'
+import { LegalScreen } from './screens/LegalScreen'
+import type { LegalDocumentId } from './legal/legalContent'
 import { usePlayer } from '../state/PlayerContext'
 
 const GameScreen = lazy(() => import('./screens/GameScreen').then((module) => ({ default: module.GameScreen })))
 
-type Screen = 'home' | 'levels' | 'game' | 'collection' | 'shop' | 'settings'
+type Screen = 'home' | 'levels' | 'game' | 'collection' | 'shop' | 'settings' | 'legal'
 
 export function App() {
   const { player, isReady, addHints, claimDailyReward } = usePlayer()
@@ -17,6 +19,7 @@ export function App() {
   const [selectedLevel, setSelectedLevel] = useState(player.currentLevel)
   const [isDailyOpen, setIsDailyOpen] = useState(false)
   const [toast, setToast] = useState<string>()
+  const [legalDocument, setLegalDocument] = useState<LegalDocumentId>('privacy')
 
   useEffect(() => {
     if (!toast) return undefined
@@ -27,6 +30,11 @@ export function App() {
   const openGame = (levelId: number) => {
     setSelectedLevel(levelId)
     setScreen('game')
+  }
+
+  const openLegal = (documentId: LegalDocumentId) => {
+    setLegalDocument(documentId)
+    setScreen('legal')
   }
 
   const claimDaily = (amount: number) => {
@@ -46,7 +54,8 @@ export function App() {
       {screen === 'game' && <Suspense fallback={<div className="app-loading"><span>🐱</span><strong>正在整理紙箱…</strong></div>}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} /></Suspense>}
       {screen === 'collection' && <CollectionScreen onBack={() => setScreen('home')} onShop={() => setScreen('shop')} />}
       {screen === 'shop' && <ShopScreen onBack={() => setScreen('home')} onToast={setToast} />}
-      {screen === 'settings' && <SettingsScreen onBack={() => setScreen('home')} onToast={setToast} />}
+      {screen === 'settings' && <SettingsScreen onBack={() => setScreen('home')} onToast={setToast} onLegal={openLegal} />}
+      {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}
       <DailyRewardModal open={isDailyOpen} streak={player.dailyReward.streak} canClaim={hasDailyReward} onClaim={claimDaily} onClose={() => setIsDailyOpen(false)} />
       {toast && <div className="app-toast" role="status">🐾 {toast}</div>}
     </div>

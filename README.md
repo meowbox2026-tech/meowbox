@@ -51,7 +51,23 @@ npm run test:coverage
 npm run build
 ```
 
-目前核心規則、存檔、素材按鈕、暫停面板、關卡卡與過關彈窗測試共 28 項；覆蓋率（核心規則與存檔範圍）會在 `npm run test:coverage` 產生最新報告。
+目前核心規則、存檔、素材按鈕、暫停面板、關卡卡、過關彈窗與法律頁面測試共 106 項；覆蓋率（核心規則與存檔範圍）會在 `npm run test:coverage` 產生最新報告。
+
+## App Store 與 iOS
+
+- 隱私權政策、使用條款與客服頁面已放在 `public/privacy.html`、`public/terms.html`、`public/support.html`，客服信箱為 `meowbox2026@gmail.com`。
+- App 內設定頁也可開啟相同內容；`ios/App/App/PrivacyInfo.xcprivacy` 已聲明目前只使用本機 UserDefaults 儲存進度，不做追蹤。
+- iOS App 圖示為 `public/app-icon.png`，Xcode 1024 × 1024 圖示位於 `ios/App/App/Assets.xcassets/AppIcon.appiconset/`。
+
+在 Xcode 執行 iPhone 版本：
+
+```bash
+npm run build
+npx cap sync ios
+open ios/App/App.xcworkspace
+```
+
+在 Xcode 選取 `App` target、連接已信任的 iPhone，確認 Signing Team 後按 Run。App Store Connect 的 Privacy Policy URL 請填部署後的 `https://你的 Pages 網域/privacy.html`，Support URL 請填 `/support.html`。
 
 ## 原生上架前設定
 

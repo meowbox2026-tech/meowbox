@@ -1,15 +1,19 @@
 import type { ImgHTMLAttributes } from 'react'
+import { Capacitor } from '@capacitor/core'
 
 interface GameImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   asset: string
 }
 
 function assetPath(asset: string): string {
-  return `/assets/${asset}.webp`
+  return Capacitor.isNativePlatform()
+    ? `/assets-native/${asset}.png`
+    : `/assets/${asset}.webp`
 }
 
 /**
- * Loads the compact WebP artwork. Game artwork is never draggable.
+ * Loads compact WebP artwork on the web and ImageIO-compatible PNG artwork
+ * in the native shell. Game artwork is never draggable.
  */
 export function GameImage({ asset, ...props }: GameImageProps) {
   return (
