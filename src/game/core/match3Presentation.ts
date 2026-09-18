@@ -4,9 +4,20 @@ export const MATCH3_FALL_ANIMATION_DURATION_MS = 360
 export const MATCH3_FALL_STAGGER_MS = 60
 export const MATCH3_FALL_PRESENTATION_BUFFER_MS = 20
 
+export type Match3CatSpectacle = 'paw' | 'combo' | 'run'
+
 export function getMatch3ComboLabel(cascades: number): string | undefined {
   const count = normalizeCascadeCount(cascades)
   return count > 0 ? `喵喵 ×${count}` : undefined
+}
+
+export function getMatch3CatSpectacle(cascades: number): Match3CatSpectacle | undefined {
+  const count = normalizeCascadeCount(cascades)
+  // Even combos get the paw; rare chains intentionally override it at 6+.
+  if (count >= 6) return 'run'
+  if (count >= 2 && count % 2 === 0) return 'paw'
+  if (count >= 3) return 'combo'
+  return undefined
 }
 
 export function getMatch3ClearDelay(cascade: number): number {

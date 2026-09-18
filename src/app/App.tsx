@@ -41,7 +41,7 @@ export function App() {
   const hasDailyReward = player.dailyReward.lastClaimDate !== new Date().toISOString().slice(0, 10)
   return (
     <div className="app-frame">
-      {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={setScreen} onDailyReward={() => setIsDailyOpen(true)} />}
+      {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={setScreen} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
       {screen === 'game' && <Suspense fallback={<div className="app-loading"><span>🐱</span><strong>正在整理紙箱…</strong></div>}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} /></Suspense>}
       {screen === 'collection' && <CollectionScreen onBack={() => setScreen('home')} onShop={() => setScreen('shop')} />}

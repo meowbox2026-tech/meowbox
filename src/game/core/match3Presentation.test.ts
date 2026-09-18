@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getMatch3ClearDelay,
   getMatch3ClearWaveDuration,
+  getMatch3CatSpectacle,
   getMatch3ComboLabel,
   getMatch3FallPresentationDuration,
   getMatch3PresentationDuration
@@ -26,5 +27,16 @@ describe('match-3 presentation timing', () => {
   it('keeps the falling animation alive through its travel and stagger', () => {
     expect(getMatch3FallPresentationDuration(8)).toBe(440)
     expect(getMatch3FallPresentationDuration(1)).toBeLessThanOrEqual(440)
+  })
+
+  it('assigns paw, rare run, and peek spectacles to combo thresholds', () => {
+    expect(getMatch3CatSpectacle(1)).toBeUndefined()
+    expect(getMatch3CatSpectacle(2)).toBe('paw')
+    expect(getMatch3CatSpectacle(3)).toBe('combo')
+    expect(getMatch3CatSpectacle(4)).toBe('paw')
+    expect(getMatch3CatSpectacle(5)).toBe('combo')
+    expect(getMatch3CatSpectacle(6)).toBe('run')
+    expect(getMatch3CatSpectacle(7)).toBe('run')
+    expect(getMatch3CatSpectacle(8)).toBe('run')
   })
 })

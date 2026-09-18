@@ -1,8 +1,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { playMatch3Sound } from './audioService'
+import {
+  CAT_SOUND_PATHS,
+  playCatSound,
+  playMatch3Sound,
+  startBackgroundMusic,
+  stopBackgroundMusic
+} from './audioService'
 
 describe('match-3 audio feedback', () => {
   afterEach(() => {
+    stopBackgroundMusic()
     vi.unstubAllGlobals()
   })
 
@@ -44,5 +51,37 @@ describe('match-3 audio feedback', () => {
     expect(AudioContextMock).toHaveBeenCalledTimes(1)
     expect(oscillator.start).toHaveBeenCalled()
     expect(oscillator.stop).toHaveBeenCalled()
+  })
+
+  it('keeps only non-meow cat sounds and plays them only when sound is enabled', () => {
+    const play = vi.fn(() => Promise.resolve())
+    const AudioMock = vi.fn(() => ({ play, pause: vi.fn(), loop: false, volume: 1 }))
+    vi.stubGlobal('Audio', AudioMock)
+    Object.defineProperty(window, 'Audio', { configurable: true, value: AudioMock })
+
+    playCatSound('purr', true)
+
+    expect(AudioMock).toHaveBeenCalledTimes(1)
+    expect(AudioMock).toHaveBeenCalledWith(CAT_SOUND_PATHS.purr)
+    expect(CAT_SOUND_PATHS).not.toHaveProperty('meow')
+    expect(CAT_SOUND_PATHS).not.toHaveProperty('paw')
+    expect(CAT_SOUND_PATHS.rustle).toBe('/assets/audio/box-rustle.mp3')
+    expect(play).toHaveBeenCalledTimes(1)
+  })
+
+  it('starts and stops the looping MeowBox theme after a user gesture', () => {
+    const play = vi.fn(() => Promise.resolve())
+    const pause = vi.fn()
+    const AudioMock = vi.fn(() => ({ play, pause, loop: false, volume: 1 }))
+    vi.stubGlobal('Audio', AudioMock)
+    Object.defineProperty(window, 'Audio', { configurable: true, value: AudioMock })
+
+    startBackgroundMusic(true)
+    startBackgroundMusic(true)
+    stopBackgroundMusic()
+
+    expect(AudioMock).toHaveBeenCalledTimes(1)
+    expect(play).toHaveBeenCalledTimes(2)
+    expect(pause).toHaveBeenCalledTimes(1)
   })
 })

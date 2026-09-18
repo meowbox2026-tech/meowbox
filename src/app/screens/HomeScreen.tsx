@@ -6,11 +6,10 @@ import { usePlayer } from '../../state/PlayerContext'
 
 interface HomeScreenProps {
   onStart: () => void
-  onNavigate: (screen: 'levels' | 'collection' | 'shop' | 'settings') => void
-  onDailyReward: () => void
+  onNavigate: (screen: 'levels' | 'settings') => void
 }
 
-export function HomeScreen({ onStart, onNavigate, onDailyReward }: HomeScreenProps) {
+export function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
   const { player } = usePlayer()
   const completedStars = Object.values(player.stars).reduce((total, stars) => total + stars, 0)
 
@@ -34,9 +33,6 @@ export function HomeScreen({ onStart, onNavigate, onDailyReward }: HomeScreenPro
       <ArtworkButton asset="start" className="home-start" onClick={onStart}>開始遊戲</ArtworkButton>
       <nav className="home-nav" aria-label="主選單">
         <ArtworkButton asset="levelmap" className="home-nav__button" onClick={() => onNavigate('levels')}>關卡</ArtworkButton>
-        <ArtworkButton asset="collect" className="home-nav__button home-nav__button--dark" onClick={() => onNavigate('collection')}>收藏</ArtworkButton>
-        <ArtworkButton asset="dailyrewards" className="home-nav__button" badge="!" onClick={onDailyReward}>每日獎勵</ArtworkButton>
-        <ArtworkButton asset="store" className="home-nav__button" onClick={() => onNavigate('shop')}>商店</ArtworkButton>
       </nav>
     </main>
   )

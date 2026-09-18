@@ -1,17 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getLevelById } from '../../game/data/levels'
-import type { Match3State } from '../../game/core/match3Engine'
+import { getRandomCatPawDirection, type CatPawDirection } from '../../game/animation/catPaw'
+import type { Match3State, Match3SwapResult } from '../../game/core/match3Engine'
+import { getMatch3CatSpectacle } from '../../game/core/match3Presentation'
 import { createPuzzleState } from '../../game/core/puzzleEngine'
 import { Match3Board, type Match3BoardHandle } from '../../game/phaser/Match3Board'
 import { PuzzleCanvas, type PuzzleCanvasHandle } from '../../game/phaser/PuzzleCanvas'
 import type { PuzzleFeedback } from '../../game/phaser/PuzzleScene'
 import type { CatDefinition, PuzzleState } from '../../game/types'
-import { playMatch3Sound, playUiSound } from '../../services/audio/audioService'
+import {
+  playCatSound,
+  playMatch3Sound,
+  playUiSound,
+  startBackgroundMusic,
+  stopBackgroundMusic
+} from '../../services/audio/audioService'
 import { playPlacementHaptic } from '../../services/haptics/hapticsService'
 import { usePlayer } from '../../state/PlayerContext'
 import { AppButton } from '../components/AppButton'
 import { ArtworkButton } from '../components/ArtworkButton'
 import { CatSelectionTray } from '../components/CatSelectionTray'
+import {
+  CAT_PEEK_INTERVAL_MS,
+  CatSpectacleOverlay,
+  getCatSpectacleDuration,
+  getRandomDropAnchor,
+  type CatSpectacle,
+  type CatSpectacleKind
+} from '../components/CatSpectacleOverlay'
 import { Modal } from '../components/Modal'
 import { PauseModal } from '../components/PauseModal'
 import { RewardedAdModal } from '../components/RewardedAdModal'
@@ -47,7 +63,11 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
   const canvasRef = useRef<PuzzleCanvasHandle>(null)
   const match3Ref = useRef<Match3BoardHandle>(null)
   const didOpenResult = useRef(false)
+  const didOpenFailure = useRef(false)
   const didClaimReward = useRef(false)
+  const spectacleId = useRef(0)
+  const idleSide = useRef<'left' | 'right'>('left')
+  const outcomeTimer = useRef<number | undefined>(undefined)
   const [puzzle, setPuzzle] = useState<PuzzleState>(() => createPuzzleState(level))
   const [isPaused, setIsPaused] = useState(false)
   const [isResultOpen, setIsResultOpen] = useState(false)
@@ -56,11 +76,34 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
   const [selectedCatId, setSelectedCatId] = useState<string>()
   const [rewardPrompt, setRewardPrompt] = useState<RewardPrompt>()
   const [match3Stats, setMatch3Stats] = useState<Match3Stats>({ moves: 0, cleared: 0, cascades: 0 })
+  const [spectacle, setSpectacle] = useState<CatSpectacle>()
+  const [activityTick, setActivityTick] = useState(0)
   const isMatch3Level = level.id === 1 && Boolean(level.match3)
 
+  const markActivity = useCallback(() => {
+    setActivityTick((value) => value + 1)
+  }, [])
+
+  const showSpectacle = useCallback((
+    kind: CatSpectacleKind,
+    side?: 'left' | 'right',
+    anchor?: CatSpectacle['anchor'],
+    direction?: CatPawDirection
+  ) => {
+    spectacleId.current += 1
+    setSpectacle({ id: spectacleId.current, kind, side, anchor, direction })
+  }, [])
+
+  const onSpectacleComplete = useCallback((effectId: number) => {
+    setSpectacle((current) => current?.id === effectId ? undefined : current)
+    setActivityTick((value) => value + 1)
+  }, [])
+
   useEffect(() => {
+    if (outcomeTimer.current !== undefined) window.clearTimeout(outcomeTimer.current)
     setPuzzle(createPuzzleState(level))
     didOpenResult.current = false
+    didOpenFailure.current = false
     didClaimReward.current = false
     setIsRewardClaimed(false)
     setIsPaused(false)
@@ -68,35 +111,85 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
     setIsFailedOpen(false)
     setSelectedCatId(undefined)
     setMatch3Stats({ moves: 0, cleared: 0, cascades: 0 })
+    setSpectacle(undefined)
+    setActivityTick((value) => value + 1)
   }, [level])
+
+  useEffect(() => () => {
+    if (outcomeTimer.current !== undefined) window.clearTimeout(outcomeTimer.current)
+    stopBackgroundMusic()
+  }, [])
+
+  useEffect(() => {
+    if (isPaused || isResultOpen || isFailedOpen) return undefined
+
+    const timer = window.setTimeout(() => {
+      const side = idleSide.current
+      idleSide.current = side === 'left' ? 'right' : 'left'
+      showSpectacle('idle', side)
+    }, 4000)
+
+    return () => window.clearTimeout(timer)
+  }, [activityTick, isFailedOpen, isPaused, isResultOpen, level.id, showSpectacle])
+
+  useEffect(() => {
+    if (isPaused || isResultOpen || isFailedOpen) return undefined
+
+    const timer = window.setInterval(() => showSpectacle('peek'), CAT_PEEK_INTERVAL_MS)
+    return () => window.clearInterval(timer)
+  }, [isFailedOpen, isPaused, isResultOpen, level.id, showSpectacle])
 
   useEffect(() => {
     if (puzzle.phase === 'completed' && !didOpenResult.current) {
       didOpenResult.current = true
-      setIsResultOpen(true)
+      setIsResultOpen(false)
+      showSpectacle('complete')
+      playCatSound('purr', player.settings.sound)
+      outcomeTimer.current = window.setTimeout(() => {
+        outcomeTimer.current = undefined
+        setIsResultOpen(true)
+      }, getCatSpectacleDuration('complete'))
     }
-    if (puzzle.phase === 'failed') setIsFailedOpen(true)
-  }, [puzzle.phase])
+    if (puzzle.phase === 'failed' && !didOpenFailure.current) {
+      didOpenFailure.current = true
+      setIsFailedOpen(false)
+      showSpectacle('failed')
+      outcomeTimer.current = window.setTimeout(() => {
+        outcomeTimer.current = undefined
+        setIsFailedOpen(true)
+      }, getCatSpectacleDuration('failed'))
+    }
+  }, [player.settings.sound, puzzle.phase, showSpectacle])
 
   const onStateChange = useCallback((nextState: PuzzleState) => {
     setPuzzle(nextState)
   }, [])
 
   const onFeedback = useCallback((feedback: PuzzleFeedback) => {
+    markActivity()
+    startBackgroundMusic(player.settings.sound)
     if (feedback.type === 'selection') {
       setSelectedCatId(feedback.catId)
+      if (feedback.catId) {
+        showSpectacle('pickup', 'left')
+      }
       return
     }
     if (feedback.accepted) {
+      showSpectacle('drop', undefined, getRandomDropAnchor())
       playUiSound(player.settings.sound)
+      playCatSound('purr', player.settings.sound)
+      playCatSound('rustle', player.settings.sound)
       void playPlacementHaptic(player.settings.haptics)
       return
     }
+    showSpectacle('invalid')
     void playPlacementHaptic(player.settings.haptics, false)
     onToast(getPlacementMessage(feedback.reason))
-  }, [onToast, player.settings.haptics, player.settings.sound])
+  }, [markActivity, onToast, player.settings.haptics, player.settings.sound, showSpectacle])
 
   const selectedCat = level.cats.find((cat) => cat.id === selectedCatId)
+  const boardPeek = isMatch3Level && spectacle?.kind === 'peek' ? spectacle : undefined
   const stretchCat = level.cats.find((cat) => cat.type === 'stretch' && !puzzle.placements[cat.id])
   const sleepingCat = level.cats.find((cat) => cat.type === 'sleeping' && puzzle.placements[cat.id]?.locked)
   const displayedStars = calculateStars(level.targetMoves, puzzle)
@@ -104,12 +197,17 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
 
   const dispatch = (command: Parameters<PuzzleCanvasHandle['dispatch']>[0]) => canvasRef.current?.dispatch(command)
   const restart = () => {
+    if (outcomeTimer.current !== undefined) window.clearTimeout(outcomeTimer.current)
+    outcomeTimer.current = undefined
     didOpenResult.current = false
+    didOpenFailure.current = false
     didClaimReward.current = false
     setIsRewardClaimed(false)
     setIsResultOpen(false)
     setIsFailedOpen(false)
     setIsPaused(false)
+    setSpectacle(undefined)
+    markActivity()
     if (isMatch3Level) {
       match3Ref.current?.reset()
       setMatch3Stats({ moves: 0, cleared: 0, cascades: 0 })
@@ -122,10 +220,29 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
     setMatch3Stats({ moves: state.moves, cleared: state.cleared, cascades: state.cascades })
   }, [])
 
+  const onMatch3Action = useCallback((result: Match3SwapResult) => {
+    markActivity()
+    startBackgroundMusic(player.settings.sound)
+    if (!result.accepted) {
+      showSpectacle('invalid')
+    }
+  }, [markActivity, player.settings.sound, showSpectacle])
+
   const onMatch3ClearWave = useCallback((cascade: number) => {
+    markActivity()
+    startBackgroundMusic(player.settings.sound)
     playMatch3Sound(player.settings.sound, cascade)
+    const catSpectacle = getMatch3CatSpectacle(cascade)
+    if (catSpectacle) {
+      showSpectacle(
+        catSpectacle,
+        catSpectacle === 'run' ? 'left' : undefined,
+        undefined,
+        catSpectacle === 'paw' ? getRandomCatPawDirection() : undefined
+      )
+    }
     void playPlacementHaptic(player.settings.haptics)
-  }, [player.settings.haptics, player.settings.sound])
+  }, [markActivity, player.settings.haptics, player.settings.sound, showSpectacle])
 
   const requestAd = (prompt: RewardPrompt) => setRewardPrompt(prompt)
   const hint = () => {
@@ -145,6 +262,7 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
 
   return (
     <main className={`screen screen--game${level.id === 1 ? ' screen--game--intro' : ''}`}>
+      <CatSpectacleOverlay effect={boardPeek ? undefined : spectacle} onComplete={onSpectacleComplete} />
       <TopBar
         coins={player.pawCoins}
         level={level.id}
@@ -160,6 +278,8 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
             width={level.board.width}
             height={level.board.height}
             tileAssets={level.match3?.tileAssets ?? []}
+            overlay={boardPeek ? <CatSpectacleOverlay effect={boardPeek} onComplete={onSpectacleComplete} /> : undefined}
+            onAction={onMatch3Action}
             onClearWave={onMatch3ClearWave}
             onStateChange={onMatch3StateChange}
           />

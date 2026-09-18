@@ -31,6 +31,20 @@ describe('Match3Board', () => {
     expect(screen.getAllByRole('gridcell')).toHaveLength(64)
   })
 
+  it('mounts an optional overlay inside the board shell', () => {
+    render(
+      <Match3Board
+        width={8}
+        height={8}
+        tileAssets={[...TILE_ASSETS]}
+        random={() => 0.2}
+        overlay={<span data-testid="board-overlay" />}
+      />
+    )
+
+    expect(screen.getByTestId('board-overlay').parentElement).toHaveClass('match3-board-shell')
+  })
+
   it('swaps cats when one is dragged onto an adjacent cat and keeps the board mounted', () => {
     const onAction = vi.fn()
     render(

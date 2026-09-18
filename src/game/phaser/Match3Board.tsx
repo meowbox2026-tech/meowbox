@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactNode } from 'react'
 import { getCatAssetPath } from '../data/catAssets'
 import type { CatAsset } from '../types'
 import {
@@ -32,6 +32,7 @@ export interface Match3BoardProps {
   onAction?: (result: Match3SwapResult) => void
   onClearWave?: (cascade: number) => void
   onStateChange?: (state: Match3State) => void
+  overlay?: ReactNode
 }
 
 interface DragPreview {
@@ -51,7 +52,7 @@ const CAT_LABELS: Partial<Record<CatAsset, string>> = {
 }
 
 export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(function Match3Board(
-  { width, height, tileAssets, initialBoard, random, onAction, onStateChange, onClearWave },
+  { width, height, tileAssets, initialBoard, random, onAction, onStateChange, onClearWave, overlay },
   forwardedRef
 ) {
   const randomRef = useRef(random ?? Math.random)
@@ -315,7 +316,6 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
               '--match3-clear-delay': '0ms'
             } as React.CSSProperties}
           >
-            <span className="match3-clear-effect__bubble">🐾</span>
             <span className="match3-clear-effect__stars" aria-hidden="true"><i>✦</i><i>✧</i><i>✦</i></span>
           </div>
         ))}
@@ -338,6 +338,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
       >
         <img src={getCatAssetPath(dragPreview.tile.type as CatAsset)} alt="" draggable="false" />
       </div>}
+      {overlay}
     </div>
   )
 })

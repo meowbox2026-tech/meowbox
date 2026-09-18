@@ -1,7 +1,5 @@
 import { LEVELS } from '../../game/data/levels'
 import { usePlayer } from '../../state/PlayerContext'
-import { ArtworkButton } from '../components/ArtworkButton'
-import { GameImage } from '../components/GameImage'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { TopBar } from '../components/TopBar'
 
@@ -12,7 +10,6 @@ interface LevelSelectScreenProps {
 
 export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenProps) {
   const { player } = usePlayer()
-  const totalStars = Object.values(player.stars).reduce((total, starCount) => total + starCount, 0)
 
   return (
     <main className="screen screen--levels">
@@ -43,8 +40,6 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
           )
         })}
       </section>
-      <footer className="star-progress"><GameImage asset="stars" alt="" aria-hidden="true" /><strong>{totalStars} / 90</strong><div><i style={{ width: `${Math.min(100, totalStars / 90 * 100)}%` }} /></div><GameImage asset="treasure" className="star-progress__treasure" alt="寶箱獎勵" /></footer>
-      <ArtworkButton asset="bask" className="levels-back" onClick={onBack}>返回主頁</ArtworkButton>
     </main>
   )
 }

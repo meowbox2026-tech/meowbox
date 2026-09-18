@@ -14,6 +14,7 @@ import {
 import { getPlacedCells, pointKey } from '../core/shapes'
 import { getCatAssetPath, getCatTextureKey } from '../data/catAssets'
 import type { CatDefinition, GridPoint, LevelDefinition, PlacementFailure, PuzzleState } from '../types'
+import { getCatDisplayAngle, getCatDropScale } from './catMotion'
 import { getPuzzleMetrics, type BoardMetrics } from './puzzleLayout'
 
 export type PuzzleCommand =
@@ -62,6 +63,7 @@ export class PuzzleScene extends Phaser.Scene {
   private selectedCatId?: string
   private selectedRotation = 0
   private dragStart?: Phaser.Math.Vector2
+  private dragTilt = 0
   private previewOrigin?: GridPoint
   private isReady = false
   private queuedCommands: PuzzleCommand[] = []
@@ -105,6 +107,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.scale.off('resize', this.renderPuzzle, this)
     this.tweens.killAll()
     this.dropAnimations.clear()
+    this.dragTilt = 0
     this.isReady = false
   }
 
@@ -138,11 +141,13 @@ export class PuzzleScene extends Phaser.Scene {
     if (placedCatId) {
       this.selectCat(placedCatId)
       this.dragStart = new Phaser.Math.Vector2(pointer.x, pointer.y)
+      this.dragTilt = 0
       return
     }
 
     if (this.isInsideBoard(pointer) && this.selectedCatId) {
       this.dragStart = new Phaser.Math.Vector2(pointer.x, pointer.y)
+      this.dragTilt = 0
       this.previewOrigin = this.getGridPoint(pointer)
       this.renderPuzzle()
     }
@@ -150,6 +155,7 @@ export class PuzzleScene extends Phaser.Scene {
 
   private handlePointerMove(pointer: Phaser.Input.Pointer): void {
     if (!this.dragStart || !this.selectedCatId || !this.isInsideBoard(pointer)) return
+    this.dragTilt = Phaser.Math.Clamp((pointer.x - this.dragStart.x) * 0.12, -12, 12)
     this.previewOrigin = this.getGridPoint(pointer)
     this.renderPuzzle()
   }
@@ -161,6 +167,7 @@ export class PuzzleScene extends Phaser.Scene {
     }
 
     this.dragStart = undefined
+    this.dragTilt = 0
     this.previewOrigin = undefined
     this.renderPuzzle()
   }
@@ -173,6 +180,7 @@ export class PuzzleScene extends Phaser.Scene {
     }
 
     this.dragStart = undefined
+    this.dragTilt = 0
     this.previewOrigin = undefined
     this.renderPuzzle()
   }
@@ -190,6 +198,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.state = result.state
     this.selectedCatId = undefined
     this.selectedRotation = 0
+    this.dragTilt = 0
     this.options.onFeedback({ type: 'selection', catId: undefined })
     this.commit(this.state)
     this.playPlacementAnimation(catId)
@@ -558,7 +567,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     if (this.selectedCatId && this.previewOrigin) {
       const cat = this.findCat(this.selectedCatId)
-      if (cat) this.drawCat(cat, this.previewOrigin, this.selectedRotation, this.state.stretchLengths[cat.id], false, 0.42)
+      if (cat) this.drawCat(cat, this.previewOrigin, this.selectedRotation, this.state.stretchLengths[cat.id], false, 0.42, true)
     }
   }
 
@@ -568,7 +577,8 @@ export class PuzzleScene extends Phaser.Scene {
     rotation: number,
     stretchLength?: number,
     locked?: boolean,
-    alpha = 1
+    alpha = 1,
+    isPreview = false
   ): void {
     const metrics = this.metrics!
     const placement = { origin, rotation, stretchLength }
@@ -587,8 +597,11 @@ export class PuzzleScene extends Phaser.Scene {
     const motion = this.dropAnimations.get(cat.id)
     const dropProgress = motion?.progress ?? 1
     const easedProgress = 1 - Math.pow(1 - dropProgress, 3)
-    const legacyDropOffsetY = (1 - easedProgress) * -metrics.cell * 0.78
-    const legacyBounceScale = 0.92 + easedProgress * 0.08 + Math.sin(dropProgress * Math.PI) * 0.06
+    const dropScale = getCatDropScale(dropProgress)
+    const previewLift = isPreview ? -metrics.cell * 0.38 : 0
+    const legacyDropOffsetY = (1 - easedProgress) * -metrics.cell * 0.78 + previewLift
+    const previewScale = isPreview ? 1.05 : 1
+    const displayAngle = getCatDisplayAngle(rotation, this.dragTilt, isPreview)
     const textureKey = cat.visualAsset ? getCatTextureKey(cat.visualAsset) : undefined
 
     if (textureKey && this.textures.exists(textureKey)) {
@@ -596,12 +609,12 @@ export class PuzzleScene extends Phaser.Scene {
       const visualHeight = Math.max(heightInCells * metrics.cell * 0.94, metrics.cell * 1.32)
       const centerX = boardX + (minX + widthInCells / 2) * metrics.cell
       const centerY = boardY + (minY + heightInCells / 2) * metrics.cell
-      this.add.ellipse(centerX, centerY + metrics.cell * 0.37, visualWidth * 0.5, Math.max(5, metrics.cell * 0.13), 0x43261f, alpha * 0.22)
-        .setScale(0.7 + easedProgress * 0.3, 1)
+      this.add.ellipse(centerX, centerY + metrics.cell * 0.37 + (isPreview ? metrics.cell * 0.08 : 0), visualWidth * 0.5, Math.max(5, metrics.cell * 0.13), 0x43261f, alpha * (isPreview ? 0.3 : 0.22))
+        .setScale((0.7 + easedProgress * 0.3) * (isPreview ? 1.18 : 1), 1)
         .setDepth(3)
       this.add.image(centerX, centerY + legacyDropOffsetY, textureKey)
-        .setDisplaySize(visualWidth * legacyBounceScale, visualHeight * legacyBounceScale)
-        .setAngle(rotation * 90)
+        .setDisplaySize(visualWidth * dropScale.x * previewScale, visualHeight * dropScale.y * previewScale)
+        .setAngle(displayAngle)
         .setAlpha(alpha)
         .setDepth(4)
     } else {
