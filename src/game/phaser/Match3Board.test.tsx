@@ -87,6 +87,7 @@ describe('Match3Board', () => {
   it('plays a three-wave chain one clear wave at a time with a counting combo label', () => {
     vi.useFakeTimers()
     const onAction = vi.fn()
+    const onClearWave = vi.fn()
     const refillValues = [
       0.03242476633749902,
       0.07025589840486646,
@@ -113,6 +114,7 @@ describe('Match3Board', () => {
           ])}
           random={() => refillValues.shift() ?? 0.5}
           onAction={onAction}
+          onClearWave={onClearWave}
         />
       )
 
@@ -125,6 +127,7 @@ describe('Match3Board', () => {
       const firstClearTile = cells[firstClearCell.y * 5 + firstClearCell.x]
 
       expect(screen.getByTestId('match3-combo')).toHaveTextContent('喵喵 ×1')
+      expect(onClearWave.mock.calls).toEqual([[1]])
       expect(screen.getByTestId('match3-combo')).toHaveAttribute('data-cascade', '1')
       expect(screen.getAllByTestId('match3-clear-effect')).toHaveLength(3)
       expect(firstClearTile).toHaveAttribute('data-tile-type', firstClearCell.type)
@@ -140,6 +143,7 @@ describe('Match3Board', () => {
 
       act(() => vi.advanceTimersByTime(getMatch3FallPresentationDuration(5)))
       expect(screen.getByTestId('match3-combo')).toHaveTextContent('喵喵 ×2')
+      expect(onClearWave.mock.calls).toEqual([[1], [2]])
       expect(screen.getByTestId('match3-combo')).toHaveAttribute('data-cascade', '2')
       expect(screen.getAllByTestId('match3-clear-effect')).toHaveLength(3)
       expect(screen.getAllByTestId('match3-clear-effect').map((effect) => effect.getAttribute('data-cascade'))).toEqual([
@@ -153,6 +157,7 @@ describe('Match3Board', () => {
 
       act(() => vi.advanceTimersByTime(getMatch3FallPresentationDuration(5)))
       expect(screen.getByTestId('match3-combo')).toHaveTextContent('喵喵 ×3')
+      expect(onClearWave.mock.calls).toEqual([[1], [2], [3]])
       expect(screen.getByTestId('match3-combo')).toHaveAttribute('data-cascade', '3')
       expect(screen.getAllByTestId('match3-clear-effect')).toHaveLength(3)
       expect(screen.getAllByTestId('match3-clear-effect').map((effect) => effect.getAttribute('data-cascade'))).toEqual([

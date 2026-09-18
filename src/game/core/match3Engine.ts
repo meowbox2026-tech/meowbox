@@ -219,20 +219,31 @@ function resolveMatches(
     const matches = findMatchCells(board)
     if (matches.length === 0) break
 
-    cascades += 1
     clearedCount += matches.length
-    const boardBeforeClear = cloneBoard(board)
-    const clearEvent = {
-      cascade: cascades,
-      cells: matches.flatMap(({ x, y }) => {
-        const tile = board[y][x]
-        return tile ? [{ x, y, type: tile.type }] : []
+    const remaining = new Map(matches.map(point => [`${point.x}:${point.y}`, point]))
+    while (remaining.size > 0) {
+      const first = remaining.values().next().value!
+      const type = board[first.y][first.x]!.type
+      const pending = [first]
+      const cells: Match3ClearCell[] = []
+      while (pending.length) {
+        const point = pending.pop()!
+        if (!remaining.delete(`${point.x}:${point.y}`)) continue
+        cells.push({ ...point, type })
+        for (const neighbor of remaining.values()) {
+          if (board[neighbor.y][neighbor.x]?.type === type && areMatch3PointsAdjacent(point, neighbor)) pending.push(neighbor)
+        }
+      }
+      const before = cloneBoard(board)
+      const clearEvent = { cascade: ++cascades, cells }
+      clearEvents.push(clearEvent)
+      cells.forEach(({ x, y }) => { board[y][x] = null })
+      resolutionSteps.push({
+        board: before,
+        clearEvent,
+        nextBoard: cloneBoard(board)
       })
     }
-    clearEvents.push(clearEvent)
-    matches.forEach(({ x, y }) => {
-      board[y][x] = null
-    })
 
     for (let x = 0; x < board[0].length; x += 1) {
       const existingTiles = board
@@ -251,11 +262,7 @@ function resolveMatches(
       }
     }
 
-    resolutionSteps.push({
-      board: boardBeforeClear,
-      clearEvent,
-      nextBoard: cloneBoard(board)
-    })
+    resolutionSteps[resolutionSteps.length - 1].nextBoard = cloneBoard(board)
   }
 
   return { board, clearedCount, cascades, clearEvents, resolutionSteps }

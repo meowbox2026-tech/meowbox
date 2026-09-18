@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getLevelById } from '../../game/data/levels'
-import type { Match3State, Match3SwapResult } from '../../game/core/match3Engine'
+import type { Match3State } from '../../game/core/match3Engine'
 import { createPuzzleState } from '../../game/core/puzzleEngine'
 import { Match3Board, type Match3BoardHandle } from '../../game/phaser/Match3Board'
 import { PuzzleCanvas, type PuzzleCanvasHandle } from '../../game/phaser/PuzzleCanvas'
@@ -122,15 +122,10 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
     setMatch3Stats({ moves: state.moves, cleared: state.cleared, cascades: state.cascades })
   }, [])
 
-  const onMatch3Action = useCallback((result: Match3SwapResult) => {
-    if (result.accepted) {
-      playMatch3Sound(player.settings.sound, result.cascades)
-      void playPlacementHaptic(player.settings.haptics)
-      return
-    }
-    void playPlacementHaptic(player.settings.haptics, false)
-    if (result.reason === 'no-match') onToast('交換後沒有三隻相同花色。')
-  }, [onToast, player.settings.haptics, player.settings.sound])
+  const onMatch3ClearWave = useCallback((cascade: number) => {
+    playMatch3Sound(player.settings.sound, cascade)
+    void playPlacementHaptic(player.settings.haptics)
+  }, [player.settings.haptics, player.settings.sound])
 
   const requestAd = (prompt: RewardPrompt) => setRewardPrompt(prompt)
   const hint = () => {
@@ -157,7 +152,7 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
         moves={puzzle.movesRemaining}
         onPause={() => setIsPaused(true)}
       />
-      <div className="game-objective"><span>{isMatch3Level ? '三消測試' : level.type === 'challenge' ? '挑戰關卡' : '輕鬆關卡'}</span><strong>{isMatch3Level ? '交換相鄰貓咪，三隻相同花色即可消除。' : level.tutorial ?? '把所有貓咪放進紙箱！'}</strong></div>
+      {!isMatch3Level && <div className="game-objective"><span>{level.type === 'challenge' ? '挑戰關卡' : '輕鬆關卡'}</span><strong>{level.tutorial ?? '把所有貓咪放進紙箱！'}</strong></div>}
       <section className={`puzzle-stage${isMatch3Level ? ' puzzle-stage--match3' : ''}`}>
         {isMatch3Level ? (
           <Match3Board
@@ -165,7 +160,7 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
             width={level.board.width}
             height={level.board.height}
             tileAssets={level.match3?.tileAssets ?? []}
-            onAction={onMatch3Action}
+            onClearWave={onMatch3ClearWave}
             onStateChange={onMatch3StateChange}
           />
         ) : <>

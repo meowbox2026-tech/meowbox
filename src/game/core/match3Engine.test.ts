@@ -15,6 +15,19 @@ function boardFromRows(rows: string[]): Match3Board {
 }
 
 describe('match-3 engine', () => {
+  it('counts two groups made by one swap separately before dropping cats', () => {
+    const state = createMatch3State({
+      width: 6, height: 3, tileTypes: ['a', 'b', 'c', 'd', 'e'],
+      board: boardFromRows(['aababb', 'bcdbcd', 'cdecde'])
+    })
+    const result = swapMatch3Tiles(state, { x: 2, y: 0 }, { x: 3, y: 0 }, () => .7)
+    expect(result.accepted).toBe(true)
+    expect(result.clearEvents.slice(0, 2).map(event => [event.cascade, event.cells.length])).toEqual([[1, 3], [2, 3]])
+    expect(result.resolutionSteps[0].nextBoard[0].slice(0, 3)).toEqual([null, null, null])
+    expect(result.resolutionSteps[1].board[0].slice(3).map(tile => tile?.type)).toEqual(['b', 'b', 'b'])
+    expect(result.resolutionSteps[1].nextBoard.flat()).not.toContain(null)
+  })
+
   it('creates an 8 by 8 board without an automatic opening match', () => {
     const state = createMatch3State({ width: 8, height: 8, tileTypes: TYPES, random: () => 0.37 })
 

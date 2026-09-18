@@ -30,6 +30,7 @@ export interface Match3BoardProps {
   initialBoard?: Match3BoardState
   random?: () => number
   onAction?: (result: Match3SwapResult) => void
+  onClearWave?: (cascade: number) => void
   onStateChange?: (state: Match3State) => void
 }
 
@@ -50,10 +51,13 @@ const CAT_LABELS: Partial<Record<CatAsset, string>> = {
 }
 
 export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(function Match3Board(
-  { width, height, tileAssets, initialBoard, random, onAction, onStateChange },
+  { width, height, tileAssets, initialBoard, random, onAction, onStateChange, onClearWave },
   forwardedRef
 ) {
   const randomRef = useRef(random ?? Math.random)
+  const waveFeedback = useRef(onClearWave)
+  waveFeedback.current = onClearWave
+  const [rejectedCells, setRejectedCells] = useState<string[]>([])
   const boardShellRef = useRef<HTMLDivElement>(null)
   const [state, setState] = useState<Match3State>(() => createState())
   const [displayBoard, setDisplayBoard] = useState<Match3BoardState>(() => state.board)
@@ -94,6 +98,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
       setActiveResolutionStepIndex(0)
       setResolutionPhase('clearing')
       setDragPreview(undefined)
+      setRejectedCells([])
     }
   }), [height, initialBoard, tileAssets, width])
 
@@ -113,6 +118,11 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
     if (resolutionPhase === 'clearing') {
       clearTimer.current = window.setTimeout(() => {
         setDisplayBoard(step.nextBoard)
+        if (step.nextBoard.some(row => row.some(tile => tile === null))) {
+          setActiveResolutionStepIndex(current => current + 1)
+          waveFeedback.current?.(activeResolutionStepIndex + 2)
+          return
+        }
         setFallingCells(getFallOffsets(step.board, step.nextBoard))
         setResolutionPhase('falling')
       }, getMatch3ClearWaveDuration())
@@ -127,6 +137,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
         }
         setActiveResolutionStepIndex((current) => current + 1)
         setResolutionPhase('clearing')
+        waveFeedback.current?.(activeResolutionStepIndex + 2)
       }, getMatch3FallPresentationDuration(height))
     }
 
@@ -138,16 +149,19 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
     }
   }, [activeResolutionStepIndex, height, resolutionPhase, resolutionSteps])
 
-  const trySwap = (first: Match3Point, second: Match3Point, fromDrag = false) => {
+  const trySwap = (first: Match3Point, second: Match3Point) => {
     const result = swapMatch3Tiles(state, first, second, randomRef.current)
     onAction?.(result)
     if (!result.accepted) {
-      setSelected(!fromDrag && result.reason === 'no-match' ? second : undefined)
+      setSelected(undefined)
+      setRejectedCells([`${first.x}:${first.y}`, `${second.x}:${second.y}`])
       return
     }
 
     const firstStep = result.resolutionSteps[0]
     if (!firstStep) return
+    setRejectedCells([])
+    waveFeedback.current?.(1)
 
     setState(result.state)
     setDisplayBoard(firstStep.board)
@@ -207,7 +221,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
 
     const target = dragTargetRef.current ?? getDragTarget(start, event.clientX, event.clientY, width, height)
     if (target) {
-      trySwap(start.point, target, true)
+      trySwap(start.point, target)
     }
     if (hasDragged(start, event.clientX, event.clientY)) suppressClickUntil.current = Date.now() + 500
 
@@ -256,6 +270,10 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
             <button
               className={`match3-tile${isSelected ? ' is-selected' : ''}${isDragTarget ? ' is-drag-target' : ''}${isDragging ? ' is-dragging' : ''}${isClearing ? ' is-clearing' : ''}${fallRows ? ' is-falling' : ''}${tile ? '' : ' is-empty'}`}
               data-tile-type={tile?.type}
+              data-rejected={rejectedCells.includes(cellKey) || undefined}
+              onAnimationEnd={(event) => {
+                if (event.animationName === 'match3-rejected') setRejectedCells([])
+              }}
               key={cellKey}
               type="button"
               role="gridcell"
