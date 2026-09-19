@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { DROP_NAMES } from '../../game/core/dropEngine'
 import { getCatAssetPath } from '../../game/data/catAssets'
+import { getDropLevelById } from '../../game/data/dropLevels'
 import { DropBoard } from '../../game/phaser/DropBoard'
 import { useDropGame } from '../../game/phaser/useDropGame'
 import type { CatAsset } from '../../game/types'
@@ -23,8 +24,9 @@ interface GameScreenProps {
   onToast: (message: string) => void
 }
 
-export function GameScreen({ onHome, onSettings, onLevelSelect }: GameScreenProps) {
+export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel }: GameScreenProps) {
   const { player, completeLevel } = usePlayer()
+  const level = getDropLevelById(levelId)
   const [paused, setPaused] = useState(false)
   const [rules, setRules] = useState(false)
   const [ad, setAd] = useState<'hint' | 'revive'>()
@@ -35,16 +37,16 @@ export function GameScreen({ onHome, onSettings, onLevelSelect }: GameScreenProp
     if (combo) playMatch3Sound(player.settings.sound, combo)
     else playCatSound('rustle', player.settings.sound)
     void playPlacementHaptic(player.settings.haptics)
-  })
-  const stars = state.moves <= 20 ? 3 : state.moves <= 28 ? 2 : 1
+  }, level)
+  const stars = state.moves <= level.threeStarMoves ? 3 : state.moves <= level.threeStarMoves + 8 ? 2 : 1
   useEffect(() => {
     if (state.phase === 'completed' && !rewarded.current) {
       rewarded.current = true
-      completeLevel(1, stars, 50)
+      completeLevel(level.id, stars, 50)
       playCatSound('purr', player.settings.sound)
     }
     if (state.phase !== 'playing') stopBackgroundMusic()
-  }, [completeLevel, player.settings.sound, stars, state.phase])
+  }, [completeLevel, level.id, player.settings.sound, stars, state.phase])
   useEffect(() => {
     if (paused || rules || ad) stopBackgroundMusic()
   }, [paused, rules, ad])
@@ -55,8 +57,8 @@ export function GameScreen({ onHome, onSettings, onLevelSelect }: GameScreenProp
   const timeText = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`
   const failureTitle = failure === 'ceiling' ? '哎呀，紙箱裝滿了！' : failure === 'moves' ? '額外落下次數用完了' : '時間到，休息一下喵！'
   return <main className="screen screen--game screen--drop">
-    <TopBar coins={player.pawCoins} level={1} onPause={() => setPaused(true)} />
-    <header className="drop-heading"><span>溫馨小屋 · 01</span><h1>貓咪，落入幸福！</h1><p>輕輕一點，把同款貓咪湊在一起。</p></header>
+    <TopBar coins={player.pawCoins} level={level.id} onPause={() => setPaused(true)} />
+    <header className="drop-heading"><span>溫馨小屋 · {String(level.id).padStart(2, '0')}</span><h1>{level.name}</h1><p>{level.tutorial ?? '輕輕一點，把同款貓咪湊在一起。'}</p></header>
     <section className="drop-goal" aria-label="關卡目標">
       <div><strong>♡ 救出 {state.target} 隻貓咪</strong><b>{progress}<small> / {state.target}</small></b></div>
       <progress max={state.target} value={progress} aria-label="救援進度" />
@@ -75,14 +77,15 @@ export function GameScreen({ onHome, onSettings, onLevelSelect }: GameScreenProp
     <Modal open={rules} ariaLabel="貓咪落下玩法" className="drop-rules">
       <h2>一點、一落、一聲喵！</h2>
       <ol><li><strong>點選一欄</strong><p>NOW 的貓咪會落到那一欄最下方的空位。NEXT 是下一隻。</p></li><li><strong>三隻同款連線</strong><p>橫向、直向、兩種斜向，連續 3 隻以上一起消除。</p></li><li><strong>掉落再連鎖</strong><p>上方貓咪往下掉，再連線就觸發 Combo！</p></li><li><strong>留意箱子頂端</strong><p>消除與掉落結束後，仍有貓咪佔到最上排就失敗。</p></li></ol>
-      <p>第一關：120 秒內救出 18 隻。首次落下開始計時；動畫、暫停與廣告停表。20 次內三星，28 次內兩星，其餘一星。</p><p>每局可看廣告提示一次、復活一次。碰頂復活清掉底排（不計消除數）；時間到可加賽 3 次落下，加賽仍不能碰頂。</p><AppButton onClick={() => setRules(false)}>知道了，來玩喵！</AppButton>
+      <p>本關：{level.timeLimit} 秒內救出 {level.target} 隻。首次落下開始計時；動畫、暫停與廣告停表。{level.threeStarMoves} 次內三星，{level.threeStarMoves + 8} 次內兩星。</p><p>每局可看廣告提示一次、復活一次。碰頂復活清掉底排（不計消除數）；時間到可加賽 3 次落下，加賽仍不能碰頂。</p><AppButton onClick={() => setRules(false)}>知道了，來玩喵！</AppButton>
     </Modal>
     <Modal open={state.phase === 'completed'} ariaLabel="過關囉！" className="drop-result">
-      <div className="drop-confetti" aria-hidden="true">✦ ♡ ✧ ♡ ✦</div><img src={getCatAssetPath('orange')} alt="開心的橘子" /><h2>這一箱，都是幸福！</h2>
+      <div className="drop-confetti" aria-hidden="true">✦ ♡ ✧ ♡ ✦</div><img src={getCatAssetPath(level.tileAssets[0])} alt="開心的貓咪" /><h2>第 {level.id} 關完成！</h2>
       <div className="drop-result__stars" aria-label={`${stars} 顆星`}>{[1, 2, 3].map(i => <span className={i <= stars ? 'is-earned' : ''} key={i}>★</span>)}</div>
       <p>救出 {state.cleared} 隻 · {state.score} 分<br />最佳 Combo ×{state.bestCombo} · 落下 {state.moves} 次</p>
       <strong className="drop-reward">🐾 50 貓掌幣已存入</strong>
-      <AppButton onClick={restart}>再玩一次，挑戰高分</AppButton><AppButton variant="cream" onClick={onLevelSelect}>返回關卡</AppButton><small>新的貓咪與關卡，準備中 ♡</small>
+      {!isLastLevel(level.id) && <AppButton onClick={() => onNextLevel(level.id + 1)}>下一關：{level.id + 1}</AppButton>}
+      <AppButton onClick={restart}>再玩一次，挑戰高分</AppButton><AppButton variant="cream" onClick={onLevelSelect}>返回關卡</AppButton><small>{isLastLevel(level.id) ? '箱長的派對完成了 ♡' : '下一箱幸福正在等你 ♡'}</small>
     </Modal>
     <Modal open={state.phase === 'failed' && !ad} ariaLabel={failure === 'ceiling' ? '紙箱裝滿了' : '挑戰結束'} className="drop-result">
       <img src={getCatAssetPath('sleeping')} alt="休息一下的貓咪" /><h2>{failureTitle}</h2><p>已救出 {state.cleared} / {state.target} 隻貓咪。<br />{failure === 'ceiling' ? '試試分散堆疊，留出更多空間。' : '再找找三連線，貓咪等你帶牠們回家。'}</p>
@@ -94,4 +97,8 @@ export function GameScreen({ onHome, onSettings, onLevelSelect }: GameScreenProp
       description={ad === 'hint' ? '完成觀看後，標出一個較安全的欄位。本局限一次。' : failure === 'ceiling' ? '清除底部一排，其餘貓咪向下移；不增加消除數。每局限復活一次。' : '獲得 3 次額外落下，不再倒數；碰頂仍失敗。每局限復活一次。'}
       onClose={() => setAd(undefined)} onReward={() => { if (ad === 'hint') hint(); else revive(); setAd(undefined) }} />}
   </main>
+}
+
+function isLastLevel(levelId: number): boolean {
+  return levelId >= 30
 }

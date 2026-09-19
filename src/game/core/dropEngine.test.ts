@@ -1,7 +1,22 @@
 import { describe, expect, it } from 'vitest'
-import { createDropState, dropCat, findDropMatches, type DropBoard } from './dropEngine'
+import { createDropState, dropCat, findDropMatches, landingRow, type DropBoard } from './dropEngine'
 const board = (rows: string[]): DropBoard => rows.map((r, y) => [...r].map((c, x) => c === '.' ? null : { id: y * 10 + x + 1, type: c }))
 describe('drop rules', () => {
+  it('stops above the first cat instead of passing through to a gap below', () => {
+    const state = createDropState({ board: board(['...', '...', '.b.', '...', '.a.']), current: 'c' })
+    expect(landingRow(state.board, 1)).toBe(1)
+    const result = dropCat(state, 1)
+    expect(result.accepted).toBe(true)
+    expect(result.landed[1][1]?.type).toBe('c')
+    expect(result.landed[2][1]?.type).toBe('b')
+    expect(result.landed[3][1]).toBeNull()
+  })
+  it('rejects a blocked entrance even if there are empty cells below it', () => {
+    const state = createDropState({ board: board(['.b.', '...', '.a.']) })
+    expect(landingRow(state.board, 1)).toBe(-1)
+    expect(dropCat(state, 1).accepted).toBe(false)
+    expect(dropCat(state, 1).state).toBe(state)
+  })
   it('drops to the lowest available row without refilling', () => {
     const state = createDropState({ board: board(['...', '...', 'b..']), current: 'a' })
     const result = dropCat(state, 0, () => 0)
@@ -63,6 +78,24 @@ describe('drop rules', () => {
     expect(dropCat(state, 0).accepted).toBe(false)
     const both = createDropState({ board: board(['...b.', '...c.', 'aaad.']), current: 'c', target: 3 })
     expect(dropCat(both, 4).state.phase).toBe('failed')
+  })
+  it('supports level-sized boards and any configured cat artwork', () => {
+    const state = createDropState({
+      width: 7,
+      height: 9,
+      tileTypes: ['sunny', 'fishLover', 'alone', 'white'],
+      current: 'sunny',
+      next: 'fishLover',
+      queue: ['alone', 'white'],
+      target: 30
+    })
+    const result = dropCat(state, 6)
+    expect(result.accepted).toBe(true)
+    expect(result.state.width).toBe(7)
+    expect(result.state.height).toBe(9)
+    expect(result.state.board).toHaveLength(9)
+    expect(result.state.current).toBe('fishLover')
+    expect(result.state.next).toBe('alone')
   })
 
 })

@@ -1,4 +1,4 @@
-import { LEVELS } from '../../game/data/levels'
+import { DROP_LEVELS } from '../../game/data/dropLevels'
 import { usePlayer } from '../../state/PlayerContext'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { TopBar } from '../components/TopBar'
@@ -20,9 +20,9 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
         <button type="button" disabled>世界 2<small>花園</small></button>
         <button type="button" disabled>世界 3<small>旅行</small></button>
       </div>
-      <section className="level-board" aria-label="關卡清單">
-        {LEVELS.map((level) => {
-          const unlocked = level.id === 1
+      <section className="level-board" aria-label="關卡清單" tabIndex={0}>
+        {DROP_LEVELS.map((level) => {
+          const unlocked = level.id <= player.currentLevel
           const stars = player.stars[level.id] ?? 0
           return (
             <button
@@ -31,11 +31,10 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
               type="button"
               disabled={!unlocked}
               onClick={() => onSelectLevel(level.id)}
-              aria-label={`第 ${level.id} 關${unlocked ? '' : '，準備中'}`}
+              aria-label={`第 ${level.id} 關${unlocked ? '' : '，尚未解鎖'}`}
             >
               <strong>{level.id}</strong>
-              {unlocked ? <span>{[1, 2, 3].map((star) => <i className={star <= stars ? 'is-earned' : ''} key={star}>★</i>)}</span> : <span className="level-tile__lock" style={{ fontSize: 11 }}>準備中</span>}
-              {level.id === 1 && <em>貓咪落下</em>}
+              {unlocked ? <span>{[1, 2, 3].map((star) => <i className={star <= stars ? 'is-earned' : ''} key={star}>★</i>)}</span> : <span className="level-tile__lock">未解鎖</span>}
             </button>
           )
         })}

@@ -2,9 +2,24 @@ import { useEffect, useRef, useState } from 'react'
 import { createDropState, dropCat, type DropBoard, type DropResult, type DropWave } from '../core/dropEngine'
 import { clearBottomRow, recommendColumn } from '../core/dropAssistance'
 import { useDropClock } from './useDropClock'
+import { getDropLevelById, type DropLevelDefinition } from '../data/dropLevels'
 interface Frame { board: DropBoard; previous: DropBoard; wave?: DropWave; duration: number }
-export function useDropGame(paused: boolean, feedback: (combo: number) => void) {
-  const [state, setState] = useState(createDropState)
+export function useDropGame(
+  paused: boolean,
+  feedback: (combo: number) => void,
+  level: DropLevelDefinition = getDropLevelById(1)
+) {
+  const createState = () => createDropState({
+    width: level.width,
+    height: level.height,
+    tileTypes: level.tileAssets,
+    board: level.initialBoard,
+    current: level.initialCurrent,
+    next: level.initialNext,
+    queue: level.initialQueue,
+    target: level.target
+  })
+  const [state, setState] = useState(createState)
   const [frames, setFrames] = useState<Frame[]>([])
   const [index, setIndex] = useState(0)
   const [display, setDisplay] = useState<Frame>({ board: state.board, previous: state.board, duration: 0 })
@@ -22,7 +37,10 @@ export function useDropGame(paused: boolean, feedback: (combo: number) => void) 
   callback.current = feedback
   const busy = frames.length > 0
   const stopped = paused || hidden
-  const { secondsLeft, read, resetClock } = useDropClock(started && !stopped && !busy && state.phase === 'playing' && extraDrops === undefined)
+  const { secondsLeft, read, resetClock } = useDropClock(
+    started && !stopped && !busy && state.phase === 'playing' && extraDrops === undefined,
+    level.timeLimit
+  )
   useEffect(() => {
     const visibility = () => setHidden(document.hidden)
     document.addEventListener('visibilitychange', visibility)
@@ -84,7 +102,7 @@ export function useDropGame(paused: boolean, feedback: (combo: number) => void) 
     callback.current(0)
   }
   const reset = () => {
-    const fresh = createDropState()
+    const fresh = createState()
     pending.current = undefined
     locked.current = false
     reviveLock.current = false

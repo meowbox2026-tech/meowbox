@@ -1,6 +1,7 @@
 import { cleanup, act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { GameScreen } from './GameScreen'
+import { DROP_LEVELS } from '../../game/data/dropLevels'
 const completeLevel = vi.hoisted(() => vi.fn())
 vi.mock('../../state/PlayerContext', () => ({ usePlayer: () => ({ player: { pawCoins: 0, settings: { sound: false, haptics: false } }, completeLevel }) }))
 vi.mock('../../services/audio/audioService', () => ({ playCatSound: vi.fn(), playMatch3Sound: vi.fn(), startBackgroundMusic: vi.fn(), stopBackgroundMusic: vi.fn() }))
@@ -10,8 +11,21 @@ function mount() {
   vi.useFakeTimers()
   return render(<GameScreen levelId={1} onHome={vi.fn()} onSettings={vi.fn()} onLevelSelect={vi.fn()} onNextLevel={vi.fn()} onToast={vi.fn()} />)
 }
+function mountLevel(levelId: number) {
+  vi.useFakeTimers()
+  return render(<GameScreen levelId={levelId} onHome={vi.fn()} onSettings={vi.fn()} onLevelSelect={vi.fn()} onNextLevel={vi.fn()} onToast={vi.fn()} />)
+}
 function finishAnimation() { for (let n = 0; n < 8; n++) act(() => vi.advanceTimersByTime(600)) }
 describe('first drop level', () => {
+  it('renders every configured level with its own board, target, assets and clock', () => {
+    for (let levelId = 1; levelId <= 30; levelId += 1) {
+      cleanup()
+      mountLevel(levelId)
+      expect(screen.getByText(new RegExp(`溫馨小屋 · ${String(levelId).padStart(2, '0')}`))).toBeInTheDocument()
+      expect(screen.getByRole('progressbar')).toHaveAttribute('max', String(DROP_LEVELS[levelId - 1].target))
+      expect(screen.getByRole('button', { name: /第 1 欄/ })).toBeInTheDocument()
+    }
+  })
   it('updates previews immediately and keeps the last tapped landing ghost without another pointer move', () => {
     const { container } = mount()
     const column = screen.getByRole('button', { name: /第 5 欄/ })

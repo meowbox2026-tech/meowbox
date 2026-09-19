@@ -1,0 +1,60 @@
+import { describe, expect, it } from 'vitest'
+import { createDropState, dropCat, findDropMatches } from '../core/dropEngine'
+import { DROP_LEVELS, getDropLevelById } from './dropLevels'
+
+describe('drop level catalogue', () => {
+  it('contains 30 sequential levels with usable timed goals', () => {
+    expect(DROP_LEVELS).toHaveLength(30)
+    expect(DROP_LEVELS.map(level => level.id)).toEqual(Array.from({ length: 30 }, (_, index) => index + 1))
+    for (const level of DROP_LEVELS) {
+      expect(level.width).toBeGreaterThanOrEqual(6)
+      expect(level.height).toBeGreaterThanOrEqual(8)
+      expect(level.tileAssets.length).toBeGreaterThanOrEqual(3)
+      expect(level.timeLimit).toBeGreaterThan(0)
+      expect(level.target).toBeGreaterThan(0)
+      expect(level.initialQueue.length).toBeGreaterThan(0)
+      expect(level.initialBoard).toHaveLength(level.height)
+      expect(level.initialBoard[0]).toHaveLength(level.width)
+    }
+  })
+  it('starts every level without a free match and keeps the tutorial layout', () => {
+    expect(findDropMatches(DROP_LEVELS[0].initialBoard)).toEqual([])
+    for (const level of DROP_LEVELS.slice(1)) expect(findDropMatches(level.initialBoard)).toEqual([])
+    expect(DROP_LEVELS[0].initialBoard[7][0]?.type).toBe('orange')
+    expect(DROP_LEVELS[0].initialBoard[7][1]?.type).toBe('orange')
+    const chainLevel = DROP_LEVELS[3]
+    const chain = dropCat(createDropState({
+      width: chainLevel.width,
+      height: chainLevel.height,
+      tileTypes: chainLevel.tileAssets,
+      board: chainLevel.initialBoard,
+      current: chainLevel.initialCurrent,
+      next: chainLevel.initialNext,
+      queue: chainLevel.initialQueue,
+      target: chainLevel.target
+    }), 0)
+    expect(chain.waves.length).toBeGreaterThanOrEqual(2)
+  })
+  it('falls back safely for invalid level ids', () => {
+    expect(getDropLevelById(0).id).toBe(1)
+    expect(getDropLevelById(999).id).toBe(1)
+  })
+  it('accepts the first player action on every level-sized initial board', () => {
+    for (const level of DROP_LEVELS) {
+      const state = createDropState({
+        width: level.width,
+        height: level.height,
+        tileTypes: level.tileAssets,
+        board: level.initialBoard,
+        current: level.initialCurrent,
+        next: level.initialNext,
+        queue: level.initialQueue,
+        target: level.target
+      })
+      const result = dropCat(state, level.width - 1)
+      expect(result.accepted, `level ${level.id} should accept an empty-column drop`).toBe(true)
+      expect(result.state.board).toHaveLength(level.height)
+      expect(result.state.board[0]).toHaveLength(level.width)
+    }
+  })
+})

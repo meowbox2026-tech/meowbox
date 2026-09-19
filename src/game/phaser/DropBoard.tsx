@@ -17,7 +17,7 @@ export function DropBoard({ board, previous, current, busy, paused, wave, tutori
   const oldPositions = new Map(previous.flatMap((line, y) => line.flatMap(tile => tile ? [[tile.id, y] as const] : [])))
   return <div className={`drop-box${danger ? ' is-danger' : ''}${paused ? ' is-paused' : ''}`}>
     <div className="drop-ceiling"><span>{danger ? '⚠ 小心！快到頂端了' : '別超過這條線喔'}</span></div>
-    <div className="drop-grid" style={{ '--cols': width, '--rows': height } as CSSProperties} aria-label="貓咪紙箱">
+    <div className="drop-grid" style={{ '--cols': width, '--rows': height, aspectRatio: `${width} / ${height}` } as CSSProperties} aria-label="貓咪紙箱">
       {board.flatMap((line, y) => line.map((_, x) => <div className={`drop-cell${x === active && !busy ? ' is-guide' : ''}`} key={`${x}:${y}`} />))}
       {!busy && row >= 0 && active !== undefined && <div className="drop-ghost" style={{ left: `${active / width * 100}%`, top: `${row / height * 100}%` }} aria-hidden="true">
         <img src={getCatAssetPath(current as CatAsset)} alt="" /><span>↓</span>
