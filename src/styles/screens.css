@@ -188,7 +188,10 @@
   justify-content: center;
 }
 .screen--home .home-nav .app-button { min-height: 0; }
-.screen--home .home-nav__button { font-size: clamp(12px, min(3.6cqw, 13.5px), 16px); }
+.screen--home .home-nav__button {
+  font-size: clamp(12px, min(3.6cqw, 13.5px), 16px);
+  translate: min(0.077cqw, 0.28865px) min(2.995cqh, 25.51361px);
+}
 .screen--home .top-bar__right .top-bar__round { translate: min(1.34cqw, 5.025px) min(2.165cqw, 8.119px); }
 .screen--home .top-bar__round {
   width: min(10.667cqw, 40px);
