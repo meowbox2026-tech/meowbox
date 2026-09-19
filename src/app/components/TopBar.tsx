@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { ArtworkButton } from './ArtworkButton'
 import { GameImage } from './GameImage'
 import { ECONOMY_UI_ENABLED } from '../config'
@@ -10,9 +11,10 @@ interface TopBarProps {
   stars?: number
   moves?: number
   onPause?: () => void
+  status?: ReactNode
 }
 
-export function TopBar({ coins, onBack, onSettings, level, stars, moves, onPause }: TopBarProps) {
+export function TopBar({ coins, onBack, onSettings, level, stars, moves, onPause, status }: TopBarProps) {
   return (
     <header className="top-bar">
       <div className="top-bar__left">
@@ -23,6 +25,7 @@ export function TopBar({ coins, onBack, onSettings, level, stars, moves, onPause
           <strong>{level}</strong>
         </div>}
       </div>
+      {status && <div className="top-bar__status">{status}</div>}
       {stars !== undefined && <div className="star-meter" aria-label={`${stars} 顆星`}>{[1, 2, 3].map((star) => <GameImage asset="stars" key={star} className={star <= stars ? 'is-earned' : ''} alt="" aria-hidden="true" />)}</div>}
       {moves !== undefined && <div className="moves-pill">步數 <strong>{moves}</strong></div>}
       <div className="top-bar__right">

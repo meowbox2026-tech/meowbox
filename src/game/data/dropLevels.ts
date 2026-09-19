@@ -30,9 +30,12 @@ const names = [
 const targets = [18, 21, 24, 24, 27, 30, 27, 30, 33, 36, 33, 36, 36, 39, 42, 39, 42, 45, 39, 45, 45, 48, 48, 51, 51, 54, 54, 57, 57, 60]
 const times = [120, 120, 120, 115, 110, 105, 120, 115, 110, 105, 115, 110, 105, 105, 100, 115, 110, 105, 120, 115, 110, 105, 105, 100, 115, 110, 105, 105, 100, 100]
 const sizes = [
-  [6, 8], [6, 8], [6, 8], [6, 8], [6, 8], [6, 8], [6, 8], [6, 8], [6, 8], [6, 8],
-  [6, 8], [6, 8], [6, 8], [6, 8], [6, 8], [7, 8], [7, 8], [7, 8], [7, 8], [7, 8],
-  [7, 8], [7, 8], [6, 9], [6, 9], [7, 9], [7, 9], [7, 9], [7, 9], [7, 9], [7, 9]
+  [3, 8], [3, 8], [3, 8], [3, 8],
+  [4, 8], [4, 8], [4, 8], [4, 8], [4, 8], [4, 8],
+  [5, 8], [5, 8], [5, 8], [5, 8], [5, 8],
+  [6, 8], [6, 8], [6, 8], [6, 8], [6, 8],
+  [7, 8], [7, 8], [7, 8], [7, 8], [7, 8],
+  [8, 8], [8, 8], [8, 8], [8, 8], [8, 8]
 ] as const
 
 const threeStarMoves = targets.map((target, index) => Math.max(12, Math.ceil(target * (index < 6 ? .92 : .98))))
@@ -54,18 +57,18 @@ const guidance = [
   '最後一塊軟墊，速度與高度都要顧好。', '箱長的派對，帶 60 隻貓咪回家！'
 ]
 
+const ALL_DROP_CATS: CatAsset[] = [
+  'arrogant', 'sunny', 'fishLover', 'orange', 'white', 'blue',
+  'alone', 'sleeping', 'box', 'mischievous', 'boss', 'sticky'
+]
+
 function assetsFor(id: number): CatAsset[] {
-  if (id <= 6) return ['orange', 'blue', 'white']
-  if (id <= 10) return ['orange', 'blue', 'white', 'alone']
-  if (id <= 15) return ['orange', 'blue', 'fishLover', 'white']
-  if (id <= 18) return ['sunny', 'blue', 'fishLover', 'white']
-  if (id <= 22) return ['sunny', 'blue', 'fishLover', 'white', 'alone']
-  if (id <= 24) return ['sunny', 'blue', 'fishLover', 'white']
-  return ['sunny', 'blue', 'fishLover', 'white', 'alone']
+  if (id <= 4) return ['orange', 'blue', 'white', 'alone']
+  return [...ALL_DROP_CATS]
 }
 
 function createTutorialBoard(): DropBoard {
-  const board: DropBoard = Array.from({ length: 8 }, () => Array<DropTile | null>(6).fill(null))
+  const board: DropBoard = Array.from({ length: 8 }, () => Array<DropTile | null>(3).fill(null))
   board[7][0] = { id: 1, type: 'orange' }
   board[7][1] = { id: 2, type: 'orange' }
   board[6][0] = { id: 3, type: 'blue' }
@@ -74,7 +77,7 @@ function createTutorialBoard(): DropBoard {
 }
 
 function createVerticalTutorialBoard(type: CatAsset): DropBoard {
-  const board = Array.from({ length: 8 }, () => Array<DropTile | null>(6).fill(null))
+  const board = Array.from({ length: 8 }, () => Array<DropTile | null>(3).fill(null))
   board[7][2] = { id: 1, type }
   board[6][2] = { id: 2, type }
   board[7][0] = { id: 3, type: 'blue' }
@@ -83,21 +86,23 @@ function createVerticalTutorialBoard(type: CatAsset): DropBoard {
 }
 
 function createDiagonalTutorialBoard(type: CatAsset): DropBoard {
-  const board = Array.from({ length: 8 }, () => Array<DropTile | null>(6).fill(null))
-  board[7][2] = { id: 1, type }
-  board[6][1] = { id: 2, type }
-  board[7][4] = { id: 3, type: 'blue' }
-  board[7][5] = { id: 4, type: 'white' }
+  const board = Array.from({ length: 8 }, () => Array<DropTile | null>(3).fill(null))
+  board[6][1] = { id: 1, type }
+  board[7][2] = { id: 2, type }
+  board[6][0] = { id: 3, type: 'white' }
   return board
 }
 
 function createChainTutorialBoard(first: CatAsset, second: CatAsset): DropBoard {
-  const board = Array.from({ length: 8 }, () => Array<DropTile | null>(6).fill(null))
+  const board = Array.from({ length: 8 }, () => Array<DropTile | null>(3).fill(null))
   board[7][1] = { id: 1, type: first }
   board[7][2] = { id: 2, type: first }
-  board[6][0] = { id: 3, type: second }
-  board[6][2] = { id: 4, type: second }
-  board[5][1] = { id: 5, type: second }
+  // Keep the teaching chain low enough that the opening board is not already
+  // flashing the ceiling warning. After the orange row clears, gravity still
+  // gathers these three blue cats into the second wave.
+  board[2][1] = { id: 3, type: second }
+  board[4][1] = { id: 4, type: second }
+  board[6][1] = { id: 5, type: second }
   return board
 }
 

@@ -37,6 +37,46 @@ describe('drop rules', () => {
     expect(result.waves[0].cells).toHaveLength(6)
     expect(result.state.cleared).toBe(6)
   })
+  it('settles only columns touched by a clear and preserves pre-existing gaps', () => {
+    const state = createDropState({
+      board: board([
+        '.....',
+        '.....',
+        'aa...',
+        'b.b..',
+        '.....'
+      ]),
+      current: 'a'
+    })
+    const result = dropCat(state, 2)
+    expect(result.waves).toHaveLength(1)
+    // The cat in column 0 is below the clear wave but above a pre-existing
+    // gap. It is an authored shelf, so it must not be globally compacted.
+    expect(result.state.board[3][0]?.type).toBe('b')
+    expect(result.state.board[4][0]).toBeNull()
+    // An unrelated floating cat in column 4 keeps its authored position too.
+    const unrelated = createDropState({
+      board: board(['....b', '.....', 'aa...', '..b..', '.....']),
+      current: 'a'
+    })
+    const unrelatedResult = dropCat(unrelated, 2)
+    expect(unrelatedResult.state.board[0][4]?.type).toBe('b')
+  })
+  it('lets an affected stack fall through empty rows when no lower cat anchors it', () => {
+    const state = createDropState({
+      board: board([
+        '.....',
+        'b....',
+        'aa...',
+        '..b..',
+        '.....'
+      ]),
+      current: 'a'
+    })
+    const result = dropCat(state, 2)
+    expect(result.state.board[4][0]?.type).toBe('b')
+    expect(result.state.board[1][0]).toBeNull()
+  })
   it('chains after gravity, counting a combo per wave', () => {
     const state = createDropState({ board: board(['....', 'bb..', 'aa.b']), current: 'a' })
     const result = dropCat(state, 2)

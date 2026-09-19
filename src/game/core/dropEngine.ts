@@ -21,7 +21,8 @@ export interface DropState {
 export interface DropResult { accepted: boolean; state: DropState; landed: DropBoard; waves: DropWave[] }
 export const DROP_CATS = ['orange', 'blue', 'white'] as const
 export const DROP_NAMES: Record<string, string> = {
-  orange: '橘子', blue: '小灰', white: '奶霜', alone: '小墨', fishLover: '魚丸', sunny: '陽陽', sticky: '黏黏'
+  arrogant: '傲嬌', sunny: '陽陽', fishLover: '魚丸', orange: '橘子', white: '奶霜', blue: '小灰',
+  alone: '小墨', sleeping: '睡覺', box: '紙箱', mischievous: '淘氣', boss: '老大', sticky: '黏黏'
 }
 const clone = (board: DropBoard): DropBoard => board.map(row => row.map(tile => tile && { ...tile }))
 
@@ -87,11 +88,30 @@ export function findDropMatches(board: DropBoard): DropCell[] {
   return [...matches.values()]
 }
 
-function gravity(board: DropBoard): DropBoard {
+/**
+ * Settle only the portions of columns touched by this clear wave.
+ *
+ * A drop board can intentionally contain gaps (the level data uses them to
+ * make little shelves).  Compacting every column after every match makes
+ * those unrelated cats move when a different column is cleared.  Keeping the
+ * rows below the lowest cleared cell as an anchor also means a floating cat
+ * that was already below the wave is left exactly where the level placed it.
+ */
+function gravity(board: DropBoard, clearedCells: DropCell[]): DropBoard {
   const next = clone(board)
-  for (let x = 0; x < board[0].length; x++) {
-    const tiles = board.map(row => row[x]).filter((tile): tile is DropTile => tile !== null)
-    for (let y = board.length - 1; y >= 0; y--) next[y][x] = tiles.pop() ?? null
+  const lowestClearedByColumn = new Map<number, number>()
+  for (const { x, y } of clearedCells) {
+    const lowest = lowestClearedByColumn.get(x)
+    if (lowest === undefined || y > lowest) lowestClearedByColumn.set(x, y)
+  }
+  for (const [x, lowestCleared] of lowestClearedByColumn) {
+    // A surviving cat below the wave is an authored support.  If there is no
+    // support, the affected stack can settle all the way to the floor,
+    // including through gaps that existed above the clear.
+    const support = board.slice(lowestCleared + 1).findIndex(row => row[x] !== null)
+    const settleBottom = support < 0 ? board.length - 1 : lowestCleared + support
+    const tiles = board.slice(0, settleBottom + 1).map(row => row[x]).filter((tile): tile is DropTile => tile !== null)
+    for (let y = settleBottom; y >= 0; y--) next[y][x] = tiles.pop() ?? null
   }
   return next
 }
@@ -119,7 +139,7 @@ export function dropCat(state: DropState, column: number, random: () => number =
     if (!cells.length) break
     const before = clone(board)
     cells.forEach(({ x, y }) => { board[y][x] = null })
-    board = gravity(board)
+    board = gravity(board, cells)
     const combo = waves.length + 1
     const points = cells.length * 10 * combo
     waves.push({ board: before, after: clone(board), cells, combo, points })

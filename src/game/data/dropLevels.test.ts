@@ -6,8 +6,16 @@ describe('drop level catalogue', () => {
   it('contains 30 sequential levels with usable timed goals', () => {
     expect(DROP_LEVELS).toHaveLength(30)
     expect(DROP_LEVELS.map(level => level.id)).toEqual(Array.from({ length: 30 }, (_, index) => index + 1))
+    expect(DROP_LEVELS.map(level => `${level.width}x${level.height}`)).toEqual([
+      '3x8', '3x8', '3x8', '3x8',
+      '4x8', '4x8', '4x8', '4x8', '4x8', '4x8',
+      '5x8', '5x8', '5x8', '5x8', '5x8',
+      '6x8', '6x8', '6x8', '6x8', '6x8',
+      '7x8', '7x8', '7x8', '7x8', '7x8',
+      '8x8', '8x8', '8x8', '8x8', '8x8'
+    ])
     for (const level of DROP_LEVELS) {
-      expect(level.width).toBeGreaterThanOrEqual(6)
+      expect(level.width).toBeGreaterThanOrEqual(3)
       expect(level.height).toBeGreaterThanOrEqual(8)
       expect(level.tileAssets.length).toBeGreaterThanOrEqual(3)
       expect(level.timeLimit).toBeGreaterThan(0)
@@ -15,6 +23,13 @@ describe('drop level catalogue', () => {
       expect(level.initialQueue.length).toBeGreaterThan(0)
       expect(level.initialBoard).toHaveLength(level.height)
       expect(level.initialBoard[0]).toHaveLength(level.width)
+      expect(level.width).toBeLessThan(level.tileAssets.length)
+    }
+    const allDropCats = ['arrogant', 'sunny', 'fishLover', 'orange', 'white', 'blue', 'alone', 'sleeping', 'box', 'mischievous', 'boss', 'sticky']
+    for (const level of DROP_LEVELS.slice(4)) {
+      expect(level.tileAssets).toEqual(allDropCats)
+      expect(level.initialQueue).toHaveLength(12)
+      expect(new Set(level.initialBoard.flat().filter(Boolean).map(tile => tile!.type))).toEqual(new Set(allDropCats))
     }
   })
   it('starts every level without a free match and keeps the tutorial layout', () => {
@@ -34,6 +49,24 @@ describe('drop level catalogue', () => {
       target: chainLevel.target
     }), 0)
     expect(chain.waves.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('keeps the first three tutorial layouts playable', () => {
+    for (const [levelIndex, column] of [[0, 2], [1, 2], [2, 0]] as const) {
+      const level = DROP_LEVELS[levelIndex]
+      const state = createDropState({
+        width: level.width,
+        height: level.height,
+        tileTypes: level.tileAssets,
+        board: level.initialBoard,
+        current: level.initialCurrent,
+        next: level.initialNext,
+        queue: level.initialQueue,
+        target: level.target
+      })
+      expect(dropCat(state, column).waves.length, `level ${level.id} should teach a clear`).toBeGreaterThanOrEqual(1)
+    }
+    expect(DROP_LEVELS[3].initialBoard[1].some(Boolean)).toBe(false)
   })
   it('falls back safely for invalid level ids', () => {
     expect(getDropLevelById(0).id).toBe(1)
