@@ -20,9 +20,9 @@ export function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
         <GameImage asset="life" className="home-lives__art" alt="" aria-hidden="true" />
         <strong>5</strong><small>已滿</small>
       </div>}
-      <section className="home-brand" aria-label="Meow Box 貓咪裝箱拼圖">
+      <section className="home-brand" aria-label="Meow Box 貓咪落下消除">
         <GameImage asset="meowlogo" className="home-brand__logo" alt="MEOW BOX" />
-        <p>貓咪裝箱拼圖</p>
+        <p>貓咪落下消除</p>
       </section>
       <aside className="home-progress" aria-label={`目前進度，第 ${player.currentLevel} 關`}>
         <GameImage asset="schedule" className="home-progress__art" alt="" aria-hidden="true" />

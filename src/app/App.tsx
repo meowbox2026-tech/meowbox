@@ -28,7 +28,7 @@ export function App() {
   }, [toast])
 
   const openGame = (levelId: number) => {
-    setSelectedLevel(levelId)
+    setSelectedLevel(levelId === 1 ? levelId : 1)
     setScreen('game')
   }
 

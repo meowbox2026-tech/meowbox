@@ -22,7 +22,7 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
       </div>
       <section className="level-board" aria-label="關卡清單">
         {LEVELS.map((level) => {
-          const unlocked = level.id <= player.currentLevel
+          const unlocked = level.id === 1
           const stars = player.stars[level.id] ?? 0
           return (
             <button
@@ -31,11 +31,11 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
               type="button"
               disabled={!unlocked}
               onClick={() => onSelectLevel(level.id)}
-              aria-label={`第 ${level.id} 關${unlocked ? '' : '，尚未解鎖'}`}
+              aria-label={`第 ${level.id} 關${unlocked ? '' : '，準備中'}`}
             >
               <strong>{level.id}</strong>
-              {unlocked ? <span>{[1, 2, 3].map((star) => <i className={star <= stars ? 'is-earned' : ''} key={star}>★</i>)}</span> : <span className="level-tile__lock">🔒</span>}
-              {level.type === 'challenge' && <em>挑戰</em>}
+              {unlocked ? <span>{[1, 2, 3].map((star) => <i className={star <= stars ? 'is-earned' : ''} key={star}>★</i>)}</span> : <span className="level-tile__lock" style={{ fontSize: 11 }}>準備中</span>}
+              {level.id === 1 && <em>貓咪落下</em>}
             </button>
           )
         })}

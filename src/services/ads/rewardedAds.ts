@@ -1,4 +1,4 @@
-export type RewardKind = 'hint' | 'auto-place' | 'challenge-moves' | 'wake-sleeper' | 'double-reward' | 'daily-double'
+export type RewardKind = 'hint' | 'auto-place' | 'challenge-moves' | 'wake-sleeper' | 'double-reward' | 'daily-double' | 'clear-bottom-row'
 
 export interface RewardedAdResult {
   completed: boolean
