@@ -58,13 +58,16 @@ const guidance = [
 ]
 
 const ALL_DROP_CATS: CatAsset[] = [
-  'arrogant', 'sunny', 'fishLover', 'orange', 'white', 'blue',
-  'alone', 'sleeping', 'box', 'mischievous', 'boss', 'sticky'
+  'orange', 'blue', 'white', 'alone', 'arrogant', 'sunny',
+  'fishLover', 'sleeping', 'box', 'mischievous', 'boss', 'sticky'
 ]
 
 function assetsFor(id: number): CatAsset[] {
   if (id <= 4) return ['orange', 'blue', 'white', 'alone']
-  return [...ALL_DROP_CATS]
+  const width = sizes[id - 1][0]
+  const count = width + 1
+  const start = (id - 5) % ALL_DROP_CATS.length
+  return Array.from({ length: count }, (_, index) => ALL_DROP_CATS[(start + index) % ALL_DROP_CATS.length])
 }
 
 function createTutorialBoard(): DropBoard {

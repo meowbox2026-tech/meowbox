@@ -1,3 +1,4 @@
+import { format, useStrings } from '../../i18n'
 import { ArtworkButton } from './ArtworkButton'
 import { GameImage } from './GameImage'
 import { Modal } from './Modal'
@@ -25,32 +26,33 @@ export function ResultModal({
   onNextLevel,
   onRestart,
 }: ResultModalProps) {
-  const claimLabel = isClaimed ? '已領取獎勵' : '領取獎勵'
-  const doubleLabel = isClaimed ? '雙倍獎勵已領取' : '雙倍獎勵'
+  const strings = useStrings()
+  const claimLabel = isClaimed ? strings.result.claimedLabel : strings.result.claim
+  const doubleLabel = isClaimed ? strings.result.doubleClaimedLabel : strings.result.double
 
   return (
-    <Modal open={open} className="result-modal" ariaLabel="過關囉！">
+    <Modal open={open} className="result-modal" ariaLabel={strings.result.dialogAria}>
       <div className="result-modal__header">
         <GameImage asset="giftpink" className="result-modal__celebration" alt="" aria-hidden="true" />
-        <h2>過關囉！</h2>
-        <div className="result-stars" aria-label={`${stars} 顆星`}>
+        <h2>{strings.result.title}</h2>
+        <div className="result-stars" aria-label={format(strings.result.starsAria, { stars })}>
           {[1, 2, 3].map((star) => <GameImage asset="stars" className={star <= stars ? 'is-earned' : ''} key={star} alt="" aria-hidden="true" />)}
         </div>
-        <p>{stars === 3 ? '太完美了！' : '完成得很棒，再挑戰三星吧！'}</p>
+        <p>{stars === 3 ? strings.result.perfect : strings.result.good}</p>
       </div>
 
-      <section className="result-rewards" aria-label="過關獎勵">
-        <div className="result-rewards__heading"><span>獎勵</span><strong>🐾 {reward}</strong></div>
+      <section className="result-rewards" aria-label={strings.result.rewards}>
+        <div className="result-rewards__heading"><span>{strings.result.rewardLabel}</span><strong>🐾 {reward}</strong></div>
         <div className="result-rewards__actions">
-          <ArtworkButton asset="rewards" className="result-rewards__button result-rewards__button--dark" disabled={isClaimed} aria-label={claimLabel} onClick={onClaim}>{isClaimed ? '已領取' : '領取獎勵'}</ArtworkButton>
-          <ArtworkButton asset="watchad" className="result-rewards__button result-rewards__button--dark" disabled={isClaimed} aria-label={doubleLabel} onClick={onDouble}>{isClaimed ? '已領取' : '雙倍獎勵'}</ArtworkButton>
+          <ArtworkButton asset="rewards" className="result-rewards__button result-rewards__button--dark" disabled={isClaimed} aria-label={claimLabel} onClick={onClaim}>{isClaimed ? strings.result.claimed : strings.result.claim}</ArtworkButton>
+          <ArtworkButton asset="watchad" className="result-rewards__button result-rewards__button--dark" disabled={isClaimed} aria-label={doubleLabel} onClick={onDouble}>{isClaimed ? strings.result.claimed : strings.result.double}</ArtworkButton>
         </div>
       </section>
 
-      <nav className="result-nav" aria-label="過關後操作">
-        <ArtworkButton asset="levelselect" className="result-nav__button result-nav__button--dark" onClick={onLevelSelect}>關卡</ArtworkButton>
-        <ArtworkButton asset="nextlevel" className="result-nav__button" onClick={onNextLevel}>下一關</ArtworkButton>
-        <ArtworkButton asset="replay" className="result-nav__button" onClick={onRestart}>重玩</ArtworkButton>
+      <nav className="result-nav" aria-label={strings.result.nav}>
+        <ArtworkButton asset="levelselect" className="result-nav__button result-nav__button--dark" onClick={onLevelSelect}>{strings.result.levelNav}</ArtworkButton>
+        <ArtworkButton asset="nextlevel" className="result-nav__button" onClick={onNextLevel}>{strings.result.next}</ArtworkButton>
+        <ArtworkButton asset="replay" className="result-nav__button" onClick={onRestart}>{strings.result.replay}</ArtworkButton>
       </nav>
     </Modal>
   )

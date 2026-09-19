@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { format, useDocumentLanguage, useStrings } from '../i18n'
 import { DailyRewardModal } from './components/DailyRewardModal'
 import { CollectionScreen } from './screens/CollectionScreen'
 import { HomeScreen } from './screens/HomeScreen'
@@ -15,6 +16,8 @@ type Screen = 'home' | 'levels' | 'game' | 'collection' | 'shop' | 'settings' | 
 
 export function App() {
   const { player, isReady, addHints, claimDailyReward } = usePlayer()
+  const strings = useStrings()
+  useDocumentLanguage()
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedLevel, setSelectedLevel] = useState(player.currentLevel)
   const [isDailyOpen, setIsDailyOpen] = useState(false)
@@ -41,17 +44,17 @@ export function App() {
     if (amount <= 2) addHints(amount)
     else claimDailyReward(amount)
     setIsDailyOpen(false)
-    setToast(amount <= 2 ? `已領取提示 ×${amount}` : `已領取 🐾 ${amount}`)
+    setToast(amount <= 2 ? format(strings.app.hintClaimed, { amount }) : format(strings.app.coinClaimed, { amount }))
   }
 
-  if (!isReady) return <div className="app-loading"><span>🐱</span><strong>正在打開紙箱…</strong></div>
+  if (!isReady) return <div className="app-loading"><span>🐱</span><strong>{strings.app.openingBox}</strong></div>
 
   const hasDailyReward = player.dailyReward.lastClaimDate !== new Date().toISOString().slice(0, 10)
   return (
     <div className="app-frame">
       {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={setScreen} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
-      {screen === 'game' && <Suspense fallback={<div className="app-loading"><span>🐱</span><strong>正在整理紙箱…</strong></div>}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} /></Suspense>}
+      {screen === 'game' && <Suspense fallback={<div className="app-loading"><span>🐱</span><strong>{strings.app.organizingBox}</strong></div>}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} /></Suspense>}
       {screen === 'collection' && <CollectionScreen onBack={() => setScreen('home')} onShop={() => setScreen('shop')} />}
       {screen === 'shop' && <ShopScreen onBack={() => setScreen('home')} onToast={setToast} />}
       {screen === 'settings' && <SettingsScreen onBack={() => setScreen('home')} onToast={setToast} onLegal={openLegal} />}

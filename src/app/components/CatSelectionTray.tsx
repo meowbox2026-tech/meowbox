@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { getVisibleCatGroup } from '../../game/data/catTray'
 import { getCatAssetPath } from '../../game/data/catAssets'
+import { useStrings } from '../../i18n'
 import type { CatDefinition, LevelDefinition, PuzzleState } from '../../game/types'
 import { getPuzzleMetrics } from '../../game/phaser/puzzleLayout'
 
@@ -20,6 +21,7 @@ export interface CatSelectionTrayProps {
 }
 
 export function CatSelectionTray({ level, puzzle, selectedCatId, onSelect, onDrop }: CatSelectionTrayProps) {
+  const strings = useStrings()
   const layerRef = useRef<HTMLDivElement>(null)
   const [bounds, setBounds] = useState<TrayBounds>()
   const visibleCats = getVisibleCatGroup(level, puzzle)
@@ -51,7 +53,7 @@ export function CatSelectionTray({ level, puzzle, selectedCatId, onSelect, onDro
     <div className="cat-selection-tray-layer" ref={layerRef}>
       <section
         className="cat-selection-tray"
-        aria-label="貓咪選擇區"
+        aria-label={strings.tray.label}
         style={bounds ? {
           left: bounds.left,
           top: bounds.top,
@@ -86,6 +88,7 @@ interface CatSelectionCardProps {
 }
 
 function CatSelectionCard({ cat, isPlaced, isSelected, onSelect, onDrop }: CatSelectionCardProps) {
+  const strings = useStrings()
   const pointerStart = useRef<{ x: number; y: number } | undefined>(undefined)
   const didMove = useRef(false)
 
@@ -134,7 +137,7 @@ function CatSelectionCard({ cat, isPlaced, isSelected, onSelect, onDrop }: CatSe
     >
       {cat.visualAsset && <img src={getCatAssetPath(cat.visualAsset)} alt="" aria-hidden="true" />}
       {getCatBadge(cat) && <span className="cat-selection-tray__badge" aria-hidden="true">{getCatBadge(cat)}</span>}
-      {isPlaced && <small>已放入</small>}
+      {isPlaced && <small>{strings.tray.placed}</small>}
     </button>
   )
 }

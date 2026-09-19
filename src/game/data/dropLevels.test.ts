@@ -25,12 +25,16 @@ describe('drop level catalogue', () => {
       expect(level.initialBoard[0]).toHaveLength(level.width)
       expect(level.width).toBeLessThan(level.tileAssets.length)
     }
-    const allDropCats = ['arrogant', 'sunny', 'fishLover', 'orange', 'white', 'blue', 'alone', 'sleeping', 'box', 'mischievous', 'boss', 'sticky']
+    const allDropCats = new Set(['arrogant', 'sunny', 'fishLover', 'orange', 'white', 'blue', 'alone', 'sleeping', 'box', 'mischievous', 'boss', 'sticky'])
     for (const level of DROP_LEVELS.slice(4)) {
-      expect(level.tileAssets).toEqual(allDropCats)
+      expect(level.tileAssets).toHaveLength(level.width + 1)
+      expect(new Set(level.tileAssets).size).toBe(level.width + 1)
       expect(level.initialQueue).toHaveLength(12)
-      expect(new Set(level.initialBoard.flat().filter(Boolean).map(tile => tile!.type))).toEqual(new Set(allDropCats))
+      const initialTypes = new Set(level.initialBoard.flat().filter(Boolean).map(tile => tile!.type))
+      expect(initialTypes.size).toBe(level.tileAssets.length)
+      expect([...initialTypes].every(type => level.tileAssets.includes(type as typeof level.tileAssets[number]))).toBe(true)
     }
+    expect(new Set(DROP_LEVELS.slice(4).flatMap(level => level.tileAssets))).toEqual(allDropCats)
   })
   it('starts every level without a free match and keeps the tutorial layout', () => {
     expect(findDropMatches(DROP_LEVELS[0].initialBoard)).toEqual([])

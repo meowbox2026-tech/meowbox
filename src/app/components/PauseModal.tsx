@@ -1,3 +1,4 @@
+import { useStrings } from '../../i18n'
 import { GameImage } from './GameImage'
 import { Modal } from './Modal'
 
@@ -11,16 +12,17 @@ interface PauseModalProps {
 
 /** Keeps the supplied pause-panel artwork and its functional hit areas together. */
 export function PauseModal({ open, onContinue, onRestart, onHome, onSettings }: PauseModalProps) {
+  const strings = useStrings()
   return (
-    <Modal open={open} className="pause-modal" onClose={onContinue} ariaLabel="暫停選單">
+    <Modal open={open} className="pause-modal" onClose={onContinue} ariaLabel={strings.pause.dialogAria}>
       <div className="pause-panel">
-        <GameImage asset="paused" alt="遊戲已暫停" />
-        <h2 className="pause-panel__title">暫停</h2>
-        <button className="pause-panel__close" type="button" onClick={onContinue} aria-label="關閉暫停選單" />
-        <button className="pause-panel__continue" type="button" onClick={onContinue}><span>繼續遊戲</span></button>
-        <button className="pause-panel__restart" type="button" onClick={onRestart}><span>重新開始本關</span></button>
-        <button className="pause-panel__home" type="button" onClick={onHome}><span>回到主頁</span></button>
-        <button className="pause-panel__settings" type="button" onClick={onSettings}><span>設定</span></button>
+        <GameImage asset="paused" alt={strings.pause.pausedAlt} />
+        <h2 className="pause-panel__title">{strings.pause.title}</h2>
+        <button className="pause-panel__close" type="button" onClick={onContinue} aria-label={strings.pause.close} />
+        <button className="pause-panel__continue" type="button" onClick={onContinue}><span>{strings.pause.continue}</span></button>
+        <button className="pause-panel__restart" type="button" onClick={onRestart}><span>{strings.pause.restart}</span></button>
+        <button className="pause-panel__home" type="button" onClick={onHome}><span>{strings.pause.home}</span></button>
+        <button className="pause-panel__settings" type="button" onClick={onSettings}><span>{strings.pause.settings}</span></button>
       </div>
     </Modal>
   )

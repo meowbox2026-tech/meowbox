@@ -1,3 +1,6 @@
+import { getStrings } from '../../i18n'
+import type { Locale } from '../../i18n'
+
 export const MATCH3_CLEAR_EFFECT_DURATION_MS = 560
 export const MATCH3_PRESENTATION_BUFFER_MS = 70
 export const MATCH3_FALL_ANIMATION_DURATION_MS = 360
@@ -6,9 +9,11 @@ export const MATCH3_FALL_PRESENTATION_BUFFER_MS = 20
 
 export type Match3CatSpectacle = 'paw' | 'combo' | 'run'
 
-export function getMatch3ComboLabel(cascades: number): string | undefined {
+export function getMatch3ComboLabel(cascades: number, locale: Locale = 'zh-TW'): string | undefined {
   const count = normalizeCascadeCount(cascades)
-  return count > 0 ? `喵喵 ×${count}` : undefined
+  if (count <= 0) return undefined
+  const template = getStrings(locale).game.matchCombo
+  return template.includes('{count}') ? template.replace('{count}', String(count)) : `喵喵 ×${count}`
 }
 
 export function getMatch3CatSpectacle(cascades: number): Match3CatSpectacle | undefined {

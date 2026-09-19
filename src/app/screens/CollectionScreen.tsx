@@ -1,19 +1,20 @@
 import { useMemo, useState } from 'react'
 import type { CatSkin } from '../../game/types'
+import { format, getCatSkinName, useLocale, useStrings } from '../../i18n'
 import { usePlayer } from '../../state/PlayerContext'
 import { AppButton } from '../components/AppButton'
 import { CatPortrait } from '../components/CatPortrait'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { TopBar } from '../components/TopBar'
 
-const CAT_SKINS: Array<{ id: CatSkin; name: string; price: number }> = [
-  { id: 'orange', name: '橘貓', price: 0 },
-  { id: 'black', name: '黑貓', price: 1500 },
-  { id: 'gray', name: '灰白貓', price: 1500 },
-  { id: 'white', name: '白貓', price: 2000 },
-  { id: 'calico', name: '三花貓', price: 2000 },
-  { id: 'siamese', name: '暹羅貓', price: 2500 },
-  { id: 'ragdoll', name: '布偶貓', price: 3000 }
+const CAT_SKINS: Array<{ id: CatSkin; price: number }> = [
+  { id: 'orange', price: 0 },
+  { id: 'black', price: 1500 },
+  { id: 'gray', price: 1500 },
+  { id: 'white', price: 2000 },
+  { id: 'calico', price: 2000 },
+  { id: 'siamese', price: 2500 },
+  { id: 'ragdoll', price: 3000 }
 ]
 
 interface CollectionScreenProps {
@@ -23,6 +24,8 @@ interface CollectionScreenProps {
 
 export function CollectionScreen({ onBack, onShop }: CollectionScreenProps) {
   const { player, selectSkin } = usePlayer()
+  const strings = useStrings()
+  const locale = useLocale()
   const [selected, setSelected] = useState<string>(player.selectedCatSkin)
   const selectedSkin = useMemo(() => CAT_SKINS.find((skin) => skin.id === selected) ?? CAT_SKINS[0], [selected])
   const isUnlocked = player.unlockedCatSkins.includes(selected)
@@ -31,24 +34,25 @@ export function CollectionScreen({ onBack, onShop }: CollectionScreenProps) {
     if (!isUnlocked) return onShop()
     selectSkin('cat', selected)
   }
+  const selectedName = getCatSkinName(selectedSkin.id, locale)
 
   return (
     <main className="screen screen--collection">
       <TopBar coins={player.pawCoins} onBack={onBack} />
-      <ScreenTitle title="貓咪收藏" subtitle="收集更多貓咪，累積更多幸福！" mascot={<CatPortrait skin={selectedSkin.id} small />} />
+      <ScreenTitle title={strings.collection.title} subtitle={strings.collection.subtitle} mascot={<CatPortrait skin={selectedSkin.id} small />} />
       <section className="collection-feature">
         <CatPortrait skin={selectedSkin.id} />
-        <div className="collection-feature__detail"><h2>🐾 {selectedSkin.name} ♡</h2><p>{isUnlocked ? '溫暖又療癒的陪伴，是每一天的小確幸 ♡' : `需要 ${selectedSkin.price.toLocaleString()} Paw Coins 解鎖`}</p><AppButton onClick={useSelectedSkin} variant={isUnlocked ? 'primary' : 'cream'}>{isUnlocked && player.selectedCatSkin === selected ? '使用中' : isUnlocked ? '使用這隻貓' : '前往商店'}</AppButton></div>
+        <div className="collection-feature__detail"><h2>🐾 {selectedName} ♡</h2><p>{isUnlocked ? strings.collection.companionUnlocked : format(strings.collection.unlockPrice, { price: selectedSkin.price.toLocaleString() })}</p><AppButton onClick={useSelectedSkin} variant={isUnlocked ? 'primary' : 'cream'}>{isUnlocked && player.selectedCatSkin === selected ? strings.collection.using : isUnlocked ? strings.collection.useCat : strings.collection.goShop}</AppButton></div>
       </section>
-      <div className="collection-tabs"><button className="is-active" type="button">🐱 貓咪</button><button type="button" onClick={onShop}>📦 箱子</button><button type="button" onClick={onShop}>★ 特別系列</button></div>
-      <section className="skin-grid" aria-label="貓咪外觀收藏">
+      <div className="collection-tabs"><button className="is-active" type="button">{strings.collection.catsTab}</button><button type="button" onClick={onShop}>{strings.collection.boxesTab}</button><button type="button" onClick={onShop}>{strings.collection.specialTab}</button></div>
+      <section className="skin-grid" aria-label={strings.collection.gridLabel}>
         {CAT_SKINS.map((skin) => {
           const unlocked = player.unlockedCatSkins.includes(skin.id)
-          return <button className={`skin-card ${selected === skin.id ? 'is-selected' : ''} ${unlocked ? '' : 'is-locked'}`} key={skin.id} type="button" onClick={() => setSelected(skin.id)}><CatPortrait skin={skin.id} small sleeping={skin.id === 'ragdoll'} /><strong>{skin.name}</strong><small>{unlocked ? player.selectedCatSkin === skin.id ? '使用中' : '已解鎖' : `🐾 ${skin.price.toLocaleString()}`}</small></button>
+          return <button className={`skin-card ${selected === skin.id ? 'is-selected' : ''} ${unlocked ? '' : 'is-locked'}`} key={skin.id} type="button" onClick={() => setSelected(skin.id)}><CatPortrait skin={skin.id} small sleeping={skin.id === 'ragdoll'} /><strong>{getCatSkinName(skin.id, locale)}</strong><small>{unlocked ? player.selectedCatSkin === skin.id ? strings.collection.using : strings.collection.unlocked : `🐾 ${skin.price.toLocaleString()}`}</small></button>
         })}
-        <div className="skin-card skin-card--mystery"><span>?</span><strong>神祕貓</strong><small>Lv.50 解鎖</small></div>
+        <div className="skin-card skin-card--mystery"><span>?</span><strong>{strings.collection.mysteryName}</strong><small>{strings.collection.mysteryHint}</small></div>
       </section>
-      <p className="collection-note">🐾 持續遊玩，解鎖更多可愛貓咪！</p>
+      <p className="collection-note">{strings.collection.note}</p>
     </main>
   )
 }

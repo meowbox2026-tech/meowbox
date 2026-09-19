@@ -1,7 +1,8 @@
+import { getLegalDocument, useLocale, useStrings } from '../../i18n'
 import { AppButton } from '../components/AppButton'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { TopBar } from '../components/TopBar'
-import { LEGAL_DOCUMENTS, SUPPORT_EMAIL, type LegalDocumentId } from '../legal/legalContent'
+import { SUPPORT_EMAIL, type LegalDocumentId } from '../legal/legalContent'
 
 interface LegalScreenProps {
   documentId: LegalDocumentId
@@ -9,7 +10,9 @@ interface LegalScreenProps {
 }
 
 export function LegalScreen({ documentId, onBack }: LegalScreenProps) {
-  const document = LEGAL_DOCUMENTS[documentId]
+  const locale = useLocale()
+  const strings = useStrings()
+  const document = getLegalDocument(documentId, locale)
 
   return (
     <main className="screen screen--legal">
@@ -23,9 +26,9 @@ export function LegalScreen({ documentId, onBack }: LegalScreenProps) {
             {section.bullets && <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>}
           </section>
         ))}
-        {documentId === 'support' && <a className="legal-email" href={`mailto:${SUPPORT_EMAIL}`}>寄信給客服</a>}
+        {documentId === 'support' && <a className="legal-email" href={`mailto:${SUPPORT_EMAIL}`}>{strings.legal.emailCta}</a>}
       </article>
-      <AppButton className="settings-home" variant="pink" onClick={onBack}>‹　返回設定</AppButton>
+      <AppButton className="settings-home" variant="pink" onClick={onBack}>{strings.legal.backToSettings}</AppButton>
     </main>
   )
 }

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { DROP_NAMES } from '../../game/core/dropEngine'
 import { getCatAssetPath } from '../../game/data/catAssets'
 import { getDropLevelById } from '../../game/data/dropLevels'
 import { DropBoard } from '../../game/phaser/DropBoard'
 import { useDropGame } from '../../game/phaser/useDropGame'
 import type { CatAsset } from '../../game/types'
+import { format, getDropCatName, useLocale, useLocalizedLevel, useStrings } from '../../i18n'
 import { playCatSound, playMatch3Sound, startBackgroundMusic, stopBackgroundMusic } from '../../services/audio/audioService'
 import { playPlacementHaptic } from '../../services/haptics/hapticsService'
 import { usePlayer } from '../../state/PlayerContext'
@@ -26,7 +26,10 @@ interface GameScreenProps {
 
 export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel }: GameScreenProps) {
   const { player, completeLevel } = usePlayer()
+  const strings = useStrings()
+  const locale = useLocale()
   const level = getDropLevelById(levelId)
+  const localized = useLocalizedLevel(level.id)
   const [paused, setPaused] = useState(false)
   const [rules, setRules] = useState(false)
   const [ad, setAd] = useState<'hint' | 'revive'>()
@@ -55,42 +58,44 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
   const progress = Math.min(state.cleared, state.target)
   const hintAvailable = !busy && state.phase === 'playing' && !hintUsed && recommendColumn(state) !== undefined
   const timeText = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`
-  const failureTitle = failure === 'ceiling' ? '哎呀，紙箱裝滿了！' : failure === 'moves' ? '額外落下次數用完了' : '時間到，休息一下喵！'
+  const failureTitle = failure === 'ceiling' ? strings.game.failedCeilingTitle : failure === 'moves' ? strings.game.failedMovesTitle : strings.game.failedTimeTitle
+  void started
   return <main className="screen screen--game screen--drop">
-    <TopBar coins={player.pawCoins} level={level.id} onPause={() => setPaused(true)} status={<div className="drop-top-status" aria-label="關卡任務與時間">
-      <strong>救出 {progress} / {state.target}</strong>
-      <span className={secondsLeft <= 15 && extraDrops === undefined ? 'drop-time is-urgent' : 'drop-time'} role="timer" aria-label="剩餘時間">{extraDrops !== undefined ? `加賽 ${extraDrops} 次` : `⏱ ${timeText}`}</span>
+    <TopBar coins={player.pawCoins} level={level.id} onPause={() => setPaused(true)} status={<div className="drop-top-status" aria-label={strings.game.statusLabel}>
+      <strong>{format(strings.game.rescue, { done: progress, target: state.target })}</strong>
+      <span className={secondsLeft <= 15 && extraDrops === undefined ? 'drop-time is-urgent' : 'drop-time'} role="timer" aria-label={strings.game.timeLeft}>{extraDrops !== undefined ? format(strings.game.overtime, { count: extraDrops }) : `⏱ ${timeText}`}</span>
     </div>} />
-    <section className="drop-preview" aria-label="待落下的兩隻貓咪">
-      <div className="drop-preview__now"><span>NOW</span><img key={`${state.current}-${state.next}`} src={getCatAssetPath(state.current as CatAsset)} alt={`現在：${DROP_NAMES[state.current]}`} /></div>
+    <section className="drop-preview" aria-label={strings.game.preview}>
+      <div className="drop-preview__now"><span>{strings.game.now}</span><img key={`${state.current}-${state.next}`} src={getCatAssetPath(state.current as CatAsset)} alt={format(strings.game.nowAlt, { name: getDropCatName(state.current, locale) })} /></div>
       <span className="drop-preview__arrow" aria-hidden="true">→</span>
-      <div className="drop-preview__next"><span>NEXT</span><img src={getCatAssetPath(state.next as CatAsset)} alt={`下一隻：${DROP_NAMES[state.next]}`} /></div>
+      <div className="drop-preview__next"><span>{strings.game.next}</span><img src={getCatAssetPath(state.next as CatAsset)} alt={format(strings.game.nextAlt, { name: getDropCatName(state.next, locale) })} /></div>
     </section>
     <DropBoard key={run} board={display.board} previous={display.previous} current={state.current} wave={display.wave} hintColumn={hintColumn}
       paused={paused || rules || !!ad} terminal={state.phase !== 'playing'} onDrop={drop} />
-    <nav className="drop-actions" aria-label="遊戲操作"><button onClick={() => setRules(true)}>？ 玩法說明</button><button disabled={!hintAvailable} onClick={() => setAd('hint')}>{hintUsed ? '本局提示已使用' : '▶ 廣告提示'}</button><button onClick={restart}>↻ 重玩</button></nav>
+    <nav className="drop-actions" aria-label={strings.game.actions}><button onClick={() => setRules(true)}>{strings.game.howTo}</button><button disabled={!hintAvailable} onClick={() => setAd('hint')}>{hintUsed ? strings.game.hintUsed : strings.game.hintAd}</button><button onClick={restart}>{strings.game.replay}</button></nav>
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
-    <Modal open={rules} ariaLabel="貓咪落下玩法" className="drop-rules">
-      <h2>一點、一落、一聲喵！</h2>
-      <ol><li><strong>點選一欄</strong><p>NOW 的貓咪會落到那一欄最下方的空位。NEXT 是下一隻。</p></li><li><strong>三隻同款連線</strong><p>橫向、直向、兩種斜向，連續 3 隻以上一起消除。</p></li><li><strong>掉落再連鎖</strong><p>上方貓咪往下掉，再連線就觸發 Combo！</p></li><li><strong>留意箱子頂端</strong><p>消除與掉落結束後，仍有貓咪佔到最上排就失敗。</p></li></ol>
-      <p>本關：{level.timeLimit} 秒內救出 {level.target} 隻。首次落下開始計時；連鎖動畫也會持續倒數，暫停與廣告停表。{level.threeStarMoves} 次內三星，{level.threeStarMoves + 8} 次內兩星。</p><p>每局可看廣告提示一次、復活一次。碰頂復活清掉底排（不計消除數）；時間到可加賽 3 次落下，加賽仍不能碰頂。</p><AppButton onClick={() => setRules(false)}>知道了，來玩喵！</AppButton>
+    <Modal open={rules} ariaLabel={strings.game.rulesAria} className="drop-rules">
+      <h2>{strings.game.rulesTitle}</h2>
+      <p className="drop-level-intro">{localized.name} — {localized.guidance}</p>
+      <ol><li><strong>{strings.game.rule1Title}</strong><p>{strings.game.rule1Desc}</p></li><li><strong>{strings.game.rule2Title}</strong><p>{strings.game.rule2Desc}</p></li><li><strong>{strings.game.rule3Title}</strong><p>{strings.game.rule3Desc}</p></li><li><strong>{strings.game.rule4Title}</strong><p>{strings.game.rule4Desc}</p></li></ol>
+      <p>{format(strings.game.rulesFooter, { time: level.timeLimit, target: level.target, three: level.threeStarMoves, two: level.threeStarMoves + 8 })}</p><p>{strings.game.rulesExtra}</p><AppButton onClick={() => setRules(false)}>{strings.game.rulesCta}</AppButton>
     </Modal>
-    <Modal open={state.phase === 'completed' && !busy} ariaLabel="過關囉！" className="drop-result">
-      <div className="drop-confetti" aria-hidden="true">✦ ♡ ✧ ♡ ✦</div><img src={getCatAssetPath(level.tileAssets[0])} alt="開心的貓咪" /><h2>第 {level.id} 關完成！</h2>
-      <div className="drop-result__stars" aria-label={`${stars} 顆星`}>{[1, 2, 3].map(i => <span className={i <= stars ? 'is-earned' : ''} key={i}>★</span>)}</div>
-      <p>救出 {state.cleared} 隻 · {state.score} 分<br />最佳 Combo ×{state.bestCombo} · 落下 {state.moves} 次</p>
-      <strong className="drop-reward">🐾 50 貓掌幣已存入</strong>
-      {!isLastLevel(level.id) && <AppButton onClick={() => onNextLevel(level.id + 1)}>下一關：{level.id + 1}</AppButton>}
-      <AppButton onClick={restart}>再玩一次，挑戰高分</AppButton><AppButton variant="cream" onClick={onLevelSelect}>返回關卡</AppButton><small>{isLastLevel(level.id) ? '箱長的派對完成了 ♡' : '下一箱幸福正在等你 ♡'}</small>
+    <Modal open={state.phase === 'completed' && !busy} ariaLabel={strings.game.completedAria} className="drop-result">
+      <div className="drop-confetti" aria-hidden="true">✦ ♡ ✧ ♡ ✦</div><img src={getCatAssetPath(level.tileAssets[0])} alt={getDropCatName(level.tileAssets[0], locale)} /><h2>{format(strings.game.completedTitle, { id: level.id })}</h2>
+      <div className="drop-result__stars" aria-label={format(strings.game.starsAria, { stars })}>{[1, 2, 3].map(i => <span className={i <= stars ? 'is-earned' : ''} key={i}>★</span>)}</div>
+      <p>{format(strings.game.summary, { cleared: state.cleared, score: state.score })}<br />{format(strings.game.summaryLine2, { best: state.bestCombo, moves: state.moves })}</p>
+      <strong className="drop-reward">{format(strings.game.reward, { amount: 50 })}</strong>
+      {!isLastLevel(level.id) && <AppButton onClick={() => onNextLevel(level.id + 1)}>{format(strings.game.nextLevel, { id: level.id + 1 })}</AppButton>}
+      <AppButton onClick={restart}>{strings.game.playAgain}</AppButton><AppButton variant="cream" onClick={onLevelSelect}>{strings.game.backToLevels}</AppButton><small>{isLastLevel(level.id) ? strings.game.partyDone : strings.game.nextHappiness}</small>
     </Modal>
-    <Modal open={state.phase === 'failed' && !busy && !ad} ariaLabel={failure === 'ceiling' ? '紙箱裝滿了' : '挑戰結束'} className="drop-result">
-      <img src={getCatAssetPath('sleeping')} alt="休息一下的貓咪" /><h2>{failureTitle}</h2><p>已救出 {state.cleared} / {state.target} 隻貓咪。<br />{failure === 'ceiling' ? '試試分散堆疊，留出更多空間。' : '再找找三連線，貓咪等你帶牠們回家。'}</p>
-      {!reviveUsed && <AppButton variant="purple" onClick={() => setAd('revive')}>{failure === 'ceiling' ? '▶ 看廣告，清除底部一排' : '▶ 看廣告，再給 3 次落下'}</AppButton>}
-      <AppButton onClick={restart}>再試一次喵</AppButton><AppButton variant="cream" onClick={onHome}>回溫馨小屋</AppButton>
+    <Modal open={state.phase === 'failed' && !busy && !ad} ariaLabel={failure === 'ceiling' ? strings.game.failedCeilingAria : strings.game.failedGenericAria} className="drop-result">
+      <img src={getCatAssetPath('sleeping')} alt={getDropCatName('sleeping', locale)} /><h2>{failureTitle}</h2><p>{format(strings.game.failedProgress, { cleared: state.cleared, target: state.target })}<br />{failure === 'ceiling' ? strings.game.ceilingTip : strings.game.otherTip}</p>
+      {!reviveUsed && <AppButton variant="purple" onClick={() => setAd('revive')}>{failure === 'ceiling' ? strings.game.reviveCeiling : strings.game.reviveMoves}</AppButton>}
+      <AppButton onClick={restart}>{strings.game.retry}</AppButton><AppButton variant="cream" onClick={onHome}>{strings.game.backCottage}</AppButton>
     </Modal>
     {ad && <RewardedAdModal key={`${run}-${ad}`} open kind={ad === 'hint' ? 'hint' : failure === 'ceiling' ? 'clear-bottom-row' : 'challenge-moves'}
-      title={ad === 'hint' ? '讓貓咪幫你看一眼' : '再挑戰一次喵'}
-      description={ad === 'hint' ? '完成觀看後，標出一個較安全的欄位。本局限一次。' : failure === 'ceiling' ? '清除底部一排，其餘貓咪向下移；不增加消除數。每局限復活一次。' : '獲得 3 次額外落下，不再倒數；碰頂仍失敗。每局限復活一次。'}
+      title={ad === 'hint' ? strings.game.hintTitle : strings.game.reviveTitle}
+      description={ad === 'hint' ? strings.game.hintDesc : failure === 'ceiling' ? strings.game.reviveCeilingDesc : strings.game.reviveMovesDesc}
       onClose={() => setAd(undefined)} onReward={() => { if (ad === 'hint') hint(); else revive(); setAd(undefined) }} />}
   </main>
 }

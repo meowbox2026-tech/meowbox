@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactNode } from 'react'
 import { getCatAssetPath } from '../data/catAssets'
+import { format, getMatch3CatLabel, useLocale, useStrings } from '../../i18n'
 import type { CatAsset } from '../types'
 import {
   areMatch3PointsAdjacent,
@@ -43,18 +44,12 @@ interface DragPreview {
   size: number
 }
 
-const CAT_LABELS: Partial<Record<CatAsset, string>> = {
-  alone: '黑貓',
-  blue: '藍貓',
-  fishLover: '魚魚貓',
-  orange: '橘貓',
-  white: '白貓'
-}
-
 export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(function Match3Board(
   { width, height, tileAssets, initialBoard, random, onAction, onStateChange, onClearWave, overlay },
   forwardedRef
 ) {
+  const locale = useLocale()
+  const strings = useStrings()
   const randomRef = useRef(random ?? Math.random)
   const waveFeedback = useRef(onClearWave)
   waveFeedback.current = onClearWave
@@ -248,7 +243,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
     ? resolutionSteps[activeResolutionStepIndex]
     : undefined
   const activeClearEvent = activeResolutionStep?.clearEvent
-  const comboLabel = activeClearEvent ? getMatch3ComboLabel(activeResolutionStepIndex + 1) : undefined
+  const comboLabel = activeClearEvent ? getMatch3ComboLabel(activeResolutionStepIndex + 1, locale) : undefined
 
   return (
     <div
@@ -256,7 +251,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
       className="match3-board-shell"
       style={{ '--match3-columns': width, '--match3-rows': height } as React.CSSProperties}
     >
-      <div className="match3-board" role="grid" aria-label="三消棋盤">
+      <div className="match3-board" role="grid" aria-label={strings.match3.board}>
         {displayBoard.flatMap((row, y) => row.map((tile, x) => {
           const point = { x, y }
           const isSelected = selected?.x === x && selected?.y === y
@@ -265,7 +260,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
           const isClearing = Boolean(activeClearEvent?.cells.some((cell) => cell.x === x && cell.y === y))
           const cellKey = `${x}:${y}`
           const fallRows = fallingCells.get(cellKey)
-          const tileLabel = tile ? (CAT_LABELS[tile.type as CatAsset] ?? tile.type) : '空格'
+          const tileLabel = tile ? getMatch3CatLabel(tile.type as CatAsset, locale) : strings.match3.empty
 
           return (
             <button
@@ -278,7 +273,7 @@ export const Match3Board = forwardRef<Match3BoardHandle, Match3BoardProps>(funct
               key={cellKey}
               type="button"
               role="gridcell"
-              aria-label={`第${x + 1}欄第${y + 1}列，${tileLabel}`}
+              aria-label={format(strings.match3.cell, { col: x + 1, row: y + 1, name: tileLabel })}
               aria-pressed={isSelected}
               disabled={!tile || isResolving}
               style={{

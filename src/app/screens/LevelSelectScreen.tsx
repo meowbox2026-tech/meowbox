@@ -1,4 +1,6 @@
 import { DROP_LEVELS } from '../../game/data/dropLevels'
+import { format, useLocale, useStrings } from '../../i18n'
+import { getLevelName } from '../../i18n'
 import { usePlayer } from '../../state/PlayerContext'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { TopBar } from '../components/TopBar'
@@ -10,17 +12,21 @@ interface LevelSelectScreenProps {
 
 export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenProps) {
   const { player } = usePlayer()
+  const strings = useStrings()
+  const locale = useLocale()
+  const worlds = [0, 1, 2].map((index) => ({
+    name: format(strings.levels.world, { n: index + 1 }),
+    sub: strings.levels.worldSubs[index] ?? ''
+  }))
 
   return (
     <main className="screen screen--levels">
       <TopBar coins={player.pawCoins} onBack={onBack} />
-      <ScreenTitle title="關卡選擇" subtitle="更多貓咪，更多幸福！" />
-      <div className="world-tabs" role="tablist" aria-label="世界選擇">
-        <button className="is-active" type="button">世界 1<small>溫馨小屋</small></button>
-        <button type="button" disabled>世界 2<small>花園</small></button>
-        <button type="button" disabled>世界 3<small>旅行</small></button>
+      <ScreenTitle title={strings.levels.title} subtitle={strings.levels.subtitle} />
+      <div className="world-tabs" role="tablist" aria-label={strings.levels.worldTabs}>
+        {worlds.map((world, index) => <button className={index === 0 ? 'is-active' : ''} key={world.name} type="button" disabled={index !== 0}>{world.name}<small>{world.sub}</small></button>)}
       </div>
-      <section className="level-board" aria-label="關卡清單" tabIndex={0}>
+      <section className="level-board" aria-label={strings.levels.board} tabIndex={0}>
         {DROP_LEVELS.map((level) => {
           const unlocked = level.id <= player.currentLevel
           const stars = player.stars[level.id] ?? 0
@@ -31,10 +37,11 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
               type="button"
               disabled={!unlocked}
               onClick={() => onSelectLevel(level.id)}
-              aria-label={`第 ${level.id} 關${unlocked ? '' : '，尚未解鎖'}`}
+              aria-label={format(strings.levels.levelAria, { id: level.id }) + (unlocked ? '' : strings.levels.lockedSuffix)}
+              title={getLevelName(level.id, locale)}
             >
               <strong>{level.id}</strong>
-              {unlocked ? <span>{[1, 2, 3].map((star) => <i className={star <= stars ? 'is-earned' : ''} key={star}>★</i>)}</span> : <span className="level-tile__lock">未解鎖</span>}
+              {unlocked ? <span>{[1, 2, 3].map((star) => <i className={star <= stars ? 'is-earned' : ''} key={star}>★</i>)}</span> : <span className="level-tile__lock">{strings.levels.locked}</span>}
             </button>
           )
         })}
