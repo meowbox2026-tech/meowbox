@@ -177,21 +177,26 @@ function createQueue(assets: CatAsset[], seed: number, length = 12): CatAsset[] 
   return Array.from({ length }, (_, index) => assets[(seed + index + 1) % assets.length])
 }
 
-function createWorldTwoBoard(width: number, height: number, assets: CatAsset[], rows: number, seed: number, openingType: CatAsset): DropBoard {
-  const pairRow = Math.max(0, height - rows - 1)
+function createWorldTwoBoard(width: number, height: number, assets: CatAsset[], rows: number, seed: number, laneTypes: CatAsset[]): DropBoard {
   for (let attempt = 0; attempt < assets.length * 4; attempt += 1) {
     const board = createInitialBoard(width, height, assets, rows, seed + attempt)
-    board[pairRow][0] = { id: 9000 + attempt * 2, type: openingType }
-    board[pairRow][1] = { id: 9001 + attempt * 2, type: openingType }
+    for (let lane = 0; lane < laneTypes.length; lane += 1) {
+      for (let y = 0; y < height - 2; y += 1) board[y][lane] = null
+      board[height - 2][lane] = { id: 9000 + attempt * 8 + lane * 2, type: laneTypes[lane] }
+      board[height - 1][lane] = { id: 9001 + attempt * 8 + lane * 2, type: laneTypes[lane] }
+    }
     if (!findDropMatches(board).length) return board
   }
   return createInitialBoard(width, height, assets, rows, seed)
 }
 
 function createWorldTwoPreview(tileAssets: CatAsset[], seed: number, target: number): CatAsset[] {
-  const groupCount = Math.ceil(target / 3)
-  const order = Array.from({ length: groupCount }, (_, index) => tileAssets[(seed + index) % tileAssets.length])
-  return order.flatMap((type) => [type, type, type])
+  const totalDrops = Math.ceil((target + 3) / 3) * 3
+  const lanes = Array.from({ length: 3 }, (_, lane) => tileAssets[(seed + lane) % tileAssets.length])
+  return Array.from({ length: totalDrops }, (_, index) => {
+    const cycle = Math.floor(index / lanes.length)
+    return lanes[(index + cycle) % lanes.length]
+  })
 }
 
 function createLevel(id: number): DropLevelDefinition {
@@ -202,14 +207,14 @@ function createLevel(id: number): DropLevelDefinition {
   const initialRows = id <= 3 ? 2 : id <= 15 ? 3 : id <= 30 ? 4 : id <= 40 ? 3 : id <= 50 ? 4 : 5
   const seed = id * 17
   const worldTwoPreview = world === 2 ? createWorldTwoPreview(tileAssets, seed, targets[id - 1]) : undefined
-  const openingType = worldTwoPreview?.[0] ?? tileAssets[0]
+  const worldTwoLanes = worldTwoPreview?.slice(0, 3) ?? []
   return {
     id, world, name: names[id - 1], width, height, tileAssets,
     timeLimit: times[id - 1], target: targets[id - 1], initialRows, seed,
     threeStarMoves: Math.max(12, Math.ceil(targets[id - 1] * (world === 2 ? .94 : id < 7 ? .92 : .98))),
     previewCount: world === 2 ? 3 : 2,
     tutorial: guidance[id - 1],
-    initialBoard: id === 1 ? createTutorialBoard() : id === 2 ? createVerticalTutorialBoard(tileAssets[0]) : id === 3 ? createDiagonalTutorialBoard(tileAssets[0]) : id === 4 ? createChainTutorialBoard(tileAssets[0], tileAssets[1]) : world === 2 ? createWorldTwoBoard(width, height, tileAssets, initialRows, seed, openingType) : createInitialBoard(width, height, tileAssets, initialRows, seed),
+    initialBoard: id === 1 ? createTutorialBoard() : id === 2 ? createVerticalTutorialBoard(tileAssets[0]) : id === 3 ? createDiagonalTutorialBoard(tileAssets[0]) : id === 4 ? createChainTutorialBoard(tileAssets[0], tileAssets[1]) : world === 2 ? createWorldTwoBoard(width, height, tileAssets, initialRows, seed, worldTwoLanes) : createInitialBoard(width, height, tileAssets, initialRows, seed),
     initialCurrent: worldTwoPreview?.[0] ?? tileAssets[0], initialNext: worldTwoPreview?.[1] ?? tileAssets[1],
     initialQueue: tutorial ? ['blue', 'white', 'white', 'orange', 'orange', 'orange', 'blue', 'white', 'blue'] : worldTwoPreview?.slice(2) ?? createQueue(tileAssets, seed)
   }

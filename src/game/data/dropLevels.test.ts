@@ -47,10 +47,15 @@ describe('drop level catalogue', () => {
     for (const level of DROP_LEVELS.slice(30)) {
       expect(level.tileAssets).toHaveLength(level.width + 2)
       expect(new Set(level.tileAssets).size).toBe(level.width + 2)
-      expect(level.initialQueue).toHaveLength(Math.ceil(level.target / 3) * 3 - 2)
+      expect(level.initialQueue).toHaveLength(Math.ceil((level.target + 3) / 3) * 3 - 2)
+      const previewStream = [level.initialCurrent, level.initialNext, ...level.initialQueue]
+      expect(level.initialCurrent).not.toBe(level.initialNext)
+      for (let index = 0; index < previewStream.length - 2; index += 3) {
+        expect(new Set(previewStream.slice(index, index + 3)).size, `level ${level.id} should vary each three-cat preview`).toBe(3)
+      }
       expect(level.target).toBeGreaterThan(DROP_LEVELS[29].target)
       const initialTypes = new Set(level.initialBoard.flat().filter(Boolean).map(tile => tile!.type))
-      expect(initialTypes.size).toBe(level.tileAssets.length)
+      expect(initialTypes.size).toBeGreaterThanOrEqual(3)
       expect([...initialTypes].every(type => level.tileAssets.includes(type as typeof level.tileAssets[number]))).toBe(true)
     }
     expect(new Set(DROP_LEVELS.slice(4).flatMap(level => level.tileAssets))).toEqual(allDropCats)
@@ -150,23 +155,17 @@ describe('drop level catalogue', () => {
         queue: level.initialQueue,
         target: level.target
       })
-      let plannedType: string | undefined
-      let plannedColumn: number | undefined
-      let plannedDrops = 0
+      const laneColumns = new Map<string, number>()
+      ;[level.initialCurrent, level.initialNext, ...level.initialQueue].forEach((type, index) => {
+        if (!laneColumns.has(type)) laneColumns.set(type, index % 3)
+      })
       for (let move = 0; move < 240 && state.phase === 'playing'; move += 1) {
         const safeColumns = state.board[0].map((_, index) => index)
           .filter((index) => landingRow(state.board, index) >= 2)
           .sort((first, second) => landingRow(state.board, second) - landingRow(state.board, first))
-        if (plannedDrops === 0 && state.current === state.next) {
-          plannedType = state.current
-          plannedColumn = safeColumns[0]
-          plannedDrops = 3
-        }
-        const column = plannedDrops > 0 && state.current === plannedType
-          ? plannedColumn
-          : recommendColumn(state)
+        const laneColumn = laneColumns.get(state.current)
+        const column = laneColumn !== undefined && safeColumns.includes(laneColumn) ? laneColumn : recommendColumn(state)
         if (column === undefined) break
-        if (plannedDrops > 0 && state.current === plannedType) plannedDrops -= 1
         state = dropCat(state, column, random).state
       }
       expect(state.phase, `level ${level.id} should remain completable (cleared ${state.cleared}/${state.target} in ${state.moves} moves)`).toBe('completed')

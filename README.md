@@ -1,6 +1,6 @@
 # MEOW BOX｜貓咪落下消除
 
-以 React + TypeScript + Phaser + Capacitor 建立的直式手機落下消除遊戲原型。畫面以 9:16 為設計基準，直接使用 `allpng` 提供的 UI 素材；房間背景已轉為 1080 × 1920 高品質 WebP 優化載入體積，並內建 Huninn 繁中圓體，避免手機端退回一般系統字型。
+以 React + TypeScript + Phaser + Capacitor 建立的直式手機落下消除遊戲原型。所有頁面以 iPhone SE 直式 CSS viewport（375 × 667）為設計基準，並以 safe-area 與容器單位維持其他手機的可用性；直接使用 `allpng` 提供的 UI 素材，房間背景已轉為 1080 × 1920 高品質 WebP 優化載入體積，並內建 Huninn 繁中圓體，避免手機端退回一般系統字型。
 
 ## 開始使用
 
