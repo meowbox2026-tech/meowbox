@@ -18,16 +18,26 @@ function mountLevel(levelId: number) {
 function finishAnimation() { for (let n = 0; n < 8; n++) act(() => vi.advanceTimersByTime(600)) }
 describe('first drop level', () => {
   it('renders every configured level with its own board, target, assets and clock', () => {
-    for (let levelId = 1; levelId <= 30; levelId += 1) {
+    for (let levelId = 1; levelId <= 60; levelId += 1) {
       cleanup()
       mountLevel(levelId)
       expect(screen.queryByRole('heading', { name: DROP_LEVELS[levelId - 1].name })).not.toBeInTheDocument()
       expect(document.querySelector('.drop-top-status')).toBeInTheDocument()
-      expect(document.querySelectorAll('.drop-preview img')).toHaveLength(2)
+      expect(document.querySelectorAll('.drop-preview img')).toHaveLength(levelId <= 30 ? 2 : 3)
+      expect(document.querySelectorAll('.drop-preview__cat[data-preview-slot]')).toHaveLength(levelId <= 30 ? 2 : 3)
+      expect(document.querySelector('.drop-preview__cat--now')).toBeInTheDocument()
+      expect(document.querySelector('.drop-preview__cat--next')).toBeInTheDocument()
+      if (levelId > 30) expect(document.querySelector('.drop-preview__cat--soon')).toBeInTheDocument()
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
       expect(screen.getByRole('timer', { name: '剩餘時間' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /第 1 欄/ })).toBeInTheDocument()
     }
+  })
+
+  it('shows the third world 2 preview cat after the next cat', () => {
+    mountLevel(31)
+    expect(screen.getByText('SOON')).toBeInTheDocument()
+    expect(screen.getByLabelText('待落下的三隻貓咪')).toBeInTheDocument()
   })
   it('updates previews immediately without rendering a drop ghost', () => {
     const { container } = mount()

@@ -52,11 +52,32 @@
 }
 
 .world-tabs button:last-child { border: 0; }
-.world-tabs small { display: block; margin-top: 2px; font-size: 11px; }
+.world-tabs small { display: flex; align-items: center; justify-content: center; gap: 2px; margin-top: 2px; font-size: 11px; }
+.world-tabs__lock-icon { width: 17px; height: 17px; object-fit: contain; }
 .world-tabs .is-active {
   color: #436d2a;
   background: linear-gradient(180deg, #dfff92, #a7dc65);
   box-shadow: inset 0 -4px 0 #62a640;
+}
+
+.world-tabs button:disabled {
+  color: #9c8b7c;
+  background: rgba(231, 220, 207, .58);
+  cursor: not-allowed;
+}
+
+.world-tabs__hint {
+  flex: 0 0 auto;
+  width: 100%;
+  margin: -2px 0 0;
+  padding: 3px 7px;
+  border: 1px solid #e0bd8d;
+  border-radius: 8px;
+  color: #8c6b54;
+  background: rgba(255, 247, 226, .84);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
 }
 
 .level-board {
@@ -83,7 +104,8 @@
   position: relative;
   display: grid;
   min-width: 0;
-  min-height: clamp(82px, 23cqw, 104px);
+  aspect-ratio: 1;
+  min-height: 0;
   place-items: center;
   align-content: center;
   gap: 3px;
@@ -98,8 +120,11 @@
 
 .level-tile strong { font-size: clamp(21px, 6cqw, 28px); line-height: 1; }
 .level-tile > span { min-height: 16px; font-size: clamp(10px, 2.7cqw, 12px); line-height: 16px; white-space: nowrap; }
-.level-tile i { color: #b29d92; font-size: clamp(11px, 3.2cqw, 15px); font-style: normal; }
-.level-tile i.is-earned { color: #ffd13e; text-shadow: 0 2px 0 #bd7624; }
+.level-tile__stars { display: flex; align-items: center; justify-content: center; gap: 1px; }
+.level-tile__stars img { width: clamp(12px, 3.2cqw, 15px); height: clamp(12px, 3.2cqw, 15px); object-fit: contain; filter: grayscale(.8) saturate(.25) brightness(.93); }
+.level-tile__stars img.is-earned { filter: none; }
+.level-tile__lock { display: inline-flex; align-items: center; justify-content: center; gap: 2px; }
+.level-tile__lock img { width: clamp(17px, 4.5cqw, 21px); height: clamp(17px, 4.5cqw, 21px); object-fit: contain; }
 .level-tile--locked {
   color: #857362;
   background: linear-gradient(180deg, #eee5db, #d5c4b2);

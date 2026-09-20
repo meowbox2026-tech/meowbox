@@ -20,6 +20,7 @@ export const en: Strings = {
   levels: {
     title: 'Levels', subtitle: 'More cats, more happiness!', worldTabs: 'Worlds',
     world: 'World {n}', worldSubs: ['Cozy Cottage', 'Garden', 'Journey'],
+    worldLocked: 'Complete all 30 World 1 levels to unlock World 2',
     board: 'Level list', levelAria: 'Level {id}', lockedSuffix: ', locked', locked: 'Locked'
   },
   settings: {
@@ -56,8 +57,8 @@ export const en: Strings = {
   },
   game: {
     rescue: 'Rescued {done} / {target}', statusLabel: 'Mission and time', timeLeft: 'Time left',
-    overtime: 'Overtime: {count} drops', preview: 'Next two cats', now: 'NOW', next: 'NEXT',
-    nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', board: 'Cat box',
+    overtime: 'Overtime: {count} drops', preview: 'Next two cats', previewThree: 'Next three cats', now: 'NOW', next: 'NEXT', soon: 'SOON',
+    nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', soonAlt: 'Soon: {name}', board: 'Cat box',
     columnAction: 'Column {col}, drop {name}', ceilingDanger: '⚠ Careful! Almost at the top',
     ceilingSafe: 'Stay below this line', boxTagline: '♡ a box of happiness', actions: 'Game actions',
     howTo: '? How to Play', hintUsed: 'Hint used this round', hintAd: '▶ Ad Hint', replay: '↻ Retry',

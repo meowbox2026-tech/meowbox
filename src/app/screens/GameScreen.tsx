@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { getCatAssetPath } from '../../game/data/catAssets'
 import { getDropLevelById } from '../../game/data/dropLevels'
+import { getCatAssetPath } from '../../game/data/catAssets'
 import { DropBoard } from '../../game/phaser/DropBoard'
+import { DropPreview } from '../../game/phaser/DropPreview'
 import { useDropGame } from '../../game/phaser/useDropGame'
-import type { CatAsset } from '../../game/types'
 import { format, getDropCatName, useLocale, useLocalizedLevel, useStrings } from '../../i18n'
 import { playCatSound, playMatch3Sound, startBackgroundMusic, stopBackgroundMusic } from '../../services/audio/audioService'
 import { playPlacementHaptic } from '../../services/haptics/hapticsService'
@@ -65,11 +65,7 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
       <strong>{format(strings.game.rescue, { done: progress, target: state.target })}</strong>
       <span className={secondsLeft <= 15 && extraDrops === undefined ? 'drop-time is-urgent' : 'drop-time'} role="timer" aria-label={strings.game.timeLeft}>{extraDrops !== undefined ? format(strings.game.overtime, { count: extraDrops }) : `⏱ ${timeText}`}</span>
     </div>} />
-    <section className="drop-preview" aria-label={strings.game.preview}>
-      <div className="drop-preview__now"><span>{strings.game.now}</span><img key={`${state.current}-${state.next}`} src={getCatAssetPath(state.current as CatAsset)} alt={format(strings.game.nowAlt, { name: getDropCatName(state.current, locale) })} /></div>
-      <span className="drop-preview__arrow" aria-hidden="true">→</span>
-      <div className="drop-preview__next"><span>{strings.game.next}</span><img src={getCatAssetPath(state.next as CatAsset)} alt={format(strings.game.nextAlt, { name: getDropCatName(state.next, locale) })} /></div>
-    </section>
+    <DropPreview current={state.current} next={state.next} soon={level.previewCount === 3 ? state.queue[0] : undefined} />
     <DropBoard key={run} board={display.board} previous={display.previous} current={state.current} wave={display.wave} hintColumn={hintColumn}
       paused={paused || rules || !!ad} terminal={state.phase !== 'playing'} onDrop={drop} />
     <nav className="drop-actions" aria-label={strings.game.actions}><button onClick={() => setRules(true)}>{strings.game.howTo}</button><button disabled={!hintAvailable} onClick={() => setAd('hint')}>{hintUsed ? strings.game.hintUsed : strings.game.hintAd}</button><button onClick={restart}>{strings.game.replay}</button></nav>
@@ -101,5 +97,5 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
 }
 
 function isLastLevel(levelId: number): boolean {
-  return levelId >= 30
+  return levelId >= 60
 }

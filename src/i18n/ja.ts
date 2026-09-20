@@ -20,6 +20,7 @@ export const ja: Strings = {
   levels: {
     title: 'レベル選択', subtitle: '猫が増えるほど、幸せも増える！', worldTabs: 'ワールド選択',
     world: 'ワールド {n}', worldSubs: ['あたたかいお家', 'ガーデン', '旅行'],
+    worldLocked: 'ワールド1の30ステージをクリアするとワールド2が解放されます',
     board: 'レベル一覧', levelAria: 'レベル {id}', lockedSuffix: '、まだロック中', locked: 'ロック中'
   },
   settings: {
@@ -56,8 +57,8 @@ export const ja: Strings = {
   },
   game: {
     rescue: '{done} / {target} 匹救出', statusLabel: 'ミッションと残り時間', timeLeft: '残り時間',
-    overtime: 'おかわり {count} 回', preview: '次に落ちる2匹', now: 'NOW', next: 'NEXT',
-    nowAlt: '今：{name}', nextAlt: '次：{name}', board: '猫の箱',
+    overtime: 'おかわり {count} 回', preview: '次に落ちる2匹', previewThree: '次に落ちる3匹', now: 'NOW', next: 'NEXT', soon: 'SOON',
+    nowAlt: '今：{name}', nextAlt: '次：{name}', soonAlt: 'その次：{name}', board: '猫の箱',
     columnAction: '{col}列目、{name}を落とす', ceilingDanger: '⚠ 注意！天井が近いよ',
     ceilingSafe: 'この線を超えないでね', boxTagline: '♡ 幸せいっぱいの箱', actions: 'ゲーム操作',
     howTo: '？ 遊び方', hintUsed: 'この回ではヒント使用済み', hintAd: '▶ 広告ヒント', replay: '↻ もう一度',

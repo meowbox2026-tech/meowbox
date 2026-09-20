@@ -31,6 +31,7 @@ export interface Strings {
     worldTabs: string
     world: string
     worldSubs: [string, string, string]
+    worldLocked: string
     board: string
     levelAria: string
     lockedSuffix: string
@@ -103,10 +104,13 @@ export interface Strings {
     timeLeft: string
     overtime: string
     preview: string
+    previewThree: string
     now: string
     next: string
+    soon: string
     nowAlt: string
     nextAlt: string
+    soonAlt: string
     board: string
     columnAction: string
     ceilingDanger: string

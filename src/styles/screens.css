@@ -54,16 +54,12 @@
 /* The home screen now uses the supplied logo, progress card, and button art. */
 .home-brand { position: relative; width: min(82%, 332px); height: clamp(202px, 28dvh, 245px); margin: clamp(38px, 7dvh, 66px) auto 2px; padding: 0; border: 0; border-radius: 0; color: #6e3925; text-align: center; background: transparent; box-shadow: none; transform: none; }
 .home-brand__logo { position: absolute; top: 50%; left: 50%; width: 100%; max-width: none; transform: translate(-50%, -50%); pointer-events: none; }
-.home-brand p { position: absolute; right: 14%; bottom: 9%; left: 14%; z-index: 1; margin: 0; color: #6d3927; font-family: var(--font-cute); font-size: clamp(15px, 4.5vw, 21px); font-weight: 900; letter-spacing: .1em; text-shadow: 0 1px 0 rgba(255, 241, 208, .72); }
+.home-brand p { position: absolute; right: 14%; bottom: -2%; left: 14%; z-index: 1; margin: 0; color: #6d3927; font-family: var(--font-cute); font-size: clamp(15px, 4.5vw, 21px); font-weight: 900; letter-spacing: .1em; line-height: 1.1; text-shadow: 0 1px 0 rgba(255, 241, 208, .72); white-space: nowrap; }
 .home-progress { position: relative; z-index: 2; width: 140px; height: 140px; min-height: 0; margin: -12px 0 0 auto; padding: 0; border: 0; border-radius: 0; color: #75432f; background: transparent; box-shadow: none; transform: rotate(10deg); }
 .home-progress__art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-.home-progress > span, .home-progress > strong, .home-progress > small, .home-progress__stars { position: absolute; z-index: 1; right: 10%; left: 10%; font-family: var(--font-cute); text-align: center; }
+.home-progress > span, .home-progress > strong { position: absolute; z-index: 1; right: 10%; left: 10%; font-family: var(--font-cute); text-align: center; }
 .home-progress > span { top: 31%; font-size: clamp(10px, 3vw, 13px); font-weight: 900; }
 .home-progress > strong { top: 43%; margin: 0; font-size: clamp(20px, 6vw, 27px); line-height: 1; }
-.home-progress__stars { top: 61%; display: flex; justify-content: center; gap: 0; }
-.home-progress__stars img { width: 23%; opacity: .36; }
-.home-progress__stars img.is-earned { opacity: 1; }
-.home-progress > small { bottom: 8%; color: #986348; font-size: clamp(7px, 2vw, 9px); font-weight: 800; white-space: nowrap; }
 .home-start { width: min(89%, 390px); min-height: clamp(98px, 14dvh, 119px); margin: -8px auto 0; overflow: visible; font-size: clamp(25px, 7.2vw, 34px); }
 .home-start .artwork-button__image { width: 100%; }
 .home-start .artwork-button__label { position: absolute; top: 50%; left: 45%; color: #743920; white-space: nowrap; text-shadow: 0 2px 0 rgba(255, 239, 157, .78); transform: translate(-50%, -50%); }
@@ -165,11 +161,11 @@
   width: min(37.333cqw, 140px);
   height: min(37.333cqw, 140px);
   margin-top: max(-40px, -10.667cqw);
-  translate: max(-113.089111328125px, -28.778cqw) min(8.908cqh, 75.89694213867188px);
+  translate: max(-114px, -30cqw) min(8.908cqh, 75.89694213867188px);
 }
 .screen--home .home-progress > span { font-size: clamp(10px, min(3cqw, 11.25px), 13px); }
 .screen--home .home-progress > strong { font-size: clamp(20px, min(6cqw, 22.5px), 27px); }
-.screen--home .home-progress > small { font-size: clamp(7px, min(2cqw, 7.5px), 9px); }
+.screen--home .home-brand p { bottom: -2%; }
 .screen--home .home-start {
   width: min(89cqw, 333.75px);
   min-height: min(25cqw, 93.75px);
@@ -190,7 +186,7 @@
 .screen--home .home-nav .app-button { min-height: 0; }
 .screen--home .home-nav__button {
   font-size: clamp(12px, min(3.6cqw, 13.5px), 16px);
-  translate: min(0.077cqw, 0.28865px) min(2.995cqh, 25.51361px);
+  translate: min(0.077cqw, 0.28865px) min(3.5cqh, 30px);
 }
 .screen--home .top-bar__right .top-bar__round { translate: min(1.34cqw, 5.025px) min(2.165cqw, 8.119px); }
 .screen--home .top-bar__round {

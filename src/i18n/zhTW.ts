@@ -20,6 +20,7 @@ export const zhTW: Strings = {
   levels: {
     title: '關卡選擇', subtitle: '更多貓咪，更多幸福！', worldTabs: '世界選擇',
     world: '世界 {n}', worldSubs: ['溫馨小屋', '花園', '旅行'],
+    worldLocked: '完成世界 1 的 30 關後解鎖世界 2',
     board: '關卡清單', levelAria: '第 {id} 關', lockedSuffix: '，尚未解鎖', locked: '未解鎖'
   },
   settings: {
@@ -56,8 +57,8 @@ export const zhTW: Strings = {
   },
   game: {
     rescue: '救出 {done} / {target}', statusLabel: '關卡任務與時間', timeLeft: '剩餘時間',
-    overtime: '加賽 {count} 次', preview: '待落下的兩隻貓咪', now: 'NOW', next: 'NEXT',
-    nowAlt: '現在：{name}', nextAlt: '下一隻：{name}', board: '貓咪紙箱',
+    overtime: '加賽 {count} 次', preview: '待落下的兩隻貓咪', previewThree: '待落下的三隻貓咪', now: 'NOW', next: 'NEXT', soon: 'SOON',
+    nowAlt: '現在：{name}', nextAlt: '下一隻：{name}', soonAlt: '再下一隻：{name}', board: '貓咪紙箱',
     columnAction: '第 {col} 欄，放下{name}', ceilingDanger: '⚠ 小心！快到頂端了',
     ceilingSafe: '別超過這條線喔', boxTagline: '♡ 一箱小幸福', actions: '遊戲操作',
     howTo: '？ 玩法說明', hintUsed: '本局提示已使用', hintAd: '▶ 廣告提示', replay: '↻ 重玩',

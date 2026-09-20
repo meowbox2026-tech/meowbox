@@ -57,21 +57,36 @@ export const LEVEL_NAMES: Record<Locale, readonly string[]> = {
     '小墨報到', '四色軟糖', '愛心接力', '小屋派對', '魚丸來訪', '魚乾時間',
     '軟墊小山', '雙重驚喜', '下午茶會', '陽陽花園', '左右都可愛', '草地接力',
     '大家集合', '花園野餐', '黏黏的朋友', '愛心滿滿', '雨天紙箱', '小小建築師',
-    '彩虹小隊', '旅行第一站', '星光接力', '紙箱大搬家', '最後一塊軟墊', '箱長的派對'
+    '彩虹小隊', '旅行第一站', '星光接力', '紙箱大搬家', '最後一塊軟墊', '箱長的派對',
+    '花園初見', '露珠排隊', '風鈴小徑', '葉影藏貓', '午後花圃', '蜜蜂來信',
+    '草葉迷宮', '小徑轉彎', '藤蔓接力', '花園派對', '雨後彩虹', '水窪倒影',
+    '蘑菇小屋', '露營時間', '風箏追逐', '星夜花園', '月光階梯', '螢火蟲晚會',
+    '夜色紙箱', '花影滿箱', '春日大整理', '四季輪轉', '落葉迷陣', '果實豐收',
+    '小徑大集合', '花園守護者', '彩燈連鎖', '祕密溫室', '最後的花瓣', '花園箱長'
   ],
   en: [
     'First Meeting', 'Stacked Tea Time', 'Slanted Secret', 'Going Home Together', 'Tiny Organizer', 'Window Sunshine',
     'Inky Arrives', 'Four-Color Gummies', 'Heart Relay', 'Cottage Party', 'Fishball Visits', 'Dried Fish Time',
     'Cushion Hill', 'Double Surprise', 'Afternoon Tea', 'Sunny Garden', 'Cute Both Ways', 'Meadow Relay',
     'Everyone Gather', 'Garden Picnic', 'Sticky Friend', 'Full of Love', 'Rainy Box', 'Tiny Architect',
-    'Rainbow Team', 'Journey Begins', 'Starlight Relay', 'Big Box Move', 'Last Cushion', "Captain's Party"
+    'Rainbow Team', 'Journey Begins', 'Starlight Relay', 'Big Box Move', 'Last Cushion', "Captain's Party",
+    'Garden Arrival', 'Dewdrop Queue', 'Wind Chime Path', 'Cats in the Leaves', 'Afternoon Flowerbed', 'Bee Mail',
+    'Grass Maze', 'Turning Path', 'Vine Relay', 'Garden Party', 'Rainbow After Rain', 'Puddle Reflections',
+    'Mushroom Cottage', 'Campout Time', 'Kite Chase', 'Starlit Garden', 'Moonlit Steps', 'Firefly Night',
+    'Night Box', 'Flower Shadows', 'Spring Cleaning', 'Four Seasons', 'Fallen Leaf Maze', 'Fruit Harvest',
+    'Pathway Gathering', 'Garden Guardian', 'Lantern Chain', 'Secret Greenhouse', 'Last Petal', 'Garden Captain'
   ],
   ja: [
     '初めての出会い', '重なるティータイム', 'ななめの秘密', '一緒に帰ろう', 'ちいさな整理係', '窓辺の日差し',
     'くろすけ登場', '4色グミ', 'ハートリレー', 'おうちパーティー', 'さかなまる来訪', '煮干しタイム',
     'クッションの山', 'ダブルサプライズ', 'アフタヌーンティー', 'ひだまりガーデン', '左右どっちもかわいい', '草原リレー',
     'みんな集合', 'ガーデンピクニック', 'ねばねばフレンズ', '愛がいっぱい', '雨の日の箱', 'ちいさな建築家',
-    '虹チーム', '旅行のはじまり', '星空リレー', '箱の大引っ越し', '最後のクッション', '箱長のパーティー'
+    '虹チーム', '旅行のはじまり', '星空リレー', '箱の大引っ越し', '最後のクッション', '箱長のパーティー',
+    'ガーデン到着', '露の行列', '風鈴の小道', '葉かげの猫', '午後の花壇', 'ハチのお便り',
+    '草むら迷路', '曲がり道', 'つる草リレー', 'ガーデンパーティー', '雨上がりの虹', '水たまりの影',
+    'きのこのお家', 'キャンプタイム', 'たこ追い', '星空ガーデン', '月明かりの階段', 'ホタルの夜',
+    '夜色ボックス', '花影いっぱい', '春の大整理', '四季めぐり', '落ち葉迷路', '実りの収穫',
+    '小道に集合', 'ガーデンガーディアン', '灯りの連鎖', '秘密の温室', '最後の花びら', 'ガーデン箱長'
   ]
 }
 
@@ -95,7 +110,22 @@ export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
     '箱子變高了，記得觀察頂端警戒線。', '先整理高欄，再把貓咪送回家。',
     '彩虹小隊要在不同欄位保持平衡。', '旅行開始，沿用你最順手的策略。',
     '星光會在連鎖時亮起來。', '搬家前先留出至少一排空間。',
-    '最後一塊軟墊，速度與高度都要顧好。', '箱長的派對，帶 60 隻貓咪回家！'
+    '最後一塊軟墊，速度與高度都要顧好。', '箱長的派對，帶 60 隻貓咪回家！',
+    '花園世界開始，現在會同時看見三隻提示。', '露珠排隊，先替下一隻留一條安全路。',
+    '風鈴會讓節奏變快，記得看第三隻貓。', '葉影裡的貓咪顏色很接近，慢慢確認。',
+    '午後花圃要兼顧高欄與連鎖，不要只看眼前。', '蜜蜂來信：把同色貓咪分到相鄰欄位。',
+    '草葉迷宮裡，三隻提示能幫你預留轉彎位置。', '小徑轉彎，先放低最高的那一欄。',
+    '藤蔓接力需要連續安排，別把好位置塞滿。', '花園派對，三步預判比盲目連消更穩。',
+    '雨後彩虹有更多顏色，先辨認提示邊框。', '水窪倒影會讓欄高變化，保持左右平衡。',
+    '蘑菇小屋的空間更緊，優先清除最高的連線。', '露營時間有限，看到三連線就果斷落下。',
+    '風箏追逐，第三隻提示是安排連鎖的關鍵。', '星夜花園開始提高密度，至少留一欄呼吸。',
+    '月光階梯要控制落點高度，避免連續堆同一欄。', '螢火蟲晚會，善用顏色提示找出下一組。',
+    '夜色紙箱的貓咪更多，先整理兩側再處理中央。', '花影滿箱，連鎖與空間要一起顧好。',
+    '春日大整理，先消高欄再追求漂亮 Combo。', '四季輪轉會考驗記憶，三隻提示都要看完。',
+    '落葉迷陣，保留低處空間才能接住好牌。', '果實豐收，目標提高但每次連鎖都很重要。',
+    '小徑大集合，讓不同顏色分層落下比較穩。', '花園守護者，預留兩步空間再開始大連鎖。',
+    '彩燈連鎖是後段挑戰，先穩住高度再加速。', '祕密溫室的顏色很多，依提示邊框確認貓咪。',
+    '最後的花瓣，時間與高度都不能放鬆。', '花園箱長，帶回 94 隻貓咪完成世界 2！'
   ],
   en: [
     'Tap column 3 first and gather three Tangerines!', 'Stack matching cats and try a straight clear.',
@@ -112,7 +142,22 @@ export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
     'The box got taller—watch the top warning line.', 'Tidy tall columns first, then bring cats home.',
     'The rainbow team must balance every column.', 'The journey begins—use your favorite strategy.',
     'Starlight glows during chains.', 'Leave at least one row before the big move.',
-    'For the last cushion, mind speed and height.', 'The captain’s party—bring 60 cats home!'
+    'For the last cushion, mind speed and height.', 'The captain’s party—bring 60 cats home!',
+    'World 2 begins—three preview cats are now shown.', 'Dewdrop Queue: save a safe lane for the next cat.',
+    'Wind Chimes speed up the rhythm—check the third preview.', 'The cats blend into the leaves, so confirm the color slowly.',
+    'The afternoon flowerbed needs height control and chains.', 'Bee Mail: keep matching cats in neighboring lanes.',
+    'The grass maze rewards planning around the three previews.', 'On the turning path, lower the tallest column first.',
+    'Vine Relay needs a sequence—do not fill every good spot.', 'At the garden party, predict three steps before dropping.',
+    'Rainbow After Rain adds colors—use the preview borders.', 'Puddle Reflections shift the heights, so balance both sides.',
+    'The mushroom cottage is tight—clear the tallest line first.', 'Campout Time is short; drop decisively when a line appears.',
+    'Kite Chase: the third preview is the key to a chain.', 'Starlit Garden is denser—keep at least one lane breathing.',
+    'Moonlit Steps need careful heights; avoid stacking one lane.', 'Firefly Night: use the color accents to find the next group.',
+    'The Night Box has more cats—tidy both sides before center.', 'Flower Shadows demand chain and space control together.',
+    'Spring Cleaning: clear tall lanes before chasing a combo.', 'Four Seasons tests memory—read all three previews.',
+    'Fallen Leaf Maze: preserve low space to catch good cats.', 'Fruit Harvest raises the target; every chain matters.',
+    'Pathway Gathering is steadier when colors land in layers.', 'Garden Guardian: save two rows before a big chain.',
+    'Lantern Chain is a late challenge—stabilize height, then speed up.', 'Secret Greenhouse has many colors; trust the preview borders.',
+    'The Last Petal leaves no room for relaxing about time or height.', 'Garden Captain: bring 94 cats home to clear World 2!'
   ],
   ja: [
     'まずは3列目をタップ、みかん3匹を集めよう！', '同じ猫を重ねて、まっすぐ消しを狙おう。',
@@ -129,7 +174,22 @@ export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
     '箱が高くなった、天井ラインを見ておこう。', '高い列から整えて、猫をお家に連れて帰ろう。',
     '虹チームは列ごとのバランスが大切だよ。', '旅行のはじまり、得意な作戦で行こう。',
     '星空は連鎖のときに輝くよ。', '引っ越し前に少なくとも1段空けておこう。',
-    '最後のクッション、速さと高さの両方に注意。', '箱長のパーティー、60匹連れて帰ろう！'
+    '最後のクッション、速さと高さの両方に注意。', '箱長のパーティー、60匹連れて帰ろう！',
+    'ワールド2開始、3匹のプレビューが見えるよ。', '露の行列、次の猫の安全な道を空けよう。',
+    '風鈴でリズムアップ、3匹目のプレビューを確認。', '葉かげの猫は色が似ているから、ゆっくり見分けよう。',
+    '午後の花壇は高さと連鎖の両方を意識してね。', 'ハチのお便り、同じ色を隣の列に集めよう。',
+    '草むら迷路は3匹のプレビューで曲がり道を先読み。', '曲がり道は一番高い列から低くしよう。',
+    'つる草リレーは順番が大事、良い場所を埋めすぎないで。', 'ガーデンパーティーは3手先を見て落とそう。',
+    '雨上がりの虹は色が多い、枠色を頼りにしよう。', '水たまりの影で高さが変わる、左右を保ってね。',
+    'きのこのお家は狭い、一番高いラインを優先して消そう。', 'キャンプタイムは短め、3つ揃ったら迷わず落とそう。',
+    'たこ追いは3匹目のプレビューが連鎖の鍵。', '星空ガーデンは密度アップ、少なくとも1列空けよう。',
+    '月明かりの階段は高さを管理、同じ列に積み続けないで。', 'ホタルの夜は色のアクセントで次の組を探そう。',
+    '夜色ボックスは猫が多い、中央より先に両側を整えよう。', '花影いっぱい、連鎖と空間を一緒に管理しよう。',
+    '春の大整理は高い列から、コンボはそのあと。', '四季めぐりは記憶力勝負、3匹全部を見てね。',
+    '落ち葉迷路は低い空間を残して良い猫を受け止めよう。', '実りの収穫は目標アップ、毎回の連鎖が大切。',
+    '小道に集合は色ごとに段を分けると安定するよ。', 'ガーデンガーディアンは2段分空けてから大連鎖。',
+    '灯りの連鎖は後半戦、高さを安定させてから加速。', '秘密の温室は色が多い、プレビューの枠色を信じよう。',
+    '最後の花びら、時間と高さの両方に注意。', 'ガーデン箱長、94匹を連れてワールド2クリア！'
   ]
 }
 

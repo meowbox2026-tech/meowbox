@@ -53,7 +53,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const completeLevel = useCallback((levelId: number, stars: number, coinReward: number) => {
     update((current) => ({
       ...current,
-      currentLevel: Math.max(current.currentLevel, Math.min(30, levelId + 1)),
+      currentLevel: Math.max(current.currentLevel, Math.min(60, levelId + 1)),
       completedLevels: uniqueNumbers([...current.completedLevels, levelId]),
       stars: { ...current.stars, [levelId]: Math.max(current.stars[levelId] ?? 0, stars) },
       pawCoins: current.pawCoins + coinReward

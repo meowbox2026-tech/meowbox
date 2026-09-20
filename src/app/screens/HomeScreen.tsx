@@ -13,7 +13,6 @@ interface HomeScreenProps {
 export function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
   const { player } = usePlayer()
   const strings = useStrings()
-  const completedStars = Object.values(player.stars).reduce((total, stars) => total + stars, 0)
 
   return (
     <main className="screen screen--home">
@@ -29,8 +28,6 @@ export function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
       <aside className="home-progress" aria-label={format(strings.home.progressAria, { level: player.currentLevel })}>
         <GameImage asset="schedule" className="home-progress__art" alt="" aria-hidden="true" />
         <span>{strings.home.progress}</span><strong>Lv. {player.currentLevel}</strong>
-        <div className="home-progress__stars">{[1, 2, 3].map((star) => <GameImage asset="stars" key={star} className={star <= (player.stars[player.currentLevel] ?? 0) ? 'is-earned' : ''} alt="" aria-hidden="true" />)}</div>
-        <small>{format(strings.home.collected, { count: completedStars })}</small>
       </aside>
       <ArtworkButton asset="start" className="home-start" onClick={onStart}>{strings.home.start}</ArtworkButton>
       <nav className="home-nav" aria-label={strings.home.mainNav}>
