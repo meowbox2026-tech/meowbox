@@ -25,9 +25,7 @@ export const zhTW: Strings = {
   },
   settings: {
     title: '設定', subtitle: '讓每一次遊玩都更剛好！',
-    musicLabel: '音樂', musicDesc: '陪伴拼圖時光的輕鬆背景音樂',
-    soundLabel: '音效', soundDesc: '每一個可愛動作都有回應',
-    hapticsLabel: '震動', hapticsDesc: '放好貓咪時的小小提示',
+    musicLabel: '音樂', soundLabel: '音效', hapticsLabel: '震動',
     language: '語言', restore: '恢復購買項目',
     restoreToast: '原生購買恢復服務已預留，需接上商店商品 ID。',
     about: '關於遊戲', aboutToast: 'Meow Box 貓咪裝箱拼圖，目前版本 1.0.0。',

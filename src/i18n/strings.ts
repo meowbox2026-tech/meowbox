@@ -41,11 +41,8 @@ export interface Strings {
     title: string
     subtitle: string
     musicLabel: string
-    musicDesc: string
     soundLabel: string
-    soundDesc: string
     hapticsLabel: string
-    hapticsDesc: string
     language: string
     restore: string
     restoreToast: string

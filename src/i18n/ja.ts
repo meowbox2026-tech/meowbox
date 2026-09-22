@@ -25,9 +25,7 @@ export const ja: Strings = {
   },
   settings: {
     title: '設定', subtitle: '毎回のプレイをもっとちょうどよく！',
-    musicLabel: '音楽', musicDesc: 'パズル時間に寄り添うゆったりBGM',
-    soundLabel: '効果音', soundDesc: 'かわいいアクションに反応するよ',
-    hapticsLabel: '振動', hapticsDesc: '猫を置いたときの小さな合図',
+    musicLabel: '音楽', soundLabel: '効果音', hapticsLabel: '振動',
     language: '言語', restore: '購入の復元',
     restoreToast: 'ネイティブの購入復元は準備中です。ストアの商品IDを接続してください。',
     about: 'このゲームについて', aboutToast: 'Meow Box 猫の箱詰めパズル、バージョン 1.0.0。',

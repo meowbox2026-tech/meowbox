@@ -30,8 +30,8 @@ function start() { fireEvent.click(screen.getByRole('button', { name: '開始救
 function finish() { for (let i = 0; i < 9; i++) act(() => vi.advanceTimersByTime(700)) }
 
 describe('8x8 planning level through the game entry point', () => {
-  it('routes levels two through ten into the same 8x8 planning rules and scrollable tray', () => {
-    for (const levelId of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]) {
+  it('routes levels two through twenty into the same 8x8 planning rules and scrollable tray', () => {
+    for (const levelId of Array.from({ length: 19 }, (_, index) => index + 2)) {
       cleanup()
       mountLevel(levelId)
       expect(document.querySelectorAll('.planning-cell')).toHaveLength(64)

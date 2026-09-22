@@ -25,9 +25,7 @@ export const en: Strings = {
   },
   settings: {
     title: 'Settings', subtitle: 'Make every play session just right!',
-    musicLabel: 'Music', musicDesc: 'Relaxed background music for puzzle time',
-    soundLabel: 'Sound', soundDesc: 'A cute response to every action',
-    hapticsLabel: 'Haptics', hapticsDesc: 'A tiny nudge when a cat lands',
+    musicLabel: 'Music', soundLabel: 'Sound', hapticsLabel: 'Haptics',
     language: 'Language', restore: 'Restore Purchases',
     restoreToast: 'Native restore is reserved; connect your store product IDs.',
     about: 'About', aboutToast: 'Meow Box Cat Packing Puzzle, version 1.0.0.',

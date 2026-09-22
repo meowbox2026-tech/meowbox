@@ -31,11 +31,11 @@ interface GameScreenProps {
 }
 
 export function GameScreen(props: GameScreenProps) {
-  if (props.levelId <= 15) return <PlanningGameScreen {...props} levelId={props.levelId} />
+  if (props.levelId <= 20) return <PlanningGameScreen {...props} levelId={props.levelId} />
   return <LegacyDropGameScreen {...props} />
 }
 
-/** Retained for timed levels; levels 1–15 now use authored planning puzzles. */
+/** Retained for timed levels; levels 1–20 now use authored planning puzzles. */
 export function LegacyDropGameScreen(props: GameScreenProps) {
   const strings = useStrings()
   const { levelId } = props

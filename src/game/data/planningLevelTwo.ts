@@ -4,15 +4,15 @@ import type { CatAsset } from '../types'
 type Point = readonly [x: number, y: number]
 type PlacedCell = 0 | 1 | 2
 
-interface MatchGroup {
+export interface MatchGroup {
   type: CatAsset
   cells: [Point, Point, Point]
   placed: PlacedCell
 }
 
-const group = (type: CatAsset, cells: [Point, Point, Point], placed: PlacedCell): MatchGroup => ({ type, cells, placed })
+export const group = (type: CatAsset, cells: [Point, Point, Point], placed: PlacedCell): MatchGroup => ({ type, cells, placed })
 
-function makeLevel(id: number, groups: MatchGroup[]): PlanningLevel {
+export function makeLevel(id: number, groups: MatchGroup[]): PlanningLevel {
   const board = Array.from({ length: 8 }, () => Array<null | { id: number; type: CatAsset }>(8).fill(null))
   const cats: PlanningCat[] = groups.map((match, index) => ({ id: id * 100 + index + 1, type: match.type }))
   const solution: Placement[] = []

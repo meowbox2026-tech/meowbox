@@ -2,6 +2,7 @@ import type { CatAsset } from '../types'
 import type { Placement, PlanningLevel, PlanningCat } from '../core/planningEngine'
 import { PLANNING_LEVEL_ONE, PLANNING_LEVEL_ONE_SOLUTION } from './planningLevelOne'
 import { PLANNING_LEVELS_TWO } from './planningLevelTwo'
+import { PLANNING_LEVELS_THREE } from './planningLevelThree'
 
 type Cell = [x: number, y: number, type: CatAsset]
 type Point = [x: number, y: number]
@@ -78,7 +79,8 @@ export const PLANNING_LEVELS = [
   PLANNING_LEVEL_EIGHT,
   PLANNING_LEVEL_NINE,
   PLANNING_LEVEL_TEN,
-  ...PLANNING_LEVELS_TWO
+  ...PLANNING_LEVELS_TWO,
+  ...PLANNING_LEVELS_THREE
 ] as const
 
 export function getPlanningLevel(id: number): PlanningLevel {
