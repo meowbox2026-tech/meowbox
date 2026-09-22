@@ -18,6 +18,8 @@ import {
   type InspectorOffsets,
   type InspectorState,
 } from './inspectorLogic'
+import { loadInspectorBaselineVisible, saveInspectorBaselineVisible } from './inspectorViewport'
+import { InspectorViewportPanel } from './InspectorViewportPanel'
 import './inspector.css'
 
 const STORAGE_KEY = 'meowbox-dev-inspector.v1'
@@ -244,6 +246,7 @@ export function InspectorOverlay() {
   const [mode, setMode] = useState<InspectorMode>(loadInspectorMode)
   const [state, setState] = useState<InspectorState>(loadInspectorState)
   const [offsets, setOffsets] = useState<InspectorOffsets>(loadInspectorOffsets)
+  const [baselineVisible, setBaselineVisible] = useState(loadInspectorBaselineVisible)
   const [hoveredElement, setHoveredElement] = useState<Element | null>(null)
   const [pinnedElement, setPinnedElement] = useState<Element | null>(null)
   const [pointer, setPointer] = useState({ x: 0, y: 0 })
@@ -266,6 +269,10 @@ export function InspectorOverlay() {
   useEffect(() => {
     saveInspectorOffsets(offsets)
   }, [offsets])
+
+  useEffect(() => {
+    saveInspectorBaselineVisible(baselineVisible)
+  }, [baselineVisible])
 
   useEffect(() => {
     saveInspectorMode(mode)
@@ -567,6 +574,7 @@ export function InspectorOverlay() {
     state.rulers && 'is-rulers',
     state.safeArea && 'is-safe-area',
     state.adjust && 'is-adjust-mode',
+    baselineVisible && 'is-baseline',
   ].filter(Boolean).join(' ')
 
   if (mode === 'project') return null
@@ -576,6 +584,7 @@ export function InspectorOverlay() {
       <style id="mbo-inspector-overrides">{overridesCss}</style>
       <div className="mbo-surface" aria-hidden="true" style={{ '--mbo-mouse-x': `${pointer.x}px`, '--mbo-mouse-y': `${pointer.y}px` } as CSSProperties}>
         <div className="mbo-grid" />
+        <div className="mbo-baseline-frame" data-label="SE 375×667 · 100%" />
         <div className="mbo-safe-area mbo-safe-area--top" data-label="safe top" />
         <div className="mbo-safe-area mbo-safe-area--bottom" data-label="safe bottom" />
         <div className="mbo-rulers">
@@ -611,6 +620,7 @@ export function InspectorOverlay() {
           <button className="mbo-panel__close" type="button" onClick={() => patchState({ panel: false })} aria-label="關閉檢視工具">×</button>
         </div>
         <button className="mbo-mode-switch" type="button" onClick={() => setInspectorMode('project')}>切換專案模式</button>
+        <InspectorViewportPanel viewport={viewport} baselineVisible={baselineVisible} onToggleBaseline={setBaselineVisible} />
         <div className="mbo-panel__section-title">Overlay / Adjustment</div>
         <div className="mbo-modes">
           {([

@@ -11,7 +11,6 @@
   background: #5f3c2b;
   --design-width: 375px;
   --design-height: 667px;
-  --frame-max-width: 480px;
   --font-cute: "Huninn", "HanziPen TC", "Hannotate TC", "Chalkboard SE", "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
   font-family: var(--font-cute);
   font-synthesis: none;
@@ -53,17 +52,6 @@ img { display: block; max-width: 100%; }
 .app-frame textarea {
   -webkit-user-select: text;
   user-select: text;
-}
-
-.app-frame {
-  position: relative;
-  width: min(100%, var(--frame-max-width));
-  height: 100dvh;
-  min-height: 100dvh;
-  margin: 0 auto;
-  overflow: hidden;
-  container-type: size;
-  box-shadow: 0 0 48px rgba(34, 15, 5, .42);
 }
 
 .screen {

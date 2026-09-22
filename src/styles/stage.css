@@ -1,0 +1,78 @@
+/* Fixed 375x667 design stage, uniformly scaled: every phone renders the same composition. */
+:root {
+  --stage-scale: 1;
+}
+
+.app-frame {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #3a241a;
+}
+
+/* Same-width rendering as the stage: the tall 0.45 art aligns seam-free, no blur needed. */
+.app-bleed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: calc(375px * var(--stage-scale, 1)) auto;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.app-bleed[data-screen='home'] { background-image: url('/assets/bg-main.webp'); }
+.app-bleed[data-screen='levels'] { background-image: url('/assets/bg-main.webp'); }
+.app-bleed[data-screen='collection'] { background-image: url('/assets/bg-main.webp'); }
+.app-bleed[data-screen='shop'] { background-image: url('/assets/bg-main.webp'); }
+.app-bleed[data-screen='settings'] { background-image: url('/assets/bg-main.webp'); }
+.app-bleed[data-screen='legal'] { background-image: url('/assets/bg-main.webp'); }
+.app-bleed[data-screen='game'] { background-image: url('/assets/bg-main.webp'); }
+
+.app-stage {
+  position: relative;
+  z-index: 1;
+  width: 375px;
+  height: 667px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  container-type: size;
+  background: #5f3c2b;
+  transform: scale(var(--stage-scale, 1));
+  transform-origin: center center;
+}
+
+/* Inside the fixed stage the composition already sits inset from the physical
+   edges via bleed margins, so device safe-area insets must not shift it again
+   (SE devtools report zero insets, which is the layout truth). */
+.app-stage .screen {
+  padding-top: 14px;
+  padding-bottom: 16px;
+  /* Width-locked art: same rendered width as the bleed layer, so tall art aligns
+     seam-free. Identical to cover for the current 0.56-ratio art (sub-pixel). */
+  background-size: 375px auto;
+}
+
+.app-stage .screen.screen--drop {
+  background-size: auto, 375px auto;
+}
+
+.app-stage .screen.screen--drop {
+  padding: 7px 7px 8px;
+}
+
+.app-stage .home-lives {
+  top: 21px;
+}
+
+.app-stage .screen--home .home-nav {
+  bottom: 20px;
+}
+
+.app-stage .home-footer {
+  bottom: 132px;
+}

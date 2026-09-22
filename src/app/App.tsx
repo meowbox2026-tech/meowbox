@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { format, useDocumentLanguage, useStrings } from '../i18n'
 import { DailyRewardModal } from './components/DailyRewardModal'
+import { useStageScale } from './useStageScale'
 import { CollectionScreen } from './screens/CollectionScreen'
 import { HomeScreen } from './screens/HomeScreen'
 import { LevelSelectScreen } from './screens/LevelSelectScreen'
@@ -23,6 +24,7 @@ export function App() {
   const [isDailyOpen, setIsDailyOpen] = useState(false)
   const [toast, setToast] = useState<string>()
   const [legalDocument, setLegalDocument] = useState<LegalDocumentId>('privacy')
+  useStageScale()
 
   useEffect(() => {
     if (!toast) return undefined
@@ -52,6 +54,8 @@ export function App() {
   const hasDailyReward = player.dailyReward.lastClaimDate !== new Date().toISOString().slice(0, 10)
   return (
     <div className="app-frame">
+      <div className="app-bleed" data-screen={screen} aria-hidden="true" />
+      <div className="app-stage">
       {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={setScreen} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
       {screen === 'game' && <Suspense fallback={<div className="app-loading"><span>🐱</span><strong>{strings.app.organizingBox}</strong></div>}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} /></Suspense>}
@@ -59,6 +63,7 @@ export function App() {
       {screen === 'shop' && <ShopScreen onBack={() => setScreen('home')} onToast={setToast} />}
       {screen === 'settings' && <SettingsScreen onBack={() => setScreen('home')} onToast={setToast} onLegal={openLegal} />}
       {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}
+      </div>
       <DailyRewardModal open={isDailyOpen} streak={player.dailyReward.streak} canClaim={hasDailyReward} onClaim={claimDaily} onClose={() => setIsDailyOpen(false)} />
       {toast && <div className="app-toast" role="status">🐾 {toast}</div>}
     </div>

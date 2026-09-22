@@ -3,7 +3,7 @@
   padding-right: 10px;
   padding-left: 10px;
   overflow: hidden;
-  background-image: url('/assets/backround3.webp');
+  background-image: url('/assets/bg-main.webp');
 }
 
 .screen--game .top-bar { padding: 0 6px; }
@@ -210,39 +210,34 @@
   .result-rewards__button { height: 72px; }
 }
 
-/* Inspector handoff, converted to one fluid game composition for every phone. */
+/* SE 375x667 @100% baseline: one fluid game composition for every phone. */
 .screen--game {
   display: flex;
   height: 100%;
   min-height: 100%;
   flex-direction: column;
-  translate: 0.036cqw 0.109cqw;
 }
-.screen--game .coin-pill { scale: 0.991667 0.895833; }
-.screen--game .level-pill { scale: 0.810754 0.734429; }
 .screen--game .top-bar__round {
-  width: clamp(40px, 10.667cqw, 48px);
-  height: clamp(40px, 10.667cqw, 48px);
-  min-width: clamp(40px, 10.667cqw, 48px);
-  min-height: clamp(40px, 10.667cqw, 48px);
-  flex-basis: clamp(40px, 10.667cqw, 48px);
+  width: clamp(40px, 10.6cqw, 48px);
+  height: clamp(40px, 10.6cqw, 48px);
+  min-width: clamp(40px, 10.6cqw, 48px);
+  min-height: clamp(40px, 10.6cqw, 48px);
+  flex-basis: clamp(40px, 10.6cqw, 48px);
 }
-.screen--game .top-bar__right > .top-bar__round { translate: 1.378cqw 2.318cqw; }
 .screen--game .game-objective { flex: 0 0 auto; }
+/* Puzzle height follows viewport height so SE 667h fits and tall phones gain room. */
 .screen--game .puzzle-stage {
   flex: 0 0 auto;
-  height: calc(clamp(325px, min(95cqw, 56cqh), 475px) + 11.914cqw);
-  padding-top: 11.914cqw;
-  translate: -3.466cqw 0.545cqw;
+  height: clamp(325px, 52cqh, 480px);
 }
-.screen--game .puzzle-stage > .puzzle-canvas { translate: 3.512cqw 0; }
-.screen--game .puzzle-stage > .cat-selection-tray-layer { translate: 3.512cqw 0; }
 .screen--game .game-status { flex: 0 0 auto; }
 .screen--game .game-actions {
   flex: 0 0 auto;
   margin-top: auto;
 }
 .screen--game .game-actions .game-actions__button { font-size: clamp(10px, 3.1cqw, 14px); }
-.screen--game .coin-pill { translate: -1.332cqw 1.588cqw; }
-.screen--game .star-meter { translate: -2.537cqw 1.108cqw; }
-.screen--game .level-pill { translate: -2.102cqw 1.071cqw; }
+
+/* Tall phones (844h+) show the status hint instead of stretching the SE layout. */
+@media (min-height: 800px) {
+  .screen--game .puzzle-stage { height: clamp(360px, 54cqh, 520px); }
+}

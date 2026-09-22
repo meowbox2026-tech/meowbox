@@ -1,8 +1,8 @@
 /* WKWebView on iOS is stricter about the WebP files used by the web build. */
-.native-platform .screen--home { background-image: url('/assets-native/index.png'); }
-.native-platform .screen--levels { background-image: url('/assets-native/backround2.png'); }
-.native-platform .screen--collection { background-image: url('/assets-native/backround.png'); }
-.native-platform .screen--shop { background-image: url('/assets-native/backround2.png'); }
-.native-platform .screen--settings { background-image: url('/assets-native/backround1.png'); }
-.native-platform .screen--game { background-image: url('/assets-native/backround3.png'); }
-.native-platform .screen--game--intro { background-image: url('/assets-native/backround1.png'); }
+.native-platform .screen--home { background-image: url('/assets-native/bg-main.png'); }
+.native-platform .screen--levels { background-image: url('/assets-native/bg-main.png'); }
+.native-platform .screen--collection { background-image: url('/assets-native/bg-main.png'); }
+.native-platform .screen--shop { background-image: url('/assets-native/bg-main.png'); }
+.native-platform .screen--settings { background-image: url('/assets-native/bg-main.png'); }
+.native-platform .screen--game { background-image: url('/assets-native/bg-main.png'); }
+.native-platform .screen--game--intro { background-image: url('/assets-native/bg-main.png'); }

@@ -198,8 +198,7 @@ describe('InspectorOverlay', () => {
     target.remove()
   })
 
-  it('migrates legacy size overrides to non-layout scale previews', () => {
-    const target = document.createElement('button')
+  it('migrates legacy size overrides to non-layout scale previews', () => {    const target = document.createElement('button')
     target.className = 'artwork-button home-start'
     target.getBoundingClientRect = () => ({
       x: 20, y: 40, left: 20, top: 40, right: 140, bottom: 100, width: 120, height: 60,
@@ -219,5 +218,20 @@ describe('InspectorOverlay', () => {
     })
 
     target.remove()
+  })
+
+  it('shows the SE 375x667 baseline frame and device checklist', () => {
+    render(<InspectorOverlay />)
+    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+
+    expect(screen.getByText('Viewport / SE 基準')).toBeInTheDocument()
+    expect(screen.getByText(/iPhone SE 375×667/)).toBeInTheDocument()
+    expect(screen.getAllByText(/iPhone 12 \/ 13 \/ 14/).length).toBeGreaterThanOrEqual(1)
+    expect(document.querySelector('.mbo-baseline-frame')).toBeInTheDocument()
+    expect(document.querySelector('#meowbox-dev-inspector.is-baseline')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByLabelText('顯示 SE 基準框'))
+    expect(document.querySelector('#meowbox-dev-inspector.is-baseline')).not.toBeInTheDocument()
+    expect(localStorage.getItem('meowbox-dev-inspector-baseline.v1')).toBe('0')
   })
 })

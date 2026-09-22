@@ -3,7 +3,7 @@
   height: 100%; min-height: 100%; overflow: hidden;
   padding: max(7px, env(safe-area-inset-top)) max(7px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
   translate: none;
-  background: linear-gradient(#fff8eabb, #fff6e5d9), url('/assets/backround1.webp') center / cover;
+  background: linear-gradient(#fff8eabb, #fff6e5d9), url('/assets/bg-main.webp') center / cover;
 }
 .screen--drop .top-bar { width: 100%; flex-shrink: 0; padding: 0 5px; }
 .screen--drop .top-bar__left { flex: 0 0 96px; padding-left: 6px; }

@@ -1,7 +1,7 @@
 /* Keep the first-level preview on an open room floor; later levels retain the
    full cardboard-box room background and board treatment. */
 .screen--game--intro {
-  background-image: url('/assets/backround1.webp');
+  background-image: url('/assets/bg-main.webp');
 }
 
 .screen--game--intro .puzzle-stage {

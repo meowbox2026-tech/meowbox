@@ -63,6 +63,100 @@
   opacity: 1;
 }
 
+/* iPhone SE 375x667 @100% baseline frame. Tune inside it first; larger phones scale up. */
+.mbo-baseline-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: none;
+  width: min(375px, 100vw);
+  height: min(667px, 100dvh);
+  border: 2px dashed rgba(251, 191, 36, .9);
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(8, 47, 73, .45), inset 0 0 0 1px rgba(251, 191, 36, .25);
+  transform: translate(-50%, -50%);
+}
+
+.mbo-baseline-frame::after {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  padding: 2px 8px;
+  border-radius: 5px;
+  color: #451a03;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  background: #fde68a;
+  box-shadow: 0 2px 6px rgba(8, 47, 73, .32);
+  content: attr(data-label);
+  transform: translateX(-50%);
+}
+
+.mbo-root.is-baseline .mbo-baseline-frame {
+  display: block;
+}
+
+.mbo-viewport__baseline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: rgba(253, 230, 138, .16);
+}
+
+.mbo-viewport__baseline strong {
+  color: #fde68a;
+  font-size: 12px;
+}
+
+.mbo-viewport__baseline span {
+  color: #bae6fd;
+  font-size: 10px;
+}
+
+.mbo-viewport__current {
+  margin-top: 6px;
+  color: #e0f2fe;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mbo-viewport__current[data-baseline="true"] {
+  color: #bbf7d0;
+}
+
+.mbo-viewport__hint {
+  margin: 4px 0 0;
+  color: #7dd3fc;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.mbo-viewport__presets {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mbo-viewport__presets li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #bae6fd;
+  font-size: 10px;
+}
+
+.mbo-viewport__presets li[data-matched="true"] {
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, .18);
+}
+
 .mbo-safe-area {
   right: 0;
   left: 0;
