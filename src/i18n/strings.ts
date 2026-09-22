@@ -105,12 +105,17 @@ export interface Strings {
     overtime: string
     preview: string
     previewThree: string
+    previewFour: string
     now: string
     next: string
     soon: string
+    later: string
     nowAlt: string
     nextAlt: string
     soonAlt: string
+    laterAlt: string
+    traitScratch: string
+    traitHungry: string
     board: string
     columnAction: string
     ceilingDanger: string
@@ -165,6 +170,29 @@ export interface Strings {
     comboSuccess: string
     combo: string
     matchCombo: string
+    objectivesLabel: string
+    objectiveRescue: string
+    objectiveScratch: string
+    objectiveFish: string
+    patrolCounter: string
+    patrolNext: string
+    holdLabel: string
+    holdEmpty: string
+    holdStored: string
+    holdAction: string
+    noRouteTitle: string
+    noRouteTip: string
+    tutorialTitle: string
+    tutorialIntro: string
+    tutorialDemo: string
+    tutorialCta: string
+    tutorialScratchEffect: string
+    traitScratchEffect: string
+    tutorialFishEffect: string
+    tutorialHoldEffect: string
+    tutorialTunnelEffect: string
+    tutorialHungryEffect: string
+    tutorialPatrolEffect: string
   }
   pause: {
     dialogAria: string

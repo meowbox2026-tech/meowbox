@@ -57,8 +57,8 @@ export const en: Strings = {
   },
   game: {
     rescue: 'Rescued {done} / {target}', statusLabel: 'Mission and time', timeLeft: 'Time left',
-    overtime: 'Overtime: {count} drops', preview: 'Next two cats', previewThree: 'Next three cats', now: 'NOW', next: 'NEXT', soon: 'SOON',
-    nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', soonAlt: 'Soon: {name}', board: 'Cat box',
+    overtime: 'Overtime: {count} drops', preview: 'Next two cats', previewThree: 'Next three cats', previewFour: 'Next four cats', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
+    nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', soonAlt: 'Soon: {name}', laterAlt: 'Later: {name}', traitScratch: 'Scratch', traitHungry: 'Hungry', board: 'Cat box',
     columnAction: 'Column {col}, drop {name}', ceilingDanger: '⚠ Careful! Almost at the top',
     ceilingSafe: 'Stay below this line', boxTagline: '♡ a box of happiness', actions: 'Game actions',
     howTo: '? How to Play', hintUsed: 'Hint used this round', hintAd: '▶ Ad Hint', replay: '↻ Retry',
@@ -67,7 +67,7 @@ export const en: Strings = {
     rule2Title: 'Match 3 of a kind', rule2Desc: 'Horizontal, vertical, or either diagonal—3 or more in a row clears.',
     rule3Title: 'Drops chain again', rule3Desc: 'Cats above fall down, and new lines trigger a Combo!',
     rule4Title: 'Watch the top', rule4Desc: 'If any cat still fills the top row after clears and drops, you fail.',
-    rulesFooter: 'This level: rescue {target} cats in {time}s. The clock starts on your first drop and keeps running through chain animations; pause and ads stop it. {three} drops for 3 stars, {two} for 2 stars.',
+    rulesFooter: 'This level: rescue {target} cats in {time}s. The clock starts on your first drop; mechanic animations pause it from level 31 onward, as do pause and ads. {three} drops for 3 stars, {two} for 2 stars.',
     rulesExtra: 'One ad hint and one revive per round. Ceiling revive clears the bottom row (no rescue count); time-up grants 3 bonus drops, but the top still fails you.',
     rulesCta: 'Got it, let’s play!', completedAria: 'Level complete!', completedTitle: 'Level {id} complete!',
     starsAria: '{stars} stars', summary: 'Rescued {cleared} · {score} pts',
@@ -83,7 +83,12 @@ export const en: Strings = {
     hintDesc: 'After watching, a safer column is marked. Once per round.', reviveTitle: 'One more try, meow',
     reviveCeilingDesc: 'Clears the bottom row and shifts cats down; no rescue count. One revive per round.',
     reviveMovesDesc: 'Get 3 bonus drops with no timer; the top still fails you. One revive per round.',
-    comboSuccess: 'Meow! Matched', combo: 'COMBO ×{count}', matchCombo: 'Meow ×{count}'
+    comboSuccess: 'Meow! Matched', combo: 'COMBO ×{count}', matchCombo: 'Meow ×{count}',
+    objectivesLabel: 'Level objectives', objectiveRescue: 'Rescue {done}/{target}', objectiveScratch: 'Scratch posts {done}/{target}', objectiveFish: 'Fish treats {done}/{target}',
+    patrolCounter: 'Patrol moves in {count}', patrolNext: 'Next blocked lane: {column}', holdLabel: 'Cat teaser hold', holdEmpty: 'Empty hold', holdStored: 'Stored {name}', holdAction: 'Hold',
+    noRouteTitle: 'No safe route', noRouteTip: 'The naughty cat has closed every reachable entrance.',
+    tutorialTitle: 'Try it with the cats first', tutorialIntro: 'The new mechanic in {name} is a no-score sandbox—feel free to explore!', tutorialDemo: 'Play the cute demo', tutorialCta: 'Start the real level',
+    tutorialScratchEffect: 'Scratch!', traitScratchEffect: 'Scratchy!', tutorialFishEffect: 'Nom ♡', tutorialHoldEffect: 'Swap a cat!', tutorialTunnelEffect: 'Through we go!', tutorialHungryEffect: 'Yum!', tutorialPatrolEffect: 'Run-run!'
   },
   pause: {
     dialogAria: 'Pause menu', pausedAlt: 'Game paused', title: 'Paused', close: 'Close pause menu',

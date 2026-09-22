@@ -57,8 +57,8 @@ export const zhTW: Strings = {
   },
   game: {
     rescue: '救出 {done} / {target}', statusLabel: '關卡任務與時間', timeLeft: '剩餘時間',
-    overtime: '加賽 {count} 次', preview: '待落下的兩隻貓咪', previewThree: '待落下的三隻貓咪', now: 'NOW', next: 'NEXT', soon: 'SOON',
-    nowAlt: '現在：{name}', nextAlt: '下一隻：{name}', soonAlt: '再下一隻：{name}', board: '貓咪紙箱',
+    overtime: '加賽 {count} 次', preview: '待落下的兩隻貓咪', previewThree: '待落下的三隻貓咪', previewFour: '待落下的四隻貓咪', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
+    nowAlt: '現在：{name}', nextAlt: '下一隻：{name}', soonAlt: '再下一隻：{name}', laterAlt: '之後：{name}', traitScratch: '愛抓抓', traitHungry: '貪吃', board: '貓咪紙箱',
     columnAction: '第 {col} 欄，放下{name}', ceilingDanger: '⚠ 小心！快到頂端了',
     ceilingSafe: '別超過這條線喔', boxTagline: '♡ 一箱小幸福', actions: '遊戲操作',
     howTo: '？ 玩法說明', hintUsed: '本局提示已使用', hintAd: '▶ 廣告提示', replay: '↻ 重玩',
@@ -67,7 +67,7 @@ export const zhTW: Strings = {
     rule2Title: '三隻同款連線', rule2Desc: '橫向、直向、兩種斜向，連續 3 隻以上一起消除。',
     rule3Title: '掉落再連鎖', rule3Desc: '上方貓咪往下掉，再連線就觸發 Combo！',
     rule4Title: '留意箱子頂端', rule4Desc: '消除與掉落結束後，仍有貓咪佔到最上排就失敗。',
-    rulesFooter: '本關：{time} 秒內救出 {target} 隻。首次落下開始計時；連鎖動畫也會持續倒數，暫停與廣告停表。{three} 次內三星，{two} 次內兩星。',
+    rulesFooter: '本關：{time} 秒內救出 {target} 隻。首次落下開始計時；31 關起機關動畫會暫停倒數，暫停與廣告停表。{three} 次內三星，{two} 次內兩星。',
     rulesExtra: '每局可看廣告提示一次、復活一次。碰頂復活清掉底排（不計消除數）；時間到可加賽 3 次落下，加賽仍不能碰頂。',
     rulesCta: '知道了，來玩喵！', completedAria: '過關囉！', completedTitle: '第 {id} 關完成！',
     starsAria: '{stars} 顆星', summary: '救出 {cleared} 隻 · {score} 分',
@@ -83,7 +83,12 @@ export const zhTW: Strings = {
     hintDesc: '完成觀看後，標出一個較安全的欄位。本局限一次。', reviveTitle: '再挑戰一次喵',
     reviveCeilingDesc: '清除底部一排，其餘貓咪向下移；不增加消除數。每局限復活一次。',
     reviveMovesDesc: '獲得 3 次額外落下，不再倒數；碰頂仍失敗。每局限復活一次。',
-    comboSuccess: '喵！配對成功', combo: 'COMBO ×{count}', matchCombo: '喵喵 ×{count}'
+    comboSuccess: '喵！配對成功', combo: 'COMBO ×{count}', matchCombo: '喵喵 ×{count}',
+    objectivesLabel: '本關目標', objectiveRescue: '救出 {done}/{target}', objectiveScratch: '抓板 {done}/{target}', objectiveFish: '魚乾 {done}/{target}',
+    patrolCounter: '{count} 次後搗蛋貓移動', patrolNext: '下一個封鎖欄：第 {column} 欄', holdLabel: '逗貓棒暫存', holdEmpty: '暫存空位', holdStored: '已暫存{name}', holdAction: '暫存',
+    noRouteTitle: '沒有安全落點', noRouteTip: '搗蛋貓封住了所有可以使用的入口。',
+    tutorialTitle: '先和貓咪試玩一下', tutorialIntro: '{name} 的新機制不會計分，放心摸索！', tutorialDemo: '看可愛示範', tutorialCta: '開始正式關卡',
+    tutorialScratchEffect: '爪爪！', traitScratchEffect: '抓抓！', tutorialFishEffect: '喵♡', tutorialHoldEffect: '換一隻！', tutorialTunnelEffect: '穿過去！', tutorialHungryEffect: '好吃！', tutorialPatrolEffect: '跑跑～'
   },
   pause: {
     dialogAria: '暫停選單', pausedAlt: '遊戲已暫停', title: '暫停', close: '關閉暫停選單',

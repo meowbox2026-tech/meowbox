@@ -16,11 +16,11 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
   const { player } = usePlayer()
   const strings = useStrings()
   const locale = useLocale()
-  const [selectedWorld, setSelectedWorld] = useState(() => Math.min(1, Math.floor((player.currentLevel - 1) / 30)))
+  const [selectedWorld, setSelectedWorld] = useState(() => Math.min(2, Math.floor((player.currentLevel - 1) / 30)))
   const worlds = [0, 1, 2].map((index) => ({
     name: format(strings.levels.world, { n: index + 1 }),
     sub: strings.levels.worldSubs[index] ?? '',
-    unlocked: index < 2 && player.currentLevel >= index * 30 + 1
+    unlocked: index < 3 && player.currentLevel >= index * 30 + 1
   }))
   const visibleLevels = DROP_LEVELS.filter((level) => level.world === selectedWorld + 1)
 

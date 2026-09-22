@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createDropState, dropCat, type DropBoard, type DropResult, type DropState, type DropWave } from '../core/dropEngine'
-import { clearBottomRow, recommendColumn } from '../core/dropAssistance'
+import { canReviveFromCeiling, clearBottomRow, recommendColumn } from '../core/dropAssistance'
+import { holdCurrent } from '../core/dropHold'
 import { useDropClock } from './useDropClock'
 import { getDropLevelById, type DropLevelDefinition } from '../data/dropLevels'
 
@@ -9,9 +10,12 @@ interface Frame {
   previous: DropBoard
   wave?: DropWave
   duration: number
+  routedColumn?: number
+  routed?: boolean
+  patrolMoved?: boolean
 }
 
-type FailureReason = 'ceiling' | 'time' | 'moves'
+type FailureReason = 'ceiling' | 'time' | 'moves' | 'no-route'
 
 export function useDropGame(
   paused: boolean,
@@ -24,9 +28,20 @@ export function useDropGame(
     tileTypes: level.tileAssets,
     board: level.initialBoard,
     current: level.initialCurrent,
+    currentTrait: level.initialCurrentTrait,
     next: level.initialNext,
+    nextTrait: level.initialNextTrait,
     queue: level.initialQueue,
-    target: level.target
+    queueTraits: level.initialQueueTraits,
+    target: level.target,
+    scratchPosts: level.scratchPosts,
+    fishTreats: level.fishTreats,
+    tunnels: level.tunnels,
+    patrol: level.patrol,
+    goals: { ...level.goals, rescued: level.target },
+    holdUses: level.holdUses,
+    previewCount: level.previewCount,
+    variant: level.variant
   })
   const initial = createState()
   const [state, setState] = useState(initial)
@@ -50,6 +65,9 @@ export function useDropGame(
   const callback = useRef(feedback)
   callback.current = feedback
   const stopped = paused || hidden
+  const lockDuringMechanics = level.id >= 31
+  const levelKey = `${level.id}:${level.variant}`
+  const levelKeyRef = useRef(levelKey)
 
   const updateState = (next: DropState) => {
     stateRef.current = next
@@ -92,7 +110,7 @@ export function useDropGame(
   }, [])
 
   const { secondsLeft, read, resetClock } = useDropClock(
-    started && !stopped && state.phase === 'playing' && extraDrops === undefined,
+    started && !stopped && state.phase === 'playing' && extraDrops === undefined && (!lockDuringMechanics || !busy),
     level.timeLimit
   )
 
@@ -118,7 +136,7 @@ export function useDropGame(
   const drop = (column: number) => {
     const currentState = stateRef.current
     const currentExtra = extraDropsRef.current
-    if (stopped || currentState.phase !== 'playing' || (currentExtra !== undefined && currentExtra <= 0)) return
+    if (stopped || currentState.phase !== 'playing' || (currentExtra !== undefined && currentExtra <= 0) || (lockDuringMechanics && busy)) return
     if (startedRef.current && currentExtra === undefined && read() <= 0) {
       updateState({ ...currentState, phase: 'failed' })
       setFailure('time')
@@ -139,11 +157,11 @@ export function useDropGame(
       setExtraDrops(remaining)
       if (remaining === 0 && result.state.phase === 'playing') pendingFailure.current = 'moves'
     }
-    if (result.state.phase === 'failed') setFailure('ceiling')
+    if (result.state.phase === 'failed') setFailure(result.failureReason === 'no-route' ? 'no-route' : 'ceiling')
 
     const sequence: Frame[] = []
     let previous = currentState.board
-    sequence.push({ board: result.landed, previous, duration: 300 })
+    sequence.push({ board: result.landed, previous, duration: 300, routedColumn: result.resolvedColumn, routed: result.routed, patrolMoved: result.patrolMoved })
     previous = result.landed
     result.waves.forEach(wave => {
       sequence.push({ board: wave.board, previous, wave, duration: 380 })
@@ -153,6 +171,19 @@ export function useDropGame(
     callback.current(0)
     result.waves.forEach(wave => callback.current(wave.combo))
     enqueue(sequence)
+  }
+
+  const hold = () => {
+    const currentState = stateRef.current
+    if (stopped || busy || currentState.phase !== 'playing') return
+    const result = holdCurrent(currentState)
+    if (!result.accepted) return
+    updateState(result.state)
+    setHintColumn(undefined)
+    if (!startedRef.current) {
+      startedRef.current = true
+      setStarted(true)
+    }
   }
 
   const reset = () => {
@@ -177,20 +208,31 @@ export function useDropGame(
     setDisplay({ board: fresh.board, previous: fresh.board, duration: 0 })
   }
 
+  useEffect(() => {
+    if (levelKeyRef.current === levelKey) return
+    levelKeyRef.current = levelKey
+    reset()
+  }, [levelKey])
+
   const revive = () => {
     if (stateRef.current.phase !== 'failed' || reviveLock.current || busy) return
-    reviveLock.current = true
-    setReviveUsed(true)
     if (failure === 'ceiling') {
       const before = stateRef.current
       const next = clearBottomRow(before)
+      if (next.phase === 'failed') return
+      reviveLock.current = true
+      setReviveUsed(true)
       extraDropsRef.current = undefined
       updateState(next)
       setDisplay({ board: next.board, previous: before.board, duration: 0 })
     } else if (failure === 'time') {
+      reviveLock.current = true
+      setReviveUsed(true)
       extraDropsRef.current = 3
       setExtraDrops(3)
       updateState({ ...stateRef.current, phase: 'playing' })
+    } else {
+      return
     }
     setFailure(undefined)
   }
@@ -213,7 +255,9 @@ export function useDropGame(
     reviveUsed,
     extraDrops,
     revive,
+    canReviveFromCeiling: failure === 'ceiling' && canReviveFromCeiling(state),
     hint,
+    hold,
     hintColumn,
     hintUsed
   }

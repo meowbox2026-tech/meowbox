@@ -7,6 +7,9 @@ import {
   type PlayerSave,
   type PlayerSettings
 } from '../services/save/playerSave'
+import { MAX_DROP_LEVEL } from '../game/data/dropLevels'
+import { setBackgroundMusicEnabled, startBackgroundMusic } from '../services/audio/audioService'
+import { installGlobalAudioFeedback } from '../services/audio/globalAudioFeedback'
 
 interface PlayerContextValue {
   player: PlayerSave
@@ -42,6 +45,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (isReady) void persistPlayerSave(player)
   }, [isReady, player])
 
+  useEffect(() => {
+    if (!isReady) return
+    setBackgroundMusicEnabled(player.settings.music)
+    if (player.settings.music) startBackgroundMusic(true)
+  }, [isReady, player.settings.music])
+
+  useEffect(() => {
+    if (!isReady) return undefined
+    return installGlobalAudioFeedback(() => player.settings)
+  }, [isReady, player.settings.music, player.settings.sound])
+
   const update = useCallback((updater: (current: PlayerSave) => PlayerSave) => {
     setPlayer((current) => ({ ...updater(current), updatedAt: new Date().toISOString() }))
   }, [])
@@ -53,7 +67,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const completeLevel = useCallback((levelId: number, stars: number, coinReward: number) => {
     update((current) => ({
       ...current,
-      currentLevel: Math.max(current.currentLevel, Math.min(60, levelId + 1)),
+      currentLevel: Math.max(current.currentLevel, Math.min(MAX_DROP_LEVEL, levelId + 1)),
       completedLevels: uniqueNumbers([...current.completedLevels, levelId]),
       stars: { ...current.stars, [levelId]: Math.max(current.stars[levelId] ?? 0, stars) },
       pawCoins: current.pawCoins + coinReward

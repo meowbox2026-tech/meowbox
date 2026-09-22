@@ -57,8 +57,8 @@ export const ja: Strings = {
   },
   game: {
     rescue: '{done} / {target} 匹救出', statusLabel: 'ミッションと残り時間', timeLeft: '残り時間',
-    overtime: 'おかわり {count} 回', preview: '次に落ちる2匹', previewThree: '次に落ちる3匹', now: 'NOW', next: 'NEXT', soon: 'SOON',
-    nowAlt: '今：{name}', nextAlt: '次：{name}', soonAlt: 'その次：{name}', board: '猫の箱',
+    overtime: 'おかわり {count} 回', preview: '次に落ちる2匹', previewThree: '次に落ちる3匹', previewFour: '次に落ちる4匹', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
+    nowAlt: '今：{name}', nextAlt: '次：{name}', soonAlt: 'その次：{name}', laterAlt: 'その後：{name}', traitScratch: 'ひっかき', traitHungry: 'くいしんぼ', board: '猫の箱',
     columnAction: '{col}列目、{name}を落とす', ceilingDanger: '⚠ 注意！天井が近いよ',
     ceilingSafe: 'この線を超えないでね', boxTagline: '♡ 幸せいっぱいの箱', actions: 'ゲーム操作',
     howTo: '？ 遊び方', hintUsed: 'この回ではヒント使用済み', hintAd: '▶ 広告ヒント', replay: '↻ もう一度',
@@ -67,7 +67,7 @@ export const ja: Strings = {
     rule2Title: '同じ猫3匹で消える', rule2Desc: 'タテ・ヨコ・2種のナナメで、3匹以上つながると消えます。',
     rule3Title: '落ちて連鎖', rule3Desc: '上の猫が落ちて、またつながるとコンボ発生！',
     rule4Title: '箱の天井に注意', rule4Desc: '消去と落下の後、最上段に猫が残ると失敗です。',
-    rulesFooter: 'このレベル：{time}秒以内に{target}匹救出。最初の落下で計測開始、連鎖アニメ中も減少、停止と広告では止まります。{three}手以内で星3、{two}手以内で星2。',
+    rulesFooter: 'このレベル：{time}秒以内に{target}匹救出。最初の落下で計測開始、31以降は機関アニメ中に一時停止します。停止と広告でも止まります。{three}手以内で星3、{two}手以内で星2。',
     rulesExtra: '1回につき広告ヒント1回・復活1回。天井復活は最下段を消去（救出数に含めない）。時間切れでは3回のおかわり落下、天井はやはり失敗です。',
     rulesCta: 'わかった、遊ぼう！', completedAria: 'クリア！', completedTitle: 'レベル {id} クリア！',
     starsAria: '{stars}スター', summary: '{cleared}匹救出 · {score}点',
@@ -83,7 +83,12 @@ export const ja: Strings = {
     hintDesc: '視聴後、安全めの列に印をつけます。1回につき1回まで。', reviveTitle: 'もう一度挑戦ニャ',
     reviveCeilingDesc: '最下段を消去し、残りが下に移動。救出数は増えません。復活は1回につき1回。',
     reviveMovesDesc: '3回のおかわり落下、タイマーなし。天井はやはり失敗。復活は1回につき1回。',
-    comboSuccess: 'ニャ！マッチ成功', combo: 'COMBO ×{count}', matchCombo: 'ニャーニャー ×{count}'
+    comboSuccess: 'ニャ！マッチ成功', combo: 'COMBO ×{count}', matchCombo: 'ニャーニャー ×{count}',
+    objectivesLabel: 'ステージ目標', objectiveRescue: '{done}/{target}匹救出', objectiveScratch: '爪とぎ {done}/{target}', objectiveFish: 'おやつ {done}/{target}',
+    patrolCounter: '{count}回でいたずら猫が移動', patrolNext: '次の封鎖列：{column}列目', holdLabel: 'じゃらしストック', holdEmpty: 'ストック空き', holdStored: '{name}をストック', holdAction: 'ストック',
+    noRouteTitle: '安全な落とし場所がない', noRouteTip: 'いたずら猫が使える入口をすべて閉じました。',
+    tutorialTitle: 'まず猫と試してみよう', tutorialIntro: '{name}の新しい仕掛けを、得点なしのサンドボックスで試せるよ！', tutorialDemo: 'かわいいデモを見る', tutorialCta: '本番ステージを始める',
+    tutorialScratchEffect: 'ガリガリ！', traitScratchEffect: 'ひっかく！', tutorialFishEffect: 'ニャ♡', tutorialHoldEffect: '猫を交換！', tutorialTunnelEffect: '通り抜け！', tutorialHungryEffect: 'おいしい！', tutorialPatrolEffect: 'てくてく～'
   },
   pause: {
     dialogAria: '一時停止メニュー', pausedAlt: 'ゲーム一時停止中', title: '一時停止', close: '一時停止メニューを閉じる',

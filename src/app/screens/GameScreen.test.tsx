@@ -3,10 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { GameScreen } from './GameScreen'
 import { DROP_LEVELS } from '../../game/data/dropLevels'
 const completeLevel = vi.hoisted(() => vi.fn())
-vi.mock('../../state/PlayerContext', () => ({ usePlayer: () => ({ player: { pawCoins: 0, settings: { sound: false, haptics: false } }, completeLevel }) }))
-vi.mock('../../services/audio/audioService', () => ({ playCatSound: vi.fn(), playMatch3Sound: vi.fn(), startBackgroundMusic: vi.fn(), stopBackgroundMusic: vi.fn() }))
+const startBackgroundMusic = vi.hoisted(() => vi.fn())
+const stopBackgroundMusic = vi.hoisted(() => vi.fn())
+vi.mock('../../state/PlayerContext', () => ({ usePlayer: () => ({ player: { pawCoins: 0, settings: { sound: false, music: true, haptics: false } }, completeLevel }) }))
+vi.mock('../../services/audio/audioService', () => ({ startBackgroundMusic, stopBackgroundMusic }))
 vi.mock('../../services/haptics/hapticsService', () => ({ playPlacementHaptic: vi.fn() }))
-afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks() })
+afterEach(() => { cleanup(); window.sessionStorage.clear(); vi.useRealTimers(); vi.clearAllMocks() })
 function mount() {
   vi.useFakeTimers()
   return render(<GameScreen levelId={1} onHome={vi.fn()} onSettings={vi.fn()} onLevelSelect={vi.fn()} onNextLevel={vi.fn()} onToast={vi.fn()} />)
@@ -17,17 +19,25 @@ function mountLevel(levelId: number) {
 }
 function finishAnimation() { for (let n = 0; n < 8; n++) act(() => vi.advanceTimersByTime(600)) }
 describe('first drop level', () => {
+  it('starts background music when entering an active level', () => {
+    mount()
+
+    expect(startBackgroundMusic).toHaveBeenCalledWith(true)
+  })
+
   it('renders every configured level with its own board, target, assets and clock', () => {
-    for (let levelId = 1; levelId <= 60; levelId += 1) {
+    for (let levelId = 1; levelId <= 90; levelId += 1) {
       cleanup()
       mountLevel(levelId)
+      const previewCount = levelId <= 30 ? 2 : levelId <= 75 ? 3 : 4
       expect(screen.queryByRole('heading', { name: DROP_LEVELS[levelId - 1].name })).not.toBeInTheDocument()
       expect(document.querySelector('.drop-top-status')).toBeInTheDocument()
-      expect(document.querySelectorAll('.drop-preview img')).toHaveLength(levelId <= 30 ? 2 : 3)
-      expect(document.querySelectorAll('.drop-preview__cat[data-preview-slot]')).toHaveLength(levelId <= 30 ? 2 : 3)
+      expect(document.querySelectorAll('.drop-preview img')).toHaveLength(previewCount)
+      expect(document.querySelectorAll('.drop-preview__cat[data-preview-slot]')).toHaveLength(previewCount)
       expect(document.querySelector('.drop-preview__cat--now')).toBeInTheDocument()
       expect(document.querySelector('.drop-preview__cat--next')).toBeInTheDocument()
       if (levelId > 30) expect(document.querySelector('.drop-preview__cat--soon')).toBeInTheDocument()
+      if (levelId >= 76) expect(document.querySelector('.drop-preview__cat--later')).toBeInTheDocument()
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
       expect(screen.getByRole('timer', { name: '剩餘時間' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /第 1 欄/ })).toBeInTheDocument()
@@ -38,6 +48,26 @@ describe('first drop level', () => {
     mountLevel(31)
     expect(screen.getByText('SOON')).toBeInTheDocument()
     expect(screen.getByLabelText('待落下的三隻貓咪')).toBeInTheDocument()
+  })
+  it('shows world 3 mechanics, objectives, hold and four-cat preview together', () => {
+    mountLevel(76)
+
+    expect(screen.getByLabelText('本關目標')).toBeInTheDocument()
+    expect(screen.getByLabelText('逗貓棒暫存')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /暫存/ })).toBeInTheDocument()
+    expect(screen.getByLabelText('待落下的四隻貓咪')).toBeInTheDocument()
+    expect(screen.getByText(/次後搗蛋貓移動/)).toBeInTheDocument()
+    expect(screen.getByText(/下一個封鎖欄/)).toBeInTheDocument()
+  })
+  it('offers a no-score cute mechanic demo before the first world 2 drop', () => {
+    mountLevel(31)
+
+    expect(screen.getByRole('dialog', { name: '先和貓咪試玩一下' })).toBeInTheDocument()
+    expect(screen.getByText('爪爪！')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /看可愛示範/ }))
+    expect(document.querySelector('.drop-tutorial__demo.is-active')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '開始正式關卡' }))
+    expect(screen.queryByRole('dialog', { name: '先和貓咪試玩一下' })).not.toBeInTheDocument()
   })
   it('updates previews immediately without rendering a drop ghost', () => {
     const { container } = mount()

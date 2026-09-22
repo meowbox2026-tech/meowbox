@@ -91,4 +91,41 @@ describe('drop presentation lifecycle', () => {
     advance(300)
     expect(result.current.busy).toBe(false)
   })
+
+  it('pauses the world 2 clock and input while mechanic feedback is animating', () => {
+    vi.useFakeTimers()
+    const level = getDropLevelById(31)
+    const { result } = renderHook(() => useDropGame(false, vi.fn(), level))
+
+    act(() => result.current.drop(0))
+    expect(result.current.busy).toBe(true)
+    expect(result.current.state.moves).toBe(1)
+    act(() => result.current.drop(1))
+    expect(result.current.state.moves).toBe(1)
+    advance(100)
+    expect(result.current.secondsLeft).toBe(level.timeLimit)
+    advance(200)
+    expect(result.current.busy).toBe(false)
+    advance(1100)
+    expect(result.current.secondsLeft).toBeLessThan(level.timeLimit)
+  })
+
+  it('starts the clock with hold, preserves traits, and unlocks after one successful drop', () => {
+    vi.useFakeTimers()
+    const level = getDropLevelById(41)
+    const { result } = renderHook(() => useDropGame(false, vi.fn(), level))
+    const current = result.current.state.current
+
+    act(() => result.current.hold())
+    expect(result.current.state.moves).toBe(0)
+    expect(result.current.state.holdToken).toEqual({ type: current, trait: 'none' })
+    expect(result.current.state.holdLocked).toBe(true)
+    expect(result.current.state.holdUses).toBe(1)
+    advance(1200)
+    expect(result.current.secondsLeft).toBeLessThan(level.timeLimit)
+    act(() => result.current.hold())
+    expect(result.current.state.holdUses).toBe(1)
+    act(() => result.current.drop(0))
+    expect(result.current.state.holdLocked).toBe(false)
+  })
 })

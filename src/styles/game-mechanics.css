@@ -1,0 +1,26 @@
+.drop-mechanics { position: absolute; z-index: 4; inset: 0; pointer-events: none; }
+.drop-mechanic { position: absolute; display: grid; width: calc(100% / var(--cols)); height: calc(100% / var(--rows)); place-items: center; transform: translate(-50%, 0); font-size: clamp(16px, 5vw, 28px); filter: drop-shadow(0 2px 1px #1e2b3555); }
+.drop-mechanic small { position: absolute; right: 10%; bottom: 5%; display: grid; width: 15px; height: 15px; place-items: center; border-radius: 50%; color: #fff; background: #8a563b; font-size: 9px; font-weight: bold; }
+.drop-mechanic--scratch.is-double { filter: drop-shadow(0 0 4px #ffe39a); }
+.drop-mechanic--fish { transform: translate(-50%, 0) rotate(-8deg); font-size: clamp(14px, 4vw, 23px); animation: drop-fish-bob 1.4s ease-in-out infinite alternate; }
+.drop-tunnel-route { position: absolute; inset: 0; display: block; }
+.drop-tunnel-route i { position: absolute; top: 1px; display: grid; width: 22px; height: 17px; place-items: center; border: 1px solid #c6a0da; border-radius: 7px; color: #6e4d8e; background: #efe1f9dd; font-size: 12px; font-style: normal; }
+.drop-patrol-block { position: absolute; top: 0; left: var(--patrol-left); z-index: 5; display: grid; width: calc(100% / var(--cols)); height: 18px; place-items: center; border-bottom: 2px solid #e17b70; color: #fff8e8; background: #a74c5dcc; font-size: 12px; transform: translateX(0); }
+.drop-columns button:disabled { background: #a74c5d18; }
+.drop-effect { position: absolute; z-index: 9; display: block; padding: 3px 6px; border: 1px solid #fff8d2; border-radius: 11px; color: #fffdf5; background: #9b6c50dd; font-size: clamp(9px, 2.8vw, 13px); font-weight: bold; line-height: 1; white-space: nowrap; pointer-events: none; transform: translate(-50%, -70%); animation: drop-mechanic-pop .78s cubic-bezier(.2,.8,.3,1) both; text-shadow: 0 1px #7e4c46; }
+.drop-effect--scratch { background: #bb704cdd; }
+.drop-effect--fish { background: #4e9298dd; }
+.drop-effect--trait-scratch { background: #c1783cdd; }
+.drop-effect--trait-hungry { background: #488c88dd; }
+.drop-effect--tunnel { top: 20%; left: 50%; background: #8365a8e6; }
+.drop-effect--patrol { top: 9%; left: 50%; background: #a94f68e8; }
+@keyframes drop-fish-bob { to { transform: translate(-50%, -3px) rotate(8deg); } }
+@keyframes drop-mechanic-pop { 0% { opacity: 0; transform: translate(-50%, 0) scale(.55) rotate(-8deg); } 25% { opacity: 1; transform: translate(-50%, -16px) scale(1.08) rotate(4deg); } 100% { opacity: 0; transform: translate(-50%, -39px) scale(.86) rotate(0); } }
+@media (prefers-reduced-motion: reduce) { .drop-mechanics * { animation: none !important; } }
+.drop-tutorial__demo { position: relative; display: grid; min-height: 92px; place-items: center; overflow: hidden; border: 2px dashed #d59b69; border-radius: 16px; background: linear-gradient(135deg, #fff8e8, #f6dfc4); }
+.drop-tutorial__cats { position: relative; z-index: 1; color: #76503d; font-size: 27px; letter-spacing: 5px; }
+.drop-tutorial__object { position: absolute; right: 18%; bottom: 12px; font-size: 27px; transform: rotate(-5deg); }
+.drop-tutorial__effect { position: absolute; top: 9px; left: 50%; padding: 3px 8px; border-radius: 12px; color: #fffdf5; background: #ae6f55dd; font-size: 12px; opacity: .3; transform: translate(-50%, 9px) scale(.8); }
+.drop-tutorial__demo.is-active .drop-tutorial__effect { opacity: 1; animation: drop-mechanic-pop .78s cubic-bezier(.2,.8,.3,1) both; }
+.drop-tutorial__hint { margin-bottom: 8px !important; }
+.drop-tutorial__demo-button { padding: 6px 12px; border: 1px solid #c78e59; border-radius: 10px; color: #80573e; background: #fff2d8; font-weight: 800; cursor: pointer; }

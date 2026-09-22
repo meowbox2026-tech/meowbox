@@ -41,6 +41,19 @@ describe('LevelSelectScreen single-phone layout', () => {
     expect(screen.queryByRole('button', { name: /第 30 關/ })).not.toBeInTheDocument()
   })
 
+  it('unlocks world 3 at level 61 and never renders a level 91 tile', () => {
+    player.currentLevel = 61
+    const { container } = render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={vi.fn()} />)
+
+    expect(screen.getByRole('tab', { name: /世界 3/ })).not.toBeDisabled()
+    fireEvent.click(screen.getByRole('tab', { name: /世界 3/ }))
+
+    expect(container.querySelectorAll('.level-tile')).toHaveLength(30)
+    expect(screen.getByRole('button', { name: '第 61 關' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /第 90 關/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /第 91 關/ })).not.toBeInTheDocument()
+  })
+
   it('explains that world 2 unlocks after world 1 is complete', () => {
     render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={vi.fn()} />)
 

@@ -1,174 +1,144 @@
 import { describe, expect, it } from 'vitest'
-import { createDropState, dropCat, findDropMatches, landingRow } from '../core/dropEngine'
-import { recommendColumn } from '../core/dropAssistance'
-import { DROP_LEVELS, getDropLevelById } from './dropLevels'
+import { createDropState, dropCat, findDropMatches, type DropState } from '../core/dropEngine'
+import { DROP_LEVELS, advanceDropVariant, getDropLevelById, getDropLevelVariants, getStoredDropVariant } from './dropLevels'
+import { WORLD_TWO_TABLE } from './dropWorldTwo'
+import { WORLD_THREE_TABLE } from './dropWorldThree'
+
+function stateFor(level: typeof DROP_LEVELS[number], withoutTraits = false): DropState {
+  return createDropState({
+    width: level.width, height: level.height, tileTypes: level.tileAssets, board: level.initialBoard,
+    current: level.initialCurrent, currentTrait: withoutTraits ? 'none' : level.initialCurrentTrait,
+    next: level.initialNext, nextTrait: withoutTraits ? 'none' : level.initialNextTrait,
+    queue: level.initialQueue, queueTraits: withoutTraits ? level.initialQueue.map(() => 'none') : level.initialQueueTraits, target: level.target,
+    scratchPosts: level.scratchPosts, fishTreats: level.fishTreats, tunnels: level.tunnels, patrol: level.patrol,
+    goals: level.goals, holdUses: level.holdUses, previewCount: level.previewCount, variant: level.variant
+  })
+}
+
+function replayWitness(level: typeof DROP_LEVELS[number], withoutTraits = false): DropState {
+  let state = stateFor(level, withoutTraits)
+  for (const column of level.witness) {
+    const result = dropCat(state, column, () => .5)
+    if (!result.accepted) break
+    state = result.state
+    if (state.phase !== 'playing') break
+  }
+  return state
+}
 
 describe('drop level catalogue', () => {
-  it('contains two balanced worlds with sequential levels and usable timed goals', () => {
-    expect(DROP_LEVELS).toHaveLength(60)
-    expect(DROP_LEVELS.map(level => level.id)).toEqual(Array.from({ length: 60 }, (_, index) => index + 1))
-    expect(DROP_LEVELS.map(level => `${level.width}x${level.height}`)).toEqual([
-      '3x8', '3x8', '3x8', '3x8',
-      '4x8', '4x8', '4x8', '4x8', '4x8', '4x8',
-      '5x8', '5x8', '5x8', '5x8', '5x8',
-      '6x8', '6x8', '6x8', '6x8', '6x8',
-      '7x8', '7x8', '7x8', '7x8', '7x8',
-      '8x8', '8x8', '8x8', '8x8', '8x8',
-      '6x8', '6x8', '6x8', '6x8', '6x8',
-      '7x8', '7x8', '7x8', '7x8', '7x8',
-      '8x8', '8x8', '8x8', '8x8', '8x8',
-      '8x8', '8x8', '8x8', '8x8', '8x8',
-      '8x8', '8x8', '8x8', '8x8', '8x8',
-      '8x8', '8x8', '8x8', '8x8', '8x8'
-    ])
+  it('contains 90 sequential levels with three worlds and exact 31–90 table values', () => {
+    expect(DROP_LEVELS).toHaveLength(90)
+    expect(DROP_LEVELS.map((level) => level.id)).toEqual(Array.from({ length: 90 }, (_, index) => index + 1))
+    expect(DROP_LEVELS.filter((level) => level.world === 1)).toHaveLength(30)
+    expect(DROP_LEVELS.filter((level) => level.world === 2)).toHaveLength(30)
+    expect(DROP_LEVELS.filter((level) => level.world === 3)).toHaveLength(30)
+    for (const row of [...WORLD_TWO_TABLE, ...WORLD_THREE_TABLE]) {
+      const level = DROP_LEVELS[row.id - 1]
+      expect(level).toMatchObject({ id: row.id, timeLimit: row.seconds, width: row.width, height: row.height, target: row.rescued })
+      expect(level.tileAssets).toHaveLength(row.kinds)
+      expect(level.initialCatCount).toBe(row.initialCats)
+      expect(level.scratchPosts.filter((post) => post.hp === 1)).toHaveLength(row.scratchSingle)
+      expect(level.scratchPosts.filter((post) => post.hp === 2)).toHaveLength(row.scratchDouble)
+      expect(level.fishTreats).toHaveLength(row.fish)
+      expect(level.tunnels).toHaveLength(row.tunnels)
+      expect(level.patrol ? 1 : 0).toBe(row.patrol)
+      expect(level.previewCount).toBe(level.id >= 76 ? 4 : 3)
+      expect(level.holdUses).toBe(level.id >= 41 ? 2 : 0)
+    }
+    expect(DROP_LEVELS[45].initialCurrentTrait).toBe('scratch')
+    expect(DROP_LEVELS[60].initialCurrentTrait).toBe('hungry')
+    expect(DROP_LEVELS[44].initialCurrentTrait).toBe('none')
+  })
+
+  it('starts every variant without a free match and with exact initial counts', () => {
     for (const level of DROP_LEVELS) {
-      expect(level.width).toBeGreaterThanOrEqual(3)
-      expect(level.height).toBeGreaterThanOrEqual(8)
-      expect(level.width).toBeLessThanOrEqual(8)
-      expect(level.tileAssets.length).toBeGreaterThanOrEqual(3)
-      expect(level.timeLimit).toBeGreaterThan(0)
-      expect(level.target).toBeGreaterThan(0)
-      expect(level.initialQueue.length).toBeGreaterThan(0)
+      expect(findDropMatches(level.initialBoard), `level ${level.id}`).toEqual([])
+      expect(level.initialBoard.flat().filter(Boolean)).toHaveLength(level.initialCatCount)
       expect(level.initialBoard).toHaveLength(level.height)
       expect(level.initialBoard[0]).toHaveLength(level.width)
-      expect(level.previewCount).toBe(level.id <= 30 ? 2 : 3)
-      expect(level.world).toBe(level.id <= 30 ? 1 : 2)
-      expect(level.width).toBeLessThan(level.tileAssets.length)
+      for (const post of level.scratchPosts) expect(level.initialBoard[post.y][post.x]).toBeNull()
+      expect(level.variantCount).toBe(level.id >= 31 ? 3 : 1)
     }
-    const allDropCats = new Set(['arrogant', 'sunny', 'fishLover', 'orange', 'white', 'blue', 'alone', 'sleeping', 'box', 'mischievous', 'boss', 'sticky'])
-    for (const level of DROP_LEVELS.slice(4, 30)) {
-      expect(level.tileAssets).toHaveLength(level.width + 1)
-      expect(new Set(level.tileAssets).size).toBe(level.width + 1)
-      expect(level.initialQueue).toHaveLength(12)
-      const initialTypes = new Set(level.initialBoard.flat().filter(Boolean).map(tile => tile!.type))
-      expect(initialTypes.size).toBe(level.tileAssets.length)
-      expect([...initialTypes].every(type => level.tileAssets.includes(type as typeof level.tileAssets[number]))).toBe(true)
-    }
-    for (const level of DROP_LEVELS.slice(30)) {
-      expect(level.tileAssets).toHaveLength(level.width + 2)
-      expect(new Set(level.tileAssets).size).toBe(level.width + 2)
-      expect(level.initialQueue).toHaveLength(Math.ceil((level.target + 3) / 3) * 3 - 2)
-      const previewStream = [level.initialCurrent, level.initialNext, ...level.initialQueue]
-      expect(level.initialCurrent).not.toBe(level.initialNext)
-      for (let index = 0; index < previewStream.length - 2; index += 3) {
-        expect(new Set(previewStream.slice(index, index + 3)).size, `level ${level.id} should vary each three-cat preview`).toBe(3)
+    for (const level of [31, 46, 61, 76, 90]) {
+      for (const variant of getDropLevelVariants(level)) {
+        expect(findDropMatches(variant.initialBoard), `variant ${level}:${variant.variant}`).toEqual([])
+        expect(variant.initialCatCount).toBe(DROP_LEVELS[level - 1].initialCatCount)
       }
-      expect(level.target).toBeGreaterThan(DROP_LEVELS[29].target)
-      const initialTypes = new Set(level.initialBoard.flat().filter(Boolean).map(tile => tile!.type))
-      expect(initialTypes.size).toBeGreaterThanOrEqual(3)
-      expect([...initialTypes].every(type => level.tileAssets.includes(type as typeof level.tileAssets[number]))).toBe(true)
     }
-    expect(new Set(DROP_LEVELS.slice(4).flatMap(level => level.tileAssets))).toEqual(allDropCats)
   })
-  it('starts every level without a free match and keeps the tutorial layout', () => {
-    expect(findDropMatches(DROP_LEVELS[0].initialBoard)).toEqual([])
-    for (const level of DROP_LEVELS.slice(1)) expect(findDropMatches(level.initialBoard)).toEqual([])
+
+  it('keeps the first three tutorials and legacy 1–30 behaviour', () => {
     expect(DROP_LEVELS[0].initialBoard[7][0]?.type).toBe('orange')
     expect(DROP_LEVELS[0].initialBoard[7][1]?.type).toBe('orange')
-    const chainLevel = DROP_LEVELS[3]
-    const chain = dropCat(createDropState({
-      width: chainLevel.width,
-      height: chainLevel.height,
-      tileTypes: chainLevel.tileAssets,
-      board: chainLevel.initialBoard,
-      current: chainLevel.initialCurrent,
-      next: chainLevel.initialNext,
-      queue: chainLevel.initialQueue,
-      target: chainLevel.target
-    }), 0)
+    for (const [levelIndex, column] of [[0, 2], [1, 2], [2, 0]] as const) {
+      const result = dropCat(stateFor(DROP_LEVELS[levelIndex]), column)
+      expect(result.waves.length, `level ${levelIndex + 1}`).toBeGreaterThanOrEqual(1)
+    }
+    const chain = dropCat(stateFor(DROP_LEVELS[3]), 0)
     expect(chain.waves.length).toBeGreaterThanOrEqual(2)
   })
 
-  it('keeps the first three tutorial layouts playable', () => {
-    for (const [levelIndex, column] of [[0, 2], [1, 2], [2, 0]] as const) {
-      const level = DROP_LEVELS[levelIndex]
-      const state = createDropState({
-        width: level.width,
-        height: level.height,
-        tileTypes: level.tileAssets,
-        board: level.initialBoard,
-        current: level.initialCurrent,
-        next: level.initialNext,
-        queue: level.initialQueue,
-        target: level.target
-      })
-      expect(dropCat(state, column).waves.length, `level ${level.id} should teach a clear`).toBeGreaterThanOrEqual(1)
-    }
-    expect(DROP_LEVELS[3].initialBoard[1].some(Boolean)).toBe(false)
-  })
-  it('falls back safely for invalid level ids', () => {
+  it('provides deterministic, non-identical variants and safe fallback lookup', () => {
+    const variants = getDropLevelVariants(51)
+    expect(variants).toHaveLength(3)
+    expect(new Set(variants.map((level) => JSON.stringify({ board: level.initialBoard, tunnels: level.tunnels, queue: level.initialQueue })))).toHaveLength(3)
     expect(getDropLevelById(0).id).toBe(1)
     expect(getDropLevelById(999).id).toBe(1)
+    expect(getDropLevelById(51, 2).variant).toBe(2)
+    expect(getDropLevelById(51, 2)).toBe(getDropLevelById(51, 2))
   })
-  it('accepts the first player action on every level-sized initial board', () => {
+
+  it('rotates variants without repeating until the session cycle wraps', () => {
+    window.sessionStorage.clear()
+    expect(getStoredDropVariant(51)).toBe(0)
+    expect([advanceDropVariant(51), advanceDropVariant(51), advanceDropVariant(51)]).toEqual([1, 2, 0])
+    expect(getStoredDropVariant(51)).toBe(0)
+    expect(advanceDropVariant(1)).toBe(0)
+  })
+
+  it('uses the authored cat pool instead of a fixed three-cat loop', () => {
+    for (const level of DROP_LEVELS.filter((candidate) => candidate.id >= 31)) {
+      const firstTokens = [level.initialCurrent, level.initialNext, ...level.initialQueue].slice(0, level.tileAssets.length * 2)
+      expect(new Set(firstTokens).size, `level ${level.id}`).toBe(level.tileAssets.length)
+      expect(firstTokens.slice(1).some((type, index) => type !== firstTokens[index]), `level ${level.id}`).toBe(true)
+    }
+  })
+
+  it('keeps all three variants structurally different', () => {
+    for (const level of DROP_LEVELS.filter((candidate) => candidate.id >= 31)) {
+      const signatures = getDropLevelVariants(level.id).map((variant) => JSON.stringify({
+        board: variant.initialBoard,
+        fish: variant.fishTreats,
+        tunnels: variant.tunnels,
+        patrol: variant.patrol,
+        queue: variant.initialQueue
+      }))
+      expect(new Set(signatures), `level ${level.id}`).toHaveLength(3)
+    }
+  })
+
+  it('accepts at least one legal first action for every level and replays stored witnesses', () => {
     for (const level of DROP_LEVELS) {
-      const state = createDropState({
-        width: level.width,
-        height: level.height,
-        tileTypes: level.tileAssets,
-        board: level.initialBoard,
-        current: level.initialCurrent,
-        next: level.initialNext,
-        queue: level.initialQueue,
-        target: level.target
-      })
-      const result = dropCat(state, level.width - 1)
-      expect(result.accepted, `level ${level.id} should accept an empty-column drop`).toBe(true)
-      expect(result.state.board).toHaveLength(level.height)
-      expect(result.state.board[0]).toHaveLength(level.width)
+      const initial = stateFor(level)
+      const first = Array.from({ length: level.width }, (_, column) => dropCat(initial, column)).find((result) => result.accepted)
+      expect(first?.accepted, `level ${level.id}`).toBe(true)
+    }
+    for (const levelId of [31, 36, 41, 46, 51, 61, 71, 76, 90]) {
+      const level = getDropLevelById(levelId)
+      const state = replayWitness(level)
+      expect(state.phase, `witness ${levelId} should complete`).toBe('completed')
     }
   })
 
-  it('keeps world 2 preview data useful after every drop', () => {
-    for (const level of DROP_LEVELS.slice(30)) {
-      const state = createDropState({
-        width: level.width,
-        height: level.height,
-        tileTypes: level.tileAssets,
-        board: level.initialBoard,
-        current: level.initialCurrent,
-        next: level.initialNext,
-        queue: level.initialQueue,
-        target: level.target
-      })
-      expect([state.current, state.next, state.queue[0]]).toHaveLength(3)
-      const result = dropCat(state, level.width - 1, () => .5)
-      expect(result.accepted).toBe(true)
-      expect([result.state.current, result.state.next, result.state.queue[0]]).toHaveLength(3)
+  it('replays every authored variant with ordinary cats, without tools or traits', () => {
+    for (const base of DROP_LEVELS) {
+      if (base.id < 31) continue
+      for (const level of getDropLevelVariants(base.id)) {
+        expect(replayWitness(level).phase, `variant ${base.id}:${level.variant}`).toBe('completed')
+        expect(replayWitness(level, true).phase, `none-trait ${base.id}:${level.variant}`).toBe('completed')
+      }
     }
   })
 
-  it('gives the assistance path enough room to clear every world 2 goal', () => {
-    for (const level of DROP_LEVELS.slice(30)) {
-      let randomState = level.seed + 1
-      const random = () => {
-        randomState = (randomState * 1664525 + 1013904223) % 4294967296
-        return randomState / 4294967296
-      }
-      let state = createDropState({
-        width: level.width,
-        height: level.height,
-        tileTypes: level.tileAssets,
-        board: level.initialBoard,
-        current: level.initialCurrent,
-        next: level.initialNext,
-        queue: level.initialQueue,
-        target: level.target
-      })
-      const laneColumns = new Map<string, number>()
-      ;[level.initialCurrent, level.initialNext, ...level.initialQueue].forEach((type, index) => {
-        if (!laneColumns.has(type)) laneColumns.set(type, index % 3)
-      })
-      for (let move = 0; move < 240 && state.phase === 'playing'; move += 1) {
-        const safeColumns = state.board[0].map((_, index) => index)
-          .filter((index) => landingRow(state.board, index) >= 2)
-          .sort((first, second) => landingRow(state.board, second) - landingRow(state.board, first))
-        const laneColumn = laneColumns.get(state.current)
-        const column = laneColumn !== undefined && safeColumns.includes(laneColumn) ? laneColumn : recommendColumn(state)
-        if (column === undefined) break
-        state = dropCat(state, column, random).state
-      }
-      expect(state.phase, `level ${level.id} should remain completable (cleared ${state.cleared}/${state.target} in ${state.moves} moves)`).toBe('completed')
-    }
-  })
 })

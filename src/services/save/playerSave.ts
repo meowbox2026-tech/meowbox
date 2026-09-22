@@ -30,6 +30,7 @@ export interface PlayerSave {
 }
 
 const STORAGE_KEY = 'meow-box-player-save'
+export const MAX_SAVED_LEVEL = 90
 
 export function createDefaultPlayerSave(): PlayerSave {
   return {
@@ -55,12 +56,16 @@ export function normalisePlayerSave(value: unknown): PlayerSave {
 
   const rawSettings = isRecord(value.settings) ? value.settings : {}
   const rawDaily = isRecord(value.dailyReward) ? value.dailyReward : {}
+  const completedLevels = uniqueNumbers(value.completedLevels).filter((level) => level <= MAX_SAVED_LEVEL)
+  const storedCurrentLevel = Math.min(MAX_SAVED_LEVEL, toPositiveInteger(value.currentLevel, defaults.currentLevel))
   return {
     ...defaults,
     version: 1,
     updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : defaults.updatedAt,
-    currentLevel: toPositiveInteger(value.currentLevel, defaults.currentLevel),
-    completedLevels: uniqueNumbers(value.completedLevels),
+    // The old build stopped at 60. A save that really completed 60 may be
+    // advanced to 61; a player merely sitting on level 60 stays there.
+    currentLevel: storedCurrentLevel === 60 && completedLevels.includes(60) ? 61 : storedCurrentLevel,
+    completedLevels,
     stars: normaliseStars(value.stars),
     pawCoins: toNonNegativeInteger(value.pawCoins, defaults.pawCoins),
     hints: toNonNegativeInteger(value.hints, defaults.hints),
@@ -83,13 +88,13 @@ export function normalisePlayerSave(value: unknown): PlayerSave {
 
 export function mergePlayerSaves(local: PlayerSave, cloud: PlayerSave): PlayerSave {
   const newest = new Date(cloud.updatedAt).getTime() >= new Date(local.updatedAt).getTime() ? cloud : local
-  return {
+  return normalisePlayerSave({
     ...newest,
     completedLevels: uniqueNumbers([...local.completedLevels, ...cloud.completedLevels]),
     unlockedCatSkins: uniqueStrings([...local.unlockedCatSkins, ...cloud.unlockedCatSkins], []),
     unlockedBoxSkins: uniqueStrings([...local.unlockedBoxSkins, ...cloud.unlockedBoxSkins], []),
     stars: mergeStars(local.stars, cloud.stars)
-  }
+  })
 }
 
 export async function loadPlayerSave(): Promise<PlayerSave> {
@@ -116,6 +121,7 @@ function normaliseStars(value: unknown): Record<number, number> {
   if (!isRecord(value)) return {}
   return Object.fromEntries(Object.entries(value)
     .filter((entry): entry is [string, number] => Number.isInteger(Number(entry[0])) && typeof entry[1] === 'number')
+    .filter(([id]) => Number(id) <= MAX_SAVED_LEVEL)
     .map(([id, stars]) => [Number(id), Math.max(0, Math.min(3, Math.floor(stars)))]))
 }
 
