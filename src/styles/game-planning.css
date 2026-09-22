@@ -1,0 +1,60 @@
+.screen.screen--planning { gap: 4px; }
+.planning-top-status { display: grid; gap: 3px; color: #754c36; text-align: center; }
+.planning-top-status strong { font-size: 16px; }
+.planning-top-status small { font-size: 11px; }
+.planning-intro { display: grid; gap: 3px; text-align: center; color: #714932; }
+.planning-intro strong { font-size: 19px; }
+.planning-intro span { font-size: 11px; color: #967455; }
+.planning-tray { width: min(100%, 330px); margin-inline: auto; padding: 7px 8px; border: 1px solid #dec1a0; border-radius: 16px; background: #fffaf0e8; }
+.planning-tray__heading { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px; color: #8e674a; }
+.planning-tray__cats { display: flex; gap: 0; overflow-x: auto; padding-bottom: 3px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.planning-tray__cats button { position: relative; display: flex; align-items: center; justify-content: center; flex: 0 0 12.5%; min-width: 0; aspect-ratio: 1; padding: 2px; border: 0; border-radius: 9px; background: #fff8e9; box-shadow: inset 0 0 0 1px #ead5b9; cursor: pointer; scroll-snap-align: start; }
+.planning-tray__cats button.is-selected { background: #ffe5ae; box-shadow: inset 0 0 0 2px #c77d3f; }
+.planning-tray__cats button.is-placed { background: #eae7dd; color: #797365; }
+.planning-tray__cats img { width: 100%; height: 100%; object-fit: contain; }
+.planning-tray__cats button.is-placed img { opacity: .35; }
+.planning-tray__hint { display: block; margin-top: 2px; color: #a18468; font-size: 9px; text-align: right; }
+.planning-instruction { margin: 1px 0; font-size: 12px; text-align: center; color: #77533b; min-height: 17px; }
+.planning-box { flex: 0 0 auto; width: min(100%, 330px); margin: 0 auto; padding: 6px 6px 0; border: 3px solid #b67e50; border-radius: 16px; background: linear-gradient(130deg, #edc89a, #cfa26f); box-shadow: 0 4px 0 #9c694a44; }
+.planning-grid { position: relative; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: #596d71; box-shadow: inset 0 2px 8px #203b4055; }
+.planning-cell { border: 1px solid #d7eceb20; }
+.planning-placement-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); z-index: 2; }
+.planning-placement-cell { min-width: 0; min-height: 0; border: 0; padding: 0; background: transparent; cursor: pointer; }
+.planning-placement-cell:hover:not(:disabled) { background: #fff0c520; }
+.planning-placement-cell:disabled { cursor: default; }
+.planning-cat { position: absolute; width: 12.5%; height: 12.5%; padding: 2px; border: 0; background: none; pointer-events: none; transition: top .28s cubic-bezier(.4, 0, .65, 1); }
+button.planning-cat { z-index: 3; pointer-events: auto; cursor: pointer; }
+.planning-cat img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 1px #243b4244); }
+.planning-cat b { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; border: 1px solid #fff2d4; color: #613e28; background: #ffe4a2; font-size: 10px; box-shadow: 0 1px 3px #39261d66; }
+.planning-cat.is-clearing img { animation: planning-clear .4s ease-in both; }
+.planning-box__label { display: flex; justify-content: center; gap: 9px; padding: 4px 0; color: #825c3c; font-size: 10px; letter-spacing: 2px; }
+.planning-box__label span { letter-spacing: 0; opacity: .8; }
+.planning-note { margin: 2px 0; text-align: center; color: #98795e; font-size: 10px; }
+.planning-edit-actions { display: flex; justify-content: center; gap: 7px; }
+.planning-edit-actions button { flex: 1; min-height: 33px; padding: 3px; border: 1px solid #d2b28f; border-radius: 10px; color: #79553b; background: #fffaee; font-size: 11px; cursor: pointer; }
+.screen--planning .planning-start { flex: 0 0 auto; min-height: 43px; margin-top: auto; font-size: 17px; }
+.screen--planning button:disabled { cursor: default; }
+.planning-edit-actions button:disabled, .planning-start:disabled { opacity: .45; }
+.screen--planning button:focus-visible { outline: 3px solid #edb352; outline-offset: -3px; }
+.planning-box.is-paused * { animation-play-state: paused !important; }
+@keyframes planning-clear { 0% { transform: scale(1); } 35% { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(0 0 5px #ffe493); } 100% { transform: scale(.3); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .planning-cat { transition: none; } .planning-cat.is-clearing img { animation: none; opacity: .45; } }
+
+/* The fixed 375x667 game stage needs a little more breathing room on dense trays. */
+@container (max-height: 700px) {
+  .screen.screen--planning { gap: 2px; }
+  .planning-top-status { gap: 1px; }
+  .planning-top-status strong { font-size: 14px; }
+  .planning-top-status small { font-size: 9px; }
+  .planning-intro { gap: 1px; }
+  .planning-intro strong { font-size: 17px; }
+  .planning-intro span { font-size: 9px; }
+  .planning-tray { padding-block: 4px; }
+  .planning-tray__heading { margin-bottom: 2px; font-size: 9px; }
+  .planning-tray__hint { font-size: 8px; }
+  .planning-instruction { margin-block: 0; font-size: 10px; min-height: 14px; }
+  .planning-note { margin-block: 0; font-size: 8px; }
+  .planning-edit-actions { gap: 4px; }
+  .planning-edit-actions button { min-height: 28px; font-size: 9px; }
+  .screen--planning .planning-start { min-height: 37px; font-size: 15px; }
+}

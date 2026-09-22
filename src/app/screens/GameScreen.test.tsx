@@ -1,6 +1,7 @@
 import { cleanup, act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { GameScreen } from './GameScreen'
+// Regression coverage for the retained timed mode; planning level one has its own suite.
+import { LegacyDropGameScreen as GameScreen } from './GameScreen'
 import { DROP_LEVELS } from '../../game/data/dropLevels'
 import { loadDropLevelById } from '../../game/data/dropLevelLoader'
 const completeLevel = vi.hoisted(() => vi.fn())

@@ -19,6 +19,7 @@ export interface DropTile {
   id: number
   type: string
   trait?: CatTrait
+  placementOrder?: number
 }
 
 export type DropBoard = (DropTile | null)[][]

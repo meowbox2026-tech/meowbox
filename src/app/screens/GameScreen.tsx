@@ -19,6 +19,7 @@ import { recommendColumn } from '../../game/core/dropAssistance'
 import { DropHold } from '../../game/phaser/DropHold'
 import { DropObjectives } from '../../game/phaser/DropObjectives'
 import { DropTutorial } from '../../game/phaser/DropTutorial'
+import { PlanningGameScreen } from './PlanningGameScreen'
 
 interface GameScreenProps {
   levelId: number
@@ -30,6 +31,12 @@ interface GameScreenProps {
 }
 
 export function GameScreen(props: GameScreenProps) {
+  if (props.levelId <= 10) return <PlanningGameScreen {...props} levelId={props.levelId} />
+  return <LegacyDropGameScreen {...props} />
+}
+
+/** Retained for timed levels; levels 1–10 now use authored planning puzzles. */
+export function LegacyDropGameScreen(props: GameScreenProps) {
   const strings = useStrings()
   const { levelId } = props
   const [variant, setVariant] = useState(() => getStoredDropVariant(levelId))
