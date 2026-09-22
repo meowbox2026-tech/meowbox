@@ -40,8 +40,9 @@ export function resolveWaveEffects(
   }
 
   for (const treat of fishTreats) {
+    const activationCell = { x: treat.x, y: treat.y - 1 }
     const collected = matched.some(({ cell, tile }) =>
-      (cell.x === treat.x && cell.y === treat.y)
+      (cell.x === activationCell.x && cell.y === activationCell.y)
       || (isHungryTile(tile) && orthogonal(cell.x, cell.y, treat.x, treat.y)))
     if (collected) collectedFishTreatIds.push(treat.id)
   }

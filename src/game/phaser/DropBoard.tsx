@@ -1,6 +1,6 @@
 import { memo, type CSSProperties } from 'react'
 import { getCatAssetPath } from '../data/catAssets'
-import { landingRow, type DropBoard as Board, type DropWave } from '../core/dropEngine'
+import { getDropBlockers, landingRow, type DropBoard as Board, type DropWave } from '../core/dropEngine'
 import { patrolColumn, resolveDropColumn } from '../core/dropRouting'
 import type { CatTunnel, FishTreat, ScratchPost, DropPatrol } from '../core/dropTypes'
 import { format, getDropCatName, useLocale, useStrings } from '../../i18n'
@@ -43,7 +43,7 @@ export const DropBoard = memo(function DropBoard({ board, previous, current, pau
           const tunnelExit = tunnels.find((tunnel) => tunnel.entryColumn === x)?.exitColumn
           const resolvedColumn = resolveDropColumn({ width, tunnels }, x)
           const routeBlocked = blockedColumn === x || (tunnelExit !== undefined && tunnelExit === blockedColumn)
-          const landing = resolvedColumn === undefined ? -1 : landingRow(board, resolvedColumn, scratchPosts.filter((post) => post.hp > 0))
+          const landing = resolvedColumn === undefined ? -1 : landingRow(board, resolvedColumn, getDropBlockers(scratchPosts, fishTreats))
           return <button key={x} type="button" aria-label={format(strings.game.columnAction, { col: x + 1, name: getDropCatName(current, locale) })}
             data-route-column={resolvedColumn ?? ''} data-landing-row={landing}
             disabled={paused || terminal || routeBlocked} onClick={() => onDrop(x)}><span>{routeBlocked ? '🐾' : hintColumn === x ? '★' : x + 1}</span></button>

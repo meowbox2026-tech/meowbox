@@ -90,6 +90,14 @@ const cloneBoard = (board: DropBoard): DropBoard => board.map((row) => row.map((
 const clonePosts = (posts: ScratchPost[]): ScratchPost[] => posts.map((post) => ({ ...post }))
 const cloneTreats = (treats: FishTreat[]): FishTreat[] => treats.map((treat) => ({ ...treat }))
 
+export function getDropBlockers(scratchPosts: readonly ScratchPost[], fishTreats: readonly FishTreat[]): DropCell[] {
+  const cells = [
+    ...scratchPosts.filter((post) => post.hp > 0),
+    ...fishTreats
+  ].map(({ x, y }) => ({ x, y }))
+  return cells.filter((cell, index) => cells.findIndex(other => other.x === cell.x && other.y === cell.y) === index)
+}
+
 export interface CreateDropStateOptions {
   board?: DropBoard
   width?: number
@@ -228,12 +236,11 @@ function gravityWithoutBlockers(board: DropBoard, clearedCells: DropCell[]): Dro
   return next
 }
 
-function gravity(board: DropBoard, clearedCells: DropCell[], blockers: ScratchPost[]): DropBoard {
-  const activeBlockers = blockers.filter((post) => post.hp > 0)
-  if (!activeBlockers.length) return gravityWithoutBlockers(board, clearedCells)
+function gravity(board: DropBoard, clearedCells: DropCell[], blockers: readonly DropCell[]): DropBoard {
+  if (!blockers.length) return gravityWithoutBlockers(board, clearedCells)
   const next = cloneBoard(board)
   const byColumn = new Map<number, number[]>()
-  activeBlockers.forEach((post) => byColumn.set(post.x, [...(byColumn.get(post.x) ?? []), post.y].sort((a, b) => a - b)))
+  blockers.forEach((blocker) => byColumn.set(blocker.x, [...(byColumn.get(blocker.x) ?? []), blocker.y].sort((a, b) => a - b)))
   const columns = new Set(clearedCells.map((cell) => cell.x))
   for (const x of columns) {
     const bounds = [-1, ...(byColumn.get(x) ?? []), board.length]
@@ -270,7 +277,7 @@ function hasLegalDrop(state: DropState): boolean {
   return Array.from({ length: state.width }, (_, input) => {
     const resolved = resolveDropColumn(state, input)
     return resolved !== undefined && !isDropRouteBlocked(state, input, resolved)
-      && landingRow(state.board, resolved, state.scratchPosts.filter((post) => post.hp > 0)) >= 0
+      && landingRow(state.board, resolved, getDropBlockers(state.scratchPosts, state.fishTreats)) >= 0
   }).some(Boolean)
 }
 
@@ -279,7 +286,7 @@ export function dropCat(state: DropState, requestedColumn: number, random: () =>
   if (state.phase !== 'playing' || resolvedColumn === undefined || isDropRouteBlocked(state, requestedColumn, resolvedColumn)) {
     return { accepted: false, state, landed: state.board, waves: [] }
   }
-  const y = landingRow(state.board, resolvedColumn, state.scratchPosts.filter((post) => post.hp > 0))
+  const y = landingRow(state.board, resolvedColumn, getDropBlockers(state.scratchPosts, state.fishTreats))
   if (y < 0) return { accepted: false, state, landed: state.board, waves: [], resolvedColumn }
 
   let board = cloneBoard(state.board)
@@ -304,7 +311,7 @@ export function dropCat(state: DropState, requestedColumn: number, random: () =>
     cells.forEach(({ x, y: cellY }) => { board[cellY][x] = null })
     scratchPosts = effects.scratchPosts
     fishTreats = effects.fishTreats
-    board = gravity(board, cells, scratchPosts)
+    board = gravity(board, cells, getDropBlockers(scratchPosts, fishTreats))
     const combo = waves.length + 1
     const points = cells.length * 10 * combo
     waves.push({

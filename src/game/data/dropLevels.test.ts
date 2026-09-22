@@ -58,6 +58,7 @@ describe('drop level catalogue', () => {
       expect(level.initialBoard).toHaveLength(level.height)
       expect(level.initialBoard[0]).toHaveLength(level.width)
       for (const post of level.scratchPosts) expect(level.initialBoard[post.y][post.x]).toBeNull()
+      for (const treat of level.fishTreats) expect(level.initialBoard[treat.y][treat.x]).toBeNull()
       expect(level.variantCount).toBe(level.id >= 31 ? 3 : 1)
     }
     for (const level of [31, 46, 61, 76, 90]) {

@@ -4,9 +4,9 @@ import { createDropState, dropCat, type DropBoard } from './dropEngine'
 const board = (rows: string[]): DropBoard => rows.map((row, y) => [...row].map((cell, x) => cell === '.' ? null : { id: y * 10 + x + 1, type: cell }))
 
 describe('drop mechanics', () => {
-  it('damages nearby scratch posts once per wave and collects a treat on the matched cell', () => {
+  it('damages nearby scratch posts once per wave and collects a treat below the matched cell', () => {
     const state = createDropState({
-      board: board(['....', '....', '....', '....', 'aa..']),
+      board: board(['....', '....', '....', 'aa..', '....']),
       width: 4,
       height: 5,
       tileTypes: ['a', 'b', 'c'],
@@ -14,8 +14,8 @@ describe('drop mechanics', () => {
       currentTrait: 'scratch',
       next: 'b',
       queue: ['c'],
-      scratchPosts: [{ id: 'post', x: 3, y: 4, hp: 2 }],
-      fishTreats: [{ id: 'treat', x: 0, y: 4 }],
+      scratchPosts: [{ id: 'post', x: 3, y: 3, hp: 2 }],
+      fishTreats: [{ id: 'treat', x: 2, y: 4 }],
       goals: { rescued: 3, scratchPosts: 1, fishTreats: 1 }
     })
 
@@ -23,14 +23,14 @@ describe('drop mechanics', () => {
 
     expect(result.waves[0].damagedScratchPostIds).toEqual(['post'])
     expect(result.waves[0].collectedFishTreatIds).toEqual(['treat'])
-    expect(result.state.scratchPosts).toEqual([{ id: 'post', x: 3, y: 4, hp: 0 }])
+    expect(result.state.scratchPosts).toEqual([{ id: 'post', x: 3, y: 3, hp: 0 }])
     expect(result.state.progress).toMatchObject({ rescued: 3, scratchPosts: 1, fishTreats: 1 })
     expect(result.state.phase).toBe('completed')
   })
 
   it('lets hungry cats collect orthogonal treats without counting them as rescues', () => {
     const state = createDropState({
-      board: board(['....', '....', '....', '....', 'aa..']),
+      board: board(['....', '....', 'aa..', '....', '....']),
       width: 4,
       height: 5,
       tileTypes: ['a', 'b', 'c'],

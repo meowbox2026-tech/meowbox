@@ -324,7 +324,7 @@ export function createTravelLevel(row: DropLevelTableRow, name: string, world: 2
     tileAssets,
     timeLimit: row.seconds,
     target: row.rescued,
-    initialRows: Math.ceil((row.initialCats + scratchPosts.length) / row.width),
+    initialRows: Math.ceil((row.initialCats + scratchPosts.length + fishTreats.length) / row.width),
     initialCatCount: row.initialCats,
     seed,
     threeStarMoves: Math.ceil(Math.max(1, witness.length) * 1.15),

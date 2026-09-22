@@ -17,6 +17,19 @@ describe('drop rules', () => {
     expect(dropCat(state, 1).accepted).toBe(false)
     expect(dropCat(state, 1).state).toBe(state)
   })
+  it('lands above a live fish treat instead of sharing its cell', () => {
+    const state = createDropState({
+      board: board(['...', '...', '...']), width: 3, height: 3,
+      tileTypes: ['a', 'b', 'c'], current: 'a', next: 'b',
+      fishTreats: [{ id: 'fish', x: 1, y: 2 }]
+    })
+
+    const result = dropCat(state, 1)
+
+    expect(result.accepted).toBe(true)
+    expect(result.landed[1][1]?.type).toBe('a')
+    expect(result.landed[2][1]).toBeNull()
+  })
   it('drops to the lowest available row without refilling', () => {
     const state = createDropState({ board: board(['...', '...', 'b..']), current: 'a' })
     const result = dropCat(state, 0, () => 0)
