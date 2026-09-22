@@ -7,7 +7,7 @@ import {
   type PlayerSave,
   type PlayerSettings
 } from '../services/save/playerSave'
-import { MAX_DROP_LEVEL } from '../game/data/dropLevels'
+import { MAX_DROP_LEVEL } from '../game/data/dropManifest'
 import { setBackgroundMusicEnabled, startBackgroundMusic } from '../services/audio/audioService'
 import { installGlobalAudioFeedback } from '../services/audio/globalAudioFeedback'
 

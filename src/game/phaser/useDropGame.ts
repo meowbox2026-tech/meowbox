@@ -3,7 +3,10 @@ import { createDropState, dropCat, type DropBoard, type DropResult, type DropSta
 import { canReviveFromCeiling, clearBottomRow, recommendColumn } from '../core/dropAssistance'
 import { holdCurrent } from '../core/dropHold'
 import { useDropClock } from './useDropClock'
-import { getDropLevelById, type DropLevelDefinition } from '../data/dropLevels'
+import { getWorldOneLevel } from '../data/dropWorldOne'
+import type { DropLevelDefinition } from '../data/dropLevelTypes'
+
+const DEFAULT_DROP_LEVEL = getWorldOneLevel(1)
 
 interface Frame {
   board: DropBoard
@@ -20,7 +23,7 @@ type FailureReason = 'ceiling' | 'time' | 'moves' | 'no-route'
 export function useDropGame(
   paused: boolean,
   feedback: (combo: number) => void,
-  level: DropLevelDefinition = getDropLevelById(1)
+  level: DropLevelDefinition = DEFAULT_DROP_LEVEL
 ) {
   const createState = () => createDropState({
     width: level.width,

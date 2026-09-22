@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { advanceDropVariant, getDropLevelById, getStoredDropVariant, MAX_DROP_LEVEL } from '../../game/data/dropLevels'
+import { advanceDropVariant, getStoredDropVariant, loadDropLevelById } from '../../game/data/dropLevelLoader'
+import { MAX_DROP_LEVEL } from '../../game/data/dropManifest'
+import type { DropLevelDefinition } from '../../game/data/dropLevelTypes'
 import { getCatAssetPath } from '../../game/data/catAssets'
 import { DropBoard } from '../../game/phaser/DropBoard'
 import { DropPreview } from '../../game/phaser/DropPreview'
@@ -27,12 +29,47 @@ interface GameScreenProps {
   onToast: (message: string) => void
 }
 
-export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel }: GameScreenProps) {
+export function GameScreen(props: GameScreenProps) {
+  const strings = useStrings()
+  const { levelId } = props
+  const [variant, setVariant] = useState(() => getStoredDropVariant(levelId))
+  const [level, setLevel] = useState<DropLevelDefinition>()
+  const [loadError, setLoadError] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
+
+  useEffect(() => {
+    let mounted = true
+    setLevel(undefined)
+    setLoadError(false)
+    void loadDropLevelById(levelId, variant)
+      .then((loadedLevel) => {
+        if (mounted) setLevel(loadedLevel)
+      })
+      .catch(() => {
+        if (mounted) setLoadError(true)
+      })
+    return () => { mounted = false }
+  }, [levelId, loadAttempt, variant])
+
+  if (!level) return <main className="screen screen--game screen--drop drop-level-loading" aria-busy="true">
+    <div className="drop-level-loading__content" role="status">
+      <span>{loadError ? strings.game.retry : strings.app.organizingBox}</span>
+      {loadError && <button type="button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>{strings.game.retry}</button>}
+    </div>
+  </main>
+
+  return <LoadedGameScreen {...props} level={level} onRestart={() => setVariant(advanceDropVariant(level.id))} />
+}
+
+interface LoadedGameScreenProps extends GameScreenProps {
+  level: DropLevelDefinition
+  onRestart: () => void
+}
+
+function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect, onNextLevel }: LoadedGameScreenProps) {
   const { player, completeLevel } = usePlayer()
   const strings = useStrings()
   const locale = useLocale()
-  const [variant, setVariant] = useState(() => getStoredDropVariant(levelId))
-  const level = getDropLevelById(levelId, variant)
   const localized = useLocalizedLevel(level.id)
   const [paused, setPaused] = useState(false)
   const [rules, setRules] = useState(false)
@@ -64,7 +101,7 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
   const restart = () => {
     rewarded.current = false
     reset()
-    setVariant(advanceDropVariant(level.id))
+    onRestart()
     setPaused(false)
     setRules(false)
     setAd(undefined)

@@ -1,26 +1,12 @@
 import type { CatAsset } from '../types'
 import type { DropBoard, DropTile } from '../core/dropEngine'
 import type { DropLevelDefinition } from './dropLevelTypes'
-
-const names = [
-  '初次相遇', '疊疊午茶', '斜斜的祕密', '一起回家', '小小整理師', '窗邊陽光',
-  '小墨報到', '四色軟糖', '愛心接力', '小屋派對', '魚丸來訪', '魚乾時間',
-  '軟墊小山', '雙重驚喜', '下午茶會', '陽陽花園', '左右都可愛', '草地接力',
-  '大家集合', '花園野餐', '黏黏的朋友', '愛心滿滿', '雨天紙箱', '小小建築師',
-  '彩虹小隊', '旅行第一站', '星光接力', '紙箱大搬家', '最後一塊軟墊', '箱長的派對'
-]
-const targets = [18, 21, 24, 24, 27, 30, 27, 30, 33, 36, 33, 36, 36, 39, 42, 39, 42, 45, 39, 45, 45, 48, 48, 51, 51, 54, 54, 57, 57, 60]
-const times = [120, 120, 120, 115, 110, 105, 120, 115, 110, 105, 115, 110, 105, 105, 100, 115, 110, 105, 120, 115, 110, 105, 105, 100, 115, 110, 105, 105, 100, 100]
-const sizes: Array<[number, number]> = [
-  [3, 8], [3, 8], [3, 8], [3, 8], [4, 8], [4, 8], [4, 8], [4, 8], [4, 8], [4, 8],
-  [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [6, 8], [6, 8], [6, 8], [6, 8], [6, 8],
-  [7, 8], [7, 8], [7, 8], [7, 8], [7, 8], [8, 8], [8, 8], [8, 8], [8, 8], [8, 8]
-]
+import { WORLD_ONE_ROWS } from './dropWorldOneData'
 const allCats: CatAsset[] = ['arrogant', 'sunny', 'fishLover', 'orange', 'white', 'blue', 'alone', 'sleeping', 'box', 'mischievous', 'boss', 'sticky']
 
 function assetsFor(id: number): CatAsset[] {
   if (id <= 4) return ['orange', 'blue', 'white', 'alone']
-  const width = sizes[id - 1][0]
+  const width = WORLD_ONE_ROWS[id - 1].width
   const count = width + 1
   const start = (id - 5) % allCats.length
   return Array.from({ length: count }, (_, index) => allCats[(start + index) % allCats.length])
@@ -67,7 +53,8 @@ function createInitialBoard(width: number, height: number, assets: CatAsset[], r
 }
 
 function createLevel(id: number): DropLevelDefinition {
-  const [width, height] = sizes[id - 1]
+  const row = WORLD_ONE_ROWS[id - 1]
+  const { width, height } = row
   const tileAssets = assetsFor(id)
   const rows = id <= 3 ? 2 : id <= 15 ? 3 : id <= 25 ? 4 : 5
   const seed = id * 17
@@ -81,17 +68,21 @@ function createLevel(id: number): DropLevelDefinition {
           ? tutorialBoard('chain', tileAssets[0], tileAssets[1])
           : createInitialBoard(width, height, tileAssets, rows, seed)
   const queue = id <= 3 ? ['blue', 'white', 'white', 'orange', 'orange', 'orange', 'blue', 'white', 'blue'] as CatAsset[] : Array.from({ length: 12 }, (_, index) => tileAssets[(seed + index + 1) % tileAssets.length])
-  const target = targets[id - 1]
   return {
-    id, world: 1, name: names[id - 1], width, height, tileAssets, timeLimit: times[id - 1], target,
+    id, world: 1, name: row.name, width, height, tileAssets, timeLimit: row.timeLimit, target: row.target,
     initialRows: rows, initialCatCount: initialBoard.flat().filter(Boolean).length, seed,
-    threeStarMoves: Math.max(12, Math.ceil(target * (id < 7 ? .92 : .98))), twoStarMoves: Math.max(12, Math.ceil(target * (id < 7 ? .92 : .98)) + 8),
+    threeStarMoves: Math.max(12, Math.ceil(row.target * (id < 7 ? .92 : .98))), twoStarMoves: Math.max(12, Math.ceil(row.target * (id < 7 ? .92 : .98)) + 8),
     previewCount: 2, tutorial: id <= 3 ? `world-one-${id}` : undefined, initialBoard,
     initialCurrent: tileAssets[0], initialCurrentTrait: 'none', initialNext: tileAssets[1], initialNextTrait: 'none',
     initialQueue: queue, initialQueueTraits: queue.map(() => 'none'), scratchPosts: [], fishTreats: [], tunnels: [],
-    goals: { rescued: target, scratchPosts: 0, fishTreats: 0 }, holdUses: 0, variant: 0, variantCount: 1,
+    goals: { rescued: row.target, scratchPosts: 0, fishTreats: 0 }, holdUses: 0, variant: 0, variantCount: 1,
     witness: []
   }
 }
 
-export const WORLD_ONE_LEVELS = Array.from({ length: 30 }, (_, index) => createLevel(index + 1))
+export function getWorldOneLevel(id: number): DropLevelDefinition {
+  const safeId = Math.min(WORLD_ONE_ROWS.length, Math.max(1, Math.floor(id)))
+  return createLevel(safeId)
+}
+
+export { WORLD_ONE_ROWS } from './dropWorldOneData'

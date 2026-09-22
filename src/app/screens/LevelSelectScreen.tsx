@@ -1,4 +1,4 @@
-import { DROP_LEVELS } from '../../game/data/dropLevels'
+import { DROP_LEVEL_MANIFEST } from '../../game/data/dropManifest'
 import { format, useLocale, useStrings } from '../../i18n'
 import { getLevelName } from '../../i18n'
 import { usePlayer } from '../../state/PlayerContext'
@@ -22,7 +22,7 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
     sub: strings.levels.worldSubs[index] ?? '',
     unlocked: index < 3 && player.currentLevel >= index * 30 + 1
   }))
-  const visibleLevels = DROP_LEVELS.filter((level) => level.world === selectedWorld + 1)
+  const visibleLevels = DROP_LEVEL_MANIFEST.filter((level) => level.world === selectedWorld + 1)
 
   return (
     <main className="screen screen--levels">
