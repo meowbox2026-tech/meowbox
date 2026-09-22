@@ -56,7 +56,6 @@
 .drop-box.is-danger { border-color: #d87572; }
 .drop-box.is-danger .drop-ceiling { border-color: #ffb6a3; animation: drop-warning .8s ease-in-out infinite alternate; }
 .drop-box.is-paused * { animation-play-state: paused !important; }
-.drop-box::before { position: absolute; z-index: 8; inset: 0; border-radius: inherit; content: ""; opacity: .22; background: repeating-linear-gradient(95deg, transparent 0 17px, rgba(255, 239, 201, .3) 18px 19px, transparent 20px 37px); pointer-events: none; mix-blend-mode: soft-light; }
 .drop-rules { text-align: left; }
 .drop-rules h2 { font-size: 24px; text-align: center; }
 .drop-rules ol { padding-left: 25px; }

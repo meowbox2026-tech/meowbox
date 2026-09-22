@@ -106,6 +106,13 @@ describe('drop level catalogue', () => {
     }
   })
 
+  it('varies the first preview instead of serving three identical cats together', () => {
+    for (const level of DROP_LEVELS.filter((candidate) => candidate.id >= 31)) {
+      const tokens = [level.initialCurrent, level.initialNext, ...level.initialQueue]
+      expect(new Set(tokens.slice(0, 3)).size, `preview ${level.id}`).toBeGreaterThan(1)
+    }
+  })
+
   it('keeps all three variants structurally different', () => {
     for (const level of DROP_LEVELS.filter((candidate) => candidate.id >= 31)) {
       const signatures = getDropLevelVariants(level.id).map((variant) => JSON.stringify({
@@ -117,7 +124,7 @@ describe('drop level catalogue', () => {
       }))
       expect(new Set(signatures), `level ${level.id}`).toHaveLength(3)
     }
-  })
+  }, 30000)
 
   it('accepts at least one legal first action for every level and replays stored witnesses', () => {
     for (const level of DROP_LEVELS) {

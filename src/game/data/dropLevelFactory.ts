@@ -129,19 +129,21 @@ function createTokens(row: DropLevelTableRow, assets: CatAsset[], variant: numbe
   const random = createSeededRandom(row.id * 97 + variant * 811)
   // Keep a generous, authored tail so a player can recover from a few
   // non-clearing drops without relying on a run-time solver. Each shuffled
-  // cycle contains every authored cat once, so the first 2N tokens already
-  // cover all N types without falling into a fixed ABC template.
+  // cycle contains every authored cat once. The first three tokens are then
+  // diversified so the preview never presents three identical cats together,
+  // while the rest of the authored rhythm stays solver-friendly.
   const tokenCount = Math.ceil((row.rescued + 90) / assets.length) * assets.length
   const tokens: CatToken[] = []
+  const addToken = (type: CatAsset) => {
+    if (tokens.length < tokenCount) tokens.push({ type, trait: traitAt(row, tokens.length, variant) })
+  }
   const leadOrder = shuffle(assets, random)
   const leadCounts = new Map(leadOrder.map((type) => [type, 1]))
   const doubleGroups = Math.floor(assets.length / 2)
   for (let index = 0; index < doubleGroups; index += 1) leadCounts.set(leadOrder[index], 3)
   if (assets.length % 2 === 1) leadCounts.set(leadOrder[doubleGroups], 2)
   for (const type of leadOrder) {
-    for (let copy = 0; copy < (leadCounts.get(type) ?? 1); copy += 1) {
-      tokens.push({ type, trait: traitAt(row, tokens.length, variant) })
-    }
+    for (let copy = 0; copy < (leadCounts.get(type) ?? 1) && tokens.length < tokenCount; copy += 1) addToken(type)
   }
   let previousType = tokens.at(-1)?.type
   while (tokens.length < tokenCount) {
@@ -151,11 +153,14 @@ function createTokens(row: DropLevelTableRow, assets: CatAsset[], variant: numbe
       ;[order[0], order[firstDifferent]] = [order[firstDifferent], order[0]]
     }
     for (const type of order) {
-      for (let copy = 0; copy < 3 && tokens.length < tokenCount; copy += 1) {
-        tokens.push({ type, trait: traitAt(row, tokens.length, variant) })
-      }
+      for (let copy = 0; copy < 3 && tokens.length < tokenCount; copy += 1) addToken(type)
     }
     previousType = tokens.at(-1)?.type
+  }
+  const previewType = tokens[0]?.type
+  if (tokens.length >= 3 && tokens[1]?.type === previewType && tokens[2]?.type === previewType) {
+    const replacementIndex = tokens.findIndex((token, candidateIndex) => candidateIndex > 2 && token.type !== previewType)
+    if (replacementIndex >= 0) [tokens[2], tokens[replacementIndex]] = [tokens[replacementIndex], tokens[2]]
   }
   return tokens
 }

@@ -4,11 +4,11 @@ const config: CapacitorConfig = {
   appId: 'com.meowbox.puzzle',
   appName: 'Meow Box',
   webDir: 'dist',
-  backgroundColor: '#f6b75c',
+  backgroundColor: '#fff8e8',
   plugins: {
     SplashScreen: {
       launchAutoHide: true,
-      backgroundColor: '#f6b75c'
+      backgroundColor: '#fff8e8'
     }
   }
 }

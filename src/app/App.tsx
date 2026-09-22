@@ -48,7 +48,9 @@ export function App() {
     setToast(amount <= 2 ? format(strings.app.hintClaimed, { amount }) : format(strings.app.coinClaimed, { amount }))
   }
 
-  if (!isReady) return <div className="app-loading"><span>🐱</span><strong>{strings.app.openingBox}</strong></div>
+  // Keep the first paint quiet while the local save is being read. The game
+  // used to flash an orange full-screen loading card during this short gap.
+  if (!isReady) return null
 
   const hasDailyReward = player.dailyReward.lastClaimDate !== new Date().toISOString().slice(0, 10)
   return (
