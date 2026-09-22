@@ -31,11 +31,11 @@ interface GameScreenProps {
 }
 
 export function GameScreen(props: GameScreenProps) {
-  if (props.levelId <= 10) return <PlanningGameScreen {...props} levelId={props.levelId} />
+  if (props.levelId <= 15) return <PlanningGameScreen {...props} levelId={props.levelId} />
   return <LegacyDropGameScreen {...props} />
 }
 
-/** Retained for timed levels; levels 1–10 now use authored planning puzzles. */
+/** Retained for timed levels; levels 1–15 now use authored planning puzzles. */
 export function LegacyDropGameScreen(props: GameScreenProps) {
   const strings = useStrings()
   const { levelId } = props
@@ -85,7 +85,7 @@ function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect,
   const [run, setRun] = useState(0)
   const rewarded = useRef(false)
   useEffect(() => setTutorial(shouldShowTutorial(level.tutorial)), [level.id, level.tutorial])
-  const { state, display, busy, drop, hold, reset, secondsLeft, started, failure, reviveUsed, canReviveFromCeiling, extraDrops, revive, hint, hintColumn, hintUsed } = useDropGame(paused || rules || !!ad || tutorial, combo => {
+  const { state, display, busy, drop, hold, reset, secondsLeft, started, failure, reviveUsed, canReviveFromCeiling, extraDrops, revive, hint, hintColumn, hintUsed, hidden } = useDropGame(paused || rules || !!ad || tutorial, combo => {
     startBackgroundMusic(player.settings.music)
     void playPlacementHaptic(player.settings.haptics)
   }, level)
@@ -98,12 +98,12 @@ function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect,
     if (state.phase !== 'playing') stopBackgroundMusic()
   }, [busy, completeLevel, level.id, player.settings.music, stars, state.phase])
   useEffect(() => {
-    if (paused || rules || ad || tutorial || state.phase !== 'playing') return
+    if (paused || rules || ad || tutorial || hidden || state.phase !== 'playing') return
     startBackgroundMusic(player.settings.music)
-  }, [ad, paused, player.settings.music, rules, state.phase, tutorial])
+  }, [ad, hidden, paused, player.settings.music, rules, state.phase, tutorial])
   useEffect(() => {
-    if (paused || rules || ad || tutorial) stopBackgroundMusic()
-  }, [paused, rules, ad, tutorial])
+    if (paused || rules || ad || tutorial || hidden) stopBackgroundMusic()
+  }, [paused, rules, ad, tutorial, hidden])
   useEffect(() => () => stopBackgroundMusic(), [])
   const restart = () => {
     rewarded.current = false
@@ -119,7 +119,7 @@ function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect,
   const timeText = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`
   const failureTitle = failure === 'ceiling' ? strings.game.failedCeilingTitle : failure === 'no-route' ? strings.game.noRouteTitle : failure === 'moves' ? strings.game.failedMovesTitle : strings.game.failedTimeTitle
   void started
-  return <main className="screen screen--game screen--drop">
+  return <main className={`screen screen--game screen--drop${hidden ? ' is-suspended' : ''}`}>
     <TopBar coins={player.pawCoins} level={level.id} onPause={() => setPaused(true)} status={<div className="drop-top-status" aria-label={strings.game.statusLabel}>
       <strong>{format(strings.game.rescue, { done: progress, target: state.target })}</strong>
       <span className={secondsLeft <= 15 && extraDrops === undefined ? 'drop-time is-urgent' : 'drop-time'} role="timer" aria-label={strings.game.timeLeft}>{extraDrops !== undefined ? format(strings.game.overtime, { count: extraDrops }) : `⏱ ${timeText}`}</span>
@@ -129,9 +129,9 @@ function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect,
     <DropPreview current={state.current} next={state.next} currentTrait={state.currentTrait} nextTrait={state.nextTrait}
       tokens={[{ type: state.current, trait: state.currentTrait }, { type: state.next, trait: state.nextTrait }, ...state.queue.map((type, index) => ({ type, trait: state.queueTraits[index] ?? 'none' as const }))]}
       previewCount={state.previewCount} />
-    {level.holdUses > 0 && <DropHold token={state.holdToken} uses={state.holdUses} locked={state.holdLocked} disabled={paused || rules || !!ad || tutorial || busy || state.phase !== 'playing'} onHold={hold} />}
+    {level.holdUses > 0 && <DropHold token={state.holdToken} uses={state.holdUses} locked={state.holdLocked} disabled={paused || rules || !!ad || tutorial || hidden || busy || state.phase !== 'playing'} onHold={hold} />}
     <DropBoard key={run} board={display.board} previous={display.previous} current={state.current} wave={display.wave} hintColumn={hintColumn}
-      paused={paused || rules || !!ad || tutorial || (level.id >= 31 && busy)} terminal={state.phase !== 'playing'} onDrop={drop}
+      paused={paused || rules || !!ad || tutorial || hidden || (level.id >= 31 && busy)} terminal={state.phase !== 'playing'} onDrop={drop}
       scratchPosts={state.scratchPosts} fishTreats={state.fishTreats} tunnels={state.tunnels} patrol={state.patrol}
       routedColumn={display.routedColumn} routed={display.routed} patrolMoved={display.patrolMoved} />
     <nav className="drop-actions" aria-label={strings.game.actions}><button onClick={() => setRules(true)}>{strings.game.howTo}</button><button disabled={!hintAvailable} onClick={() => setAd('hint')}>{hintUsed ? strings.game.hintUsed : strings.game.hintAd}</button><button onClick={restart}>{strings.game.replay}</button></nav>

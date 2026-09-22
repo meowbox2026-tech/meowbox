@@ -5,6 +5,7 @@ import { holdCurrent } from '../core/dropHold'
 import { useDropClock } from './useDropClock'
 import { getWorldOneLevel } from '../data/dropWorldOne'
 import type { DropLevelDefinition } from '../data/dropLevelTypes'
+import { usePageSuspended } from '../../app/usePageSuspended'
 
 const DEFAULT_DROP_LEVEL = getWorldOneLevel(1)
 
@@ -56,7 +57,7 @@ export function useDropGame(
   const [busy, setBusy] = useState(false)
   const startedRef = useRef(false)
   const [started, setStarted] = useState(false)
-  const [hidden, setHidden] = useState(document.hidden)
+  const hidden = usePageSuspended()
   const [failure, setFailure] = useState<FailureReason>()
   const [reviveUsed, setReviveUsed] = useState(false)
   const reviveLock = useRef(false)
@@ -105,12 +106,6 @@ export function useDropGame(
     }, activeFrame.duration)
     return () => window.clearTimeout(timer)
   }, [activeFrame, stopped])
-
-  useEffect(() => {
-    const visibility = () => setHidden(document.hidden)
-    document.addEventListener('visibilitychange', visibility)
-    return () => document.removeEventListener('visibilitychange', visibility)
-  }, [])
 
   const { secondsLeft, read, resetClock } = useDropClock(
     started && !stopped && state.phase === 'playing' && extraDrops === undefined && (!lockDuringMechanics || !busy),
@@ -265,6 +260,7 @@ export function useDropGame(
     hint,
     hold,
     hintColumn,
-    hintUsed
+    hintUsed,
+    hidden
   }
 }

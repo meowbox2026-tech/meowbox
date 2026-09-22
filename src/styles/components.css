@@ -64,7 +64,8 @@
 .cat-portrait--black .cat-portrait__face { color: #fff2df; }
 .cat-portrait__sleep { position: absolute; top: 0; right: -13px; z-index: 2; color: #fffaf0; font-weight: 900; text-shadow: 0 2px 0 #795141; }
 
-.modal-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; align-items: center; justify-content: center; padding: 20px; background: rgba(39, 24, 20, .67); backdrop-filter: blur(3px); }
+.modal-backdrop { position: fixed; z-index: 20; top: 50%; left: 50%; display: grid; width: 100vw; height: 100vh; align-items: center; justify-content: center; padding: 20px; background: rgba(39, 24, 20, .67); backdrop-filter: blur(3px); transform: translate(-50%, -50%); }
+.app-stage:has(.modal-backdrop) { overflow: visible; }
 .modal-card { width: min(100%, 400px); max-height: calc(100dvh - 40px); overflow: auto; padding: 25px; border: 3px solid #9a5d3c; border-radius: 28px; color: #6a3928; text-align: center; background: linear-gradient(180deg, #fff7e9, #f2c693); box-shadow: inset 0 2px 1px #fff, 0 14px 45px rgba(18, 8, 3, .38); }
 .modal-card h2 { margin: 6px 0; font-size: 34px; line-height: 1; }
 .modal-card p { margin: 7px 0 16px; font-weight: 700; }

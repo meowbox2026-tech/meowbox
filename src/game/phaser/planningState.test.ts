@@ -17,6 +17,40 @@ function interrupted() {
 }
 
 describe('planning checkpoint retries', () => {
+  it('always places cats in card order and only takes back the latest placement', () => {
+    let state = freshPlanning(level)
+    expect(state.selected).toBe(level.cats[0].id)
+    expect(state.undoUses).toBe(1)
+
+    const skipped = reduce(state, { type: 'select', id: level.cats[2].id })
+    expect(skipped).toBe(state)
+    state = reduce(state, { type: 'place', x: 0, y: 0 })
+    expect(state.placements[0].catId).toBe(level.cats[0].id)
+    expect(state.selected).toBe(level.cats[1].id)
+    state = reduce(state, { type: 'place', x: 1, y: 0 })
+
+    expect(reduce(state, { type: 'remove', id: level.cats[0].id })).toBe(state)
+    const recalled = reduce(state, { type: 'remove', id: level.cats[1].id })
+    expect(recalled.placements.map(item => item.catId)).toEqual([level.cats[0].id])
+    expect(recalled.selected).toBe(level.cats[1].id)
+    expect(recalled.undoUses).toBe(0)
+    expect(reduce(recalled, { type: 'remove', id: level.cats[0].id })).toBe(recalled)
+  })
+
+  it('allows one undo per level attempt and can be topped up by a reward', () => {
+    let state = freshPlanning(level)
+    state = reduce(state, { type: 'place', x: 0, y: 0 })
+    const undone = reduce(state, { type: 'undo' })
+    expect(undone.placements).toEqual([])
+    expect(undone.selected).toBe(level.cats[0].id)
+    expect(undone.undoUses).toBe(0)
+    expect(reduce(undone, { type: 'undo' })).toBe(undone)
+    expect(reduce(undone, { type: 'remove', id: level.cats[0].id })).toBe(undone)
+    const rewarded = reduce(undone, { type: 'ad-undo' })
+    expect(rewarded.undoUses).toBe(1)
+    expect(reduce(rewarded, { type: 'ad-undo' }).undoUses).toBe(2)
+  })
+
   it('keeps cleared progress and allows only surviving player cats to move', () => {
     const failed = interrupted()
     expect(failed.result?.remaining).toBe(6)

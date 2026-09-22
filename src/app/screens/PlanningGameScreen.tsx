@@ -13,6 +13,7 @@ import { Modal } from '../components/Modal'
 import { PauseModal } from '../components/PauseModal'
 import { TopBar } from '../components/TopBar'
 import { RewardedAdModal } from '../components/RewardedAdModal'
+import { PlanningDiagonalTutorial, useDiagonalTutorial } from '../components/PlanningDiagonalTutorial'
 
 interface Props {
   levelId: number
@@ -31,18 +32,20 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const [paused, setPaused] = useState(false)
   const [rules, setRules] = useState(false)
   const [ad, setAd] = useState(false)
-  const { level, state, dispatch, board, cats, clearing, wave, canResume, hidden } = usePlanningGame(paused || rules || ad, levelId)
+  const tutorial = useDiagonalTutorial(levelId)
+  const { level, state, dispatch, board, cats, clearing, wave, canResume, hidden } = usePlanningGame(paused || rules || ad || tutorial.open, levelId)
   const rewarded = useRef(false)
   const editing = state.phase === 'editing'
-  const locked = paused || rules || ad || !editing
+  const locked = paused || rules || ad || tutorial.open || hidden || !editing
   const stars = Math.max(1, 3 - state.failures)
   const left = cats.length - state.placements.length
+  const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
   useEffect(() => {
-    if (paused || rules || hidden || state.phase === 'completed' || state.phase === 'failed') stopBackgroundMusic()
+    if (paused || rules || ad || tutorial.open || hidden || state.phase === 'completed' || state.phase === 'failed') stopBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
     return () => stopBackgroundMusic()
-  }, [paused, rules, hidden, state.phase, player.settings.music])
+  }, [paused, rules, ad, tutorial.open, hidden, state.phase, player.settings.music])
   useEffect(() => {
     if (state.phase === 'completed' && !rewarded.current) {
       rewarded.current = true
@@ -62,26 +65,24 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     void playPlacementHaptic(player.settings.haptics)
   }
   const catName = (type: string) => getDropCatName(type, locale)
-  return <main className="screen screen--game screen--drop screen--planning">
+  return <main className={`screen screen--game screen--drop screen--planning${hidden ? ' is-suspended' : ''}`}>
     <TopBar level={levelId} coins={player.pawCoins} onPause={() => setPaused(true)} status={<div className="planning-top-status">
       <strong>{localized.name}</strong><small>{text.failures} {state.failures} {text.times}</small>
       <small>{retryText.retries(state.retries)}</small>
     </div>} />
     <section className="planning-intro"><strong>{text.goal(totalCats)}</strong><span>{text.calm}</span></section>
     <section className="planning-tray" aria-label={text.tray}>
-      <div className="planning-tray__heading"><span>{state.failures ? retryText.tray : text.tray}</span><b>{text.placed} {state.placements.length} / {cats.length}</b></div>
-      <div className="planning-tray__cats">{cats.map(cat => {
-        const order = state.placements.findIndex(p => p.catId === cat.id)
-        return <button key={cat.id} disabled={locked} aria-pressed={state.selected === cat.id}
-          aria-label={`${order >= 0 ? text.take : ''} ${catName(cat.type)}`.trim()}
-          className={`${state.selected === cat.id ? 'is-selected' : ''} ${order >= 0 ? 'is-placed' : ''}`}
-          onClick={() => dispatch({ type: order >= 0 ? 'remove' : 'select', id: cat.id })}>
+      <div className="planning-tray__heading"><span>{state.failures ? retryText.tray : text.tray}</span>
+        {remainingCats.length > 8 && <small className="planning-tray__hint">↔ {text.swipe}</small>}
+        <b>{text.placed} {state.placements.length} / {cats.length}</b>
+      </div>
+      <div className="planning-tray__cats" role="list">{remainingCats.map((cat, index) =>
+        <div key={cat.id} role="listitem" className={`planning-tray__cat${index === 0 ? ' is-next' : ''}`}
+          aria-label={text.cardLabel(index + 1, catName(cat.type))}>
           <img src={getCatAssetPath(cat.type)} alt="" />
-        </button>
-      })}</div>
-      {cats.length > 8 && <small className="planning-tray__hint">↔ {text.swipe}</small>}
+        </div>
+      )}</div>
     </section>
-    <p className="planning-instruction" role="status">{editing ? state.failures ? retryText.editing : left ? text.choose : text.ready : `${text.wave} ${wave}`}</p>
     <div className={`planning-box${paused || rules || hidden ? ' is-paused' : ''}`}>
       <div className="planning-grid" aria-label={text.board}>
         {Array.from({ length: 64 }, (_, i) => <div className="planning-cell" key={i} />)}
@@ -91,25 +92,27 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         {board.flatMap((row, y) => row.flatMap((cat, x) => {
           if (!cat) return []
           const order = state.placements.findIndex(p => p.catId === cat.id)
+          const canTakeBack = editing && state.undoUses > 0 && order >= 0 && order === state.placements.length - 1
           const content = <><img src={getCatAssetPath(cat.type as CatAsset)} alt="" />{editing && order >= 0 && <b>{order + 1}</b>}</>
           const style = { left: `${x * 12.5}%`, top: `${y * 12.5}%` }
           const className = `planning-cat${clearing.includes(cat.id) ? ' is-clearing' : ''}${order >= 0 ? ' is-added' : ''}`
-          return editing && order >= 0
+          return canTakeBack
             ? <button key={cat.id} className={className} style={style} disabled={locked}
               aria-label={`${text.take} ${order + 1} ${catName(cat.type)}`} onClick={() => dispatch({ type: 'remove', id: cat.id })}>{content}</button>
-            : <div key={cat.id} className={className} style={style} aria-label={`${text.fixed} ${catName(cat.type)}`}>{content}</div>
+            : <div key={cat.id} className={className} style={style}
+              aria-label={order >= 0 ? `${text.placed} ${order + 1} ${catName(cat.type)}` : `${text.fixed} ${catName(cat.type)}`}>{content}</div>
         }))}
       </div>
       <div className="planning-box__label">MEOWBOX <span>8 × 8</span></div>
     </div>
-    <p className="planning-note">{text.note}</p>
     <div className="planning-edit-actions">
-      <button disabled={locked || !state.placements.length} onClick={() => dispatch({ type: 'undo' })}>{text.undo}</button>
+      <button disabled={locked || !state.placements.length || state.undoUses <= 0} onClick={() => dispatch({ type: 'undo' })}>{text.undo} <span className="planning-undo-count">{state.undoUses}</span></button>
       <button disabled={locked || !state.placements.length} onClick={() => dispatch({ type: 'clear' })}>{text.clear}</button>
       <button disabled={state.phase === 'running'} onClick={() => setRules(true)}>{text.rules}</button>
     </div>
     <AppButton className="planning-start" disabled={locked || left > 0} onClick={() => dispatch({ type: 'start' })}>{text.start}</AppButton>
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
+    <PlanningDiagonalTutorial open={tutorial.open} onClose={tutorial.close} />
     <Modal open={rules} ariaLabel={text.rules} className="drop-rules">
       <h2>{text.rulesTitle}</h2><ol>{[text.rule1, text.rule2, text.rule3, text.rule4(totalCats), retryText.rule].map(rule => <li key={rule}>{rule}</li>)}</ol>
       <AppButton onClick={() => setRules(false)}>{text.close}</AppButton>

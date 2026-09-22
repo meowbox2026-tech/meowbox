@@ -7,16 +7,17 @@ export interface PlanningState {
   phase: 'editing' | 'running' | 'failed' | 'completed'
   failures: number
   retries: number
+  undoUses: number
   completedWaves: number
   frame: number
   result?: PlanningResult
 }
 export type PlanningAction = { type: 'select' | 'remove'; id: number } | { type: 'place'; x: number; y: number }
-  | { type: 'undo' | 'clear' | 'start' | 'tick' | 'edit' | 'ad-retry' | 'restart' }
+  | { type: 'undo' | 'clear' | 'start' | 'tick' | 'edit' | 'ad-retry' | 'ad-undo' | 'restart' }
 
 export const freshPlanning = (level: PlanningLevel): PlanningState => ({
   puzzle: level, placements: [], selected: level.cats[0]?.id, phase: 'editing',
-  failures: 0, retries: 2, completedWaves: 0, frame: 0
+  failures: 0, retries: 2, undoUses: 1, completedWaves: 0, frame: 0
 })
 
 export function stoppedBoard(state: PlanningState) {
@@ -60,23 +61,24 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
     return state.frame + 1 < state.result!.frames.length ? { ...state, frame: state.frame + 1 } : finish(state)
   }
   if (state.phase !== 'editing') return state
+  if (action.type === 'ad-undo') return { ...state, undoUses: state.undoUses + 1 }
   const level = state.puzzle
   switch (action.type) {
     case 'select':
-      return level.cats.some(cat => cat.id === action.id) && !state.placements.some(p => p.catId === action.id)
-        ? { ...state, selected: action.id } : state
+      return state
     case 'remove':
-      return state.placements.some(p => p.catId === action.id)
-        ? { ...state, placements: state.placements.filter(p => p.catId !== action.id), selected: action.id } : state
+      return state.undoUses > 0 && state.placements.at(-1)?.catId === action.id
+        ? { ...state, placements: state.placements.slice(0, -1), selected: action.id, undoUses: state.undoUses - 1 } : state
     case 'undo':
-      return state.placements.length ? { ...state, selected: state.placements.at(-1)!.catId, placements: state.placements.slice(0, -1) } : state
+      return state.undoUses > 0 && state.placements.length
+        ? { ...state, selected: state.placements.at(-1)!.catId, placements: state.placements.slice(0, -1), undoUses: state.undoUses - 1 } : state
     case 'clear':
       return { ...state, placements: [], selected: level.cats[0]?.id }
     case 'place': {
       if (state.selected === undefined) return state
       const placements = [...state.placements, { catId: state.selected, x: action.x, y: action.y }]
       if (!arrangeCats(level, placements)) return state
-      return { ...state, placements, selected: level.cats.find(cat => !placements.some(p => p.catId === cat.id))?.id }
+      return { ...state, placements, selected: level.cats[placements.length]?.id }
     }
     case 'start': {
       if (state.placements.length !== level.cats.length) return state

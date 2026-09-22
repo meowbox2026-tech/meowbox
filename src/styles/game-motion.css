@@ -329,3 +329,5 @@
     animation-delay: 0ms !important;
   }
 }
+/* Background tabs/native web views must stop every decorative loop, not only game timers. */
+.screen--game.is-suspended *, .screen--game.is-suspended *::before, .screen--game.is-suspended *::after { animation-play-state: paused !important; }

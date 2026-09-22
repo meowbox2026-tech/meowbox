@@ -1,4 +1,5 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useReducer } from 'react'
+import { usePageSuspended } from '../../app/usePageSuspended'
 import { arrangeCats } from '../core/planningEngine'
 import { getPlanningLevel } from '../data/planningLevels'
 import { canResumePlanning, freshPlanning, planningReducer, type PlanningState, type PlanningAction } from './planningState'
@@ -10,12 +11,7 @@ export function usePlanningGame(paused: boolean, levelId = 1) {
     undefined,
     () => freshPlanning(level)
   )
-  const [hidden, setHidden] = useState(document.hidden)
-  useEffect(() => {
-    const update = () => setHidden(document.hidden)
-    document.addEventListener('visibilitychange', update)
-    return () => document.removeEventListener('visibilitychange', update)
-  }, [])
+  const hidden = usePageSuspended()
   useEffect(() => {
     if (state.phase !== 'running' || paused || hidden) return
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches

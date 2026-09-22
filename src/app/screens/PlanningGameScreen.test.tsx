@@ -4,11 +4,13 @@ import { GameScreen } from './GameScreen'
 
 const completeLevel = vi.hoisted(() => vi.fn())
 const showAd = vi.hoisted(() => vi.fn())
+const startBackgroundMusic = vi.hoisted(() => vi.fn())
+const stopBackgroundMusic = vi.hoisted(() => vi.fn())
 vi.mock('../../services/ads/rewardedAds', () => ({ showRewardedAd: showAd }))
 vi.mock('../../state/PlayerContext', () => ({ usePlayer: () => ({
   player: { pawCoins: 0, settings: { music: false, haptics: false } }, completeLevel
 }) }))
-vi.mock('../../services/audio/audioService', () => ({ startBackgroundMusic: vi.fn(), stopBackgroundMusic: vi.fn() }))
+vi.mock('../../services/audio/audioService', () => ({ startBackgroundMusic, stopBackgroundMusic }))
 vi.mock('../../services/haptics/hapticsService', () => ({ playPlacementHaptic: vi.fn() }))
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks() })
 
@@ -29,15 +31,14 @@ function finish() { for (let i = 0; i < 9; i++) act(() => vi.advanceTimersByTime
 
 describe('8x8 planning level through the game entry point', () => {
   it('routes levels two through ten into the same 8x8 planning rules and scrollable tray', () => {
-    for (const levelId of [2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+    for (const levelId of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]) {
       cleanup()
       mountLevel(levelId)
       expect(document.querySelectorAll('.planning-cell')).toHaveLength(64)
       expect(document.querySelector('.planning-tray__cats')).toBeInTheDocument()
       if (levelId >= 7) expect(document.querySelector('.planning-tray__hint')).toBeInTheDocument()
       else expect(document.querySelector('.planning-tray__hint')).toBeNull()
-      for (const card of document.querySelectorAll('.planning-tray__cats button')) {
-        expect(card.textContent).toBe('')
+      for (const card of document.querySelectorAll('.planning-tray__cat')) {
         expect(card.querySelector('img')).not.toBeNull()
         expect(card.getAttribute('aria-label')).toBeTruthy()
       }
@@ -49,20 +50,41 @@ describe('8x8 planning level through the game entry point', () => {
     const { container } = mount()
     expect(container.querySelectorAll('.planning-cell')).toHaveLength(64)
     expect(container.querySelectorAll('.planning-tray img')).toHaveLength(3)
+    expect(container.querySelectorAll('.planning-tray button')).toHaveLength(0)
+    expect(container.querySelectorAll('button.planning-cat')).toHaveLength(0)
     expect(screen.queryByRole('timer')).toBeNull()
     expect(screen.getByRole('button', { name: '開始救援' })).toBeDisabled()
     fireEvent.click(cell(4, 5))
+    expect(container.querySelectorAll('.planning-tray img')).toHaveLength(2)
+    expect(container.querySelectorAll('button.planning-cat')).toHaveLength(1)
     fireEvent.click(cell(3, 5))
+    expect(container.querySelectorAll('.planning-tray img')).toHaveLength(1)
     fireEvent.click(cell(2, 5))
+    expect(container.querySelectorAll('.planning-tray img')).toHaveLength(0)
     expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
     expect([...container.querySelectorAll('.planning-cat b')].map(node => node.textContent).sort()).toEqual(['1', '2', '3'])
     expect(screen.getByRole('button', { name: '開始救援' })).toBeEnabled()
     act(() => vi.advanceTimersByTime(120000))
     expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
-    fireEvent.click(screen.getByRole('button', { name: '拿回 2 小灰' }))
+    fireEvent.click(screen.getByRole('button', { name: '拿回 3 奶霜' }))
     expect(screen.getByRole('button', { name: '開始救援' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '拿回 2 奶霜' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '撤銷上一步 0' })).toBeDisabled()
+    expect(container.querySelectorAll('.planning-tray img')).toHaveLength(1)
+    expect(screen.queryByRole('button', { name: '拿回 2 小灰' })).toBeNull()
     expect(screen.getByText('失敗 0 次')).toBeInTheDocument()
+  })
+
+  it('suspends input, playback and audio while the app window is inactive', () => {
+    mount()
+    const firstCell = cell(4, 5)
+    fireEvent.blur(window)
+    expect(firstCell).toBeDisabled()
+    expect(document.querySelector('.screen--planning')).toHaveClass('is-suspended')
+    expect(stopBackgroundMusic).toHaveBeenCalled()
+
+    fireEvent.focus(window)
+    expect(firstCell).toBeEnabled()
+    expect(document.querySelector('.screen--planning')).not.toHaveClass('is-suspended')
   })
   it('plays three waves, awards once, and navigates to level two', () => {
     const { next } = mount()
@@ -83,9 +105,8 @@ describe('8x8 planning level through the game entry point', () => {
   it('edits surviving player cats at the stopped board and keeps earlier clears', () => {
     mount()
     fireEvent.click(cell(4, 5))
-    fireEvent.click(screen.getByRole('button', { name: '奶霜' }))
-    fireEvent.click(cell(3, 5))
-    fireEvent.click(cell(2, 5))
+    fireEvent.click(cell(1, 1))
+    fireEvent.click(cell(1, 2))
     start()
     finish()
     expect(screen.getByRole('dialog', { name: '再調整一下' })).toBeInTheDocument()
@@ -93,11 +114,10 @@ describe('8x8 planning level through the game entry point', () => {
     expect(screen.getByText('失敗 1 次')).toBeInTheDocument()
     expect(screen.getByText('中途重試剩 1 次')).toBeInTheDocument()
     expect(document.querySelectorAll('.planning-cat')).toHaveLength(6)
-    expect(document.querySelectorAll('button.planning-cat')).toHaveLength(2)
+    expect(document.querySelectorAll('button.planning-cat')).toHaveLength(1)
+    expect(document.querySelectorAll('.planning-tray img')).toHaveLength(0)
+    fireEvent.click(screen.getByRole('button', { name: '全部拿回' }))
     expect(document.querySelectorAll('.planning-tray img')).toHaveLength(2)
-    fireEvent.click(screen.getByRole('button', { name: '撤銷上一步' }))
-    fireEvent.click(screen.getByRole('button', { name: '撤銷上一步' }))
-    fireEvent.click(screen.getByRole('button', { name: '小灰' }))
     fireEvent.click(cell(6, 5))
     fireEvent.click(cell(5, 5))
     start()

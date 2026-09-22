@@ -184,8 +184,12 @@
 .pause-panel__title { position: absolute; top: 31%; right: 20%; left: 20%; z-index: 1; margin: 0; color: #713c28; font-family: var(--font-cute); font-size: clamp(28px, 8vw, 40px); font-weight: 900; line-height: 1; text-align: center; text-shadow: 0 2px 0 rgba(255, 239, 205, .95); }
 .pause-panel__close { top: 21%; right: 3%; width: 17%; height: 12%; }
 .pause-panel__continue { top: 42%; left: 12%; width: 76%; height: 12%; color: #fffdf4 !important; font-size: clamp(16px, 5vw, 22px) !important; text-shadow: 0 2px 0 rgba(48, 126, 32, .62) !important; }
+.pause-panel__continue > span { transform: translateX(20px); }
 .pause-panel__restart { top: 54%; left: 12%; width: 76%; height: 11%; font-size: clamp(13px, 4vw, 18px) !important; }
+.pause-panel__restart > span { transform: translateX(19px); }
 .pause-panel__home, .pause-panel__settings { display: flex !important; align-items: center; justify-content: flex-start !important; padding-left: 16% !important; text-align: left; }
+.pause-panel__home > span { transform: translate(4px, -2px); }
+.pause-panel__settings > span { transform: translate(12px, -2px); }
 .pause-panel__home { top: 67%; left: 11%; width: 38%; height: 12%; font-size: clamp(12px, 3.5vw, 16px) !important; }
 .pause-panel__settings { top: 67%; right: 11%; width: 38%; height: 12%; font-size: clamp(12px, 3.5vw, 16px) !important; }
 .pause-panel button:focus-visible { outline-color: #72402c; outline-offset: -3px; }

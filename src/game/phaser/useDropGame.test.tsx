@@ -30,6 +30,20 @@ describe('drop presentation lifecycle', () => {
     rerender({ paused: false }); advance(420); advance(580); advance(420)
     expect(result.current.state.moves).toBe(1)
   })
+  it('freezes input and animation when the browser window loses focus', () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() => useDropGame(false, vi.fn()))
+    act(() => window.dispatchEvent(new Event('blur')))
+    act(() => result.current.drop(0))
+    advance(5000)
+    expect(result.current.hidden).toBe(true)
+    expect(result.current.state.moves).toBe(0)
+
+    act(() => window.dispatchEvent(new Event('focus')))
+    act(() => result.current.drop(0))
+    expect(result.current.hidden).toBe(false)
+    expect(result.current.state.moves).toBe(1)
+  })
   it('cancels pending resolution on restart and unmount', () => {
     vi.useFakeTimers()
     const { result, unmount } = renderHook(() => useDropGame(false, vi.fn()))
