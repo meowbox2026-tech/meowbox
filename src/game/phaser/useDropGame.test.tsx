@@ -110,6 +110,18 @@ describe('drop presentation lifecycle', () => {
     expect(result.current.secondsLeft).toBeLessThan(level.timeLimit)
   })
 
+  it('settles a world 2 drop without a long input dead time', () => {
+    vi.useFakeTimers()
+    const level = getDropLevelById(31)
+    const { result } = renderHook(() => useDropGame(false, vi.fn(), level))
+
+    act(() => result.current.drop(0))
+    advance(179)
+    expect(result.current.busy).toBe(true)
+    advance(1)
+    expect(result.current.busy).toBe(false)
+  })
+
   it('starts the clock with hold, preserves traits, and unlocks after one successful drop', () => {
     vi.useFakeTimers()
     const level = getDropLevelById(41)
