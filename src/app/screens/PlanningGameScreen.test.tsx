@@ -30,8 +30,8 @@ function start() { fireEvent.click(screen.getByRole('button', { name: '開始救
 function finish() { for (let i = 0; i < 9; i++) act(() => vi.advanceTimersByTime(700)) }
 
 describe('8x8 planning level through the game entry point', () => {
-  it('routes levels two through twenty into the same 8x8 planning rules and scrollable tray', () => {
-    for (const levelId of Array.from({ length: 19 }, (_, index) => index + 2)) {
+  it('routes levels two through twenty-five into the same 8x8 planning rules and scrollable tray', () => {
+    for (const levelId of Array.from({ length: 24 }, (_, index) => index + 2)) {
       cleanup()
       mountLevel(levelId)
       expect(document.querySelectorAll('.planning-cell')).toHaveLength(64)
@@ -74,6 +74,17 @@ describe('8x8 planning level through the game entry point', () => {
     expect(screen.getByText('失敗 0 次')).toBeInTheDocument()
   })
 
+  it('replaces take-all with one free hint per planning level', () => {
+    const { container } = mount()
+    const hint = screen.getByRole('button', { name: /提示/ })
+    expect(hint).toBeEnabled()
+    expect(screen.queryByRole('button', { name: '全部拿回' })).toBeNull()
+    fireEvent.click(hint)
+    expect(hint).toBeDisabled()
+    expect(container.querySelector('.planning-placement-cell.is-hint')).toBeInTheDocument()
+    expect(screen.getByText('提示已標出下一隻貓咪的推薦位置')).toBeInTheDocument()
+  })
+
   it('suspends input, playback and audio while the app window is inactive', () => {
     mount()
     const firstCell = cell(4, 5)
@@ -102,7 +113,7 @@ describe('8x8 planning level through the game entry point', () => {
     fireEvent.click(screen.getByRole('button', { name: '前往第 2 關' }))
     expect(next).toHaveBeenCalledWith(2)
   })
-  it('edits surviving player cats at the stopped board and keeps earlier clears', () => {
+  it('edits only the latest surviving player cat after a checkpoint retry', () => {
     mount()
     fireEvent.click(cell(4, 5))
     fireEvent.click(cell(1, 1))
@@ -116,13 +127,14 @@ describe('8x8 planning level through the game entry point', () => {
     expect(document.querySelectorAll('.planning-cat')).toHaveLength(6)
     expect(document.querySelectorAll('button.planning-cat')).toHaveLength(1)
     expect(document.querySelectorAll('.planning-tray img')).toHaveLength(0)
-    fireEvent.click(screen.getByRole('button', { name: '全部拿回' }))
-    expect(document.querySelectorAll('.planning-tray img')).toHaveLength(2)
+    fireEvent.click(document.querySelector('button.planning-cat')!)
+    expect(document.querySelectorAll('.planning-tray img')).toHaveLength(1)
     fireEvent.click(cell(6, 5))
-    fireEvent.click(cell(5, 5))
+    expect(document.querySelectorAll('.planning-tray img')).toHaveLength(0)
     start()
     finish()
-    expect(completeLevel).toHaveBeenCalledExactlyOnceWith(1, 2, 50)
+    expect(screen.getByRole('dialog', { name: '再調整一下' })).toBeInTheDocument()
+    expect(completeLevel).not.toHaveBeenCalled()
   })
   it('offers a rewarded retry only after both free retries, and cancellation grants nothing', async () => {
     mount()

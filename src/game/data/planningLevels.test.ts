@@ -18,10 +18,10 @@ function boardDirections(board: DropBoard): Set<string> {
 
 describe('authored planning levels', () => {
   it('keeps every board at 8x8 and increases the authored puzzle density', () => {
-    expect(PLANNING_LEVELS).toHaveLength(20)
+    expect(PLANNING_LEVELS).toHaveLength(25)
     expect(PLANNING_LEVELS.every(level => level.width === 8 && level.height === 8)).toBe(true)
-    expect(PLANNING_LEVELS.map(level => level.board.flat().filter(Boolean).length)).toEqual([6, 8, 10, 12, 14, 16, 18, 20, 20, 20, 20, 20, 22, 22, 24, 26, 28, 30, 32, 36])
-    expect(PLANNING_LEVELS.map(level => level.cats.length)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 11, 11, 12, 13, 14, 15, 16, 18])
+    expect(PLANNING_LEVELS.map(level => level.board.flat().filter(Boolean).length)).toEqual([6, 8, 10, 12, 14, 16, 18, 20, 20, 20, 20, 20, 22, 22, 24, 26, 28, 30, 32, 36, 37, 38, 38, 39, 39])
+    expect(PLANNING_LEVELS.map(level => level.cats.length)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 11, 11, 12, 13, 14, 15, 16, 18, 19, 20, 20, 21, 21])
   })
 
   it('starts without a free match and has a complete authored solution for each level', () => {
@@ -33,7 +33,7 @@ describe('authored planning levels', () => {
       expect(result.waves, `level ${level.id} has no elimination`).toBeGreaterThan(0)
       return result.remaining
     })
-    expect(outcomes).toEqual(Array(20).fill(0))
+    expect(outcomes).toEqual(Array(25).fill(0))
   })
 
   it('introduces a fourth cat type by level four and keeps it readable through level ten', () => {
@@ -69,7 +69,7 @@ describe('authored planning levels', () => {
   })
 
   it('adds a second chapter with four matching cats and fixed authored density', () => {
-    const chapterTwo = PLANNING_LEVELS.slice(10)
+    const chapterTwo = PLANNING_LEVELS.slice(10, 20)
     expect(chapterTwo.map(level => level.id)).toEqual([11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
     expect(chapterTwo.slice(0, 5).map(level => level.board.flat().filter(Boolean).length)).toEqual([20, 20, 22, 22, 24])
     expect(chapterTwo.slice(0, 5).map(level => level.cats.length)).toEqual([10, 10, 11, 11, 12])
@@ -80,7 +80,7 @@ describe('authored planning levels', () => {
   })
 
   it('keeps every second-chapter puzzle free of opening matches and fully solvable', () => {
-    for (const level of PLANNING_LEVELS.slice(10)) {
+    for (const level of PLANNING_LEVELS.slice(10, 20)) {
       expect(findDropMatches(level.board), `level ${level.id} starts with a match`).toEqual([])
       const solved = arrangeCats(level, level.solution)
       expect(solved, `level ${level.id} solution could not be placed`).toBeDefined()
@@ -91,11 +91,33 @@ describe('authored planning levels', () => {
   })
 
   it('raises the third chapter to 18 tray cats without changing the four-color rules', () => {
-    const chapterThree = PLANNING_LEVELS.slice(15)
+    const chapterThree = PLANNING_LEVELS.slice(15, 20)
     expect(chapterThree.map(level => level.id)).toEqual([16, 17, 18, 19, 20])
     expect(chapterThree.map(level => level.cats.length)).toEqual([13, 14, 15, 16, 18])
     expect(chapterThree.map(level => level.board.flat().filter(Boolean).length)).toEqual([26, 28, 30, 32, 36])
     expect(chapterThree.every(level => new Set(level.cats.map(cat => cat.type)).size === 4)).toBe(true)
+  })
+
+  it('adds a fourth chapter up to the 8x8 capacity without adding a fifth cat type', () => {
+    const chapterFour = PLANNING_LEVELS.slice(20)
+    expect(chapterFour.map(level => level.id)).toEqual([21, 22, 23, 24, 25])
+    expect(chapterFour.map(level => level.cats.length)).toEqual([19, 20, 20, 21, 21])
+    expect(chapterFour.map(level => level.board.flat().filter(Boolean).length)).toEqual([37, 38, 38, 39, 39])
+    expect(chapterFour.every(level => new Set(level.cats.map(cat => cat.type)).size === 4 && !level.cats.some(cat => cat.type === 'alone'))).toBe(true)
+    expect(chapterFour.every(level => level.board.flat().filter(Boolean).length + level.cats.length <= 64)).toBe(true)
+  })
+
+  it('keeps fourth-chapter layouts directional, dense, and chainable', () => {
+    const directions = new Set<string>()
+    for (const level of PLANNING_LEVELS.slice(20)) {
+      const solved = arrangeCats(level, level.solution)!
+      const result = resolvePlanning(solved)
+      boardDirections(solved).forEach(direction => directions.add(direction))
+      expect(boardDirections(solved)).toContain('diagonal')
+      expect(result.waves, `level ${level.id} waves`).toBeGreaterThanOrEqual(5)
+      expect(result.frames.filter((frame, index) => index % 2 === 0 && frame.clearing.length > 0).length, `level ${level.id} clears`).toBeGreaterThanOrEqual(5)
+    }
+    expect(directions).toEqual(new Set(['horizontal', 'vertical', 'diagonal']))
   })
 
   it('uses all three directions and produces multi-step gravity in the third chapter', () => {

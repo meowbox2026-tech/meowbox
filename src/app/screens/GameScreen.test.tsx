@@ -35,11 +35,11 @@ async function mountLevel(levelId: number) {
 }
 function finishAnimation() { for (let n = 0; n < 8; n++) act(() => vi.advanceTimersByTime(600)) }
 describe('first drop level', () => {
-  it('keeps level 21 in the timed mode after the planning chapter', async () => {
-    await loadDropLevelById(21)
+  it('keeps level 26 in the timed mode after the planning chapter', async () => {
+    await loadDropLevelById(26)
     vi.useFakeTimers()
-    const result = render(<RoutedGameScreen levelId={21} onHome={vi.fn()} onSettings={vi.fn()} onLevelSelect={vi.fn()} onNextLevel={vi.fn()} onToast={vi.fn()} />)
-    await settleLevelLoad(result.container, 21)
+    const result = render(<RoutedGameScreen levelId={26} onHome={vi.fn()} onSettings={vi.fn()} onLevelSelect={vi.fn()} onNextLevel={vi.fn()} onToast={vi.fn()} />)
+    await settleLevelLoad(result.container, 26)
 
     expect(result.container.querySelector('.planning-cell')).toBeNull()
     expect(screen.getByRole('timer', { name: '剩餘時間' })).toBeInTheDocument()

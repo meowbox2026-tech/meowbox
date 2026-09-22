@@ -86,9 +86,11 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     <div className={`planning-box${paused || rules || hidden ? ' is-paused' : ''}`}>
       <div className="planning-grid" aria-label={text.board}>
         {Array.from({ length: 64 }, (_, i) => <div className="planning-cell" key={i} />)}
-        <div className="planning-placement-grid">{Array.from({ length: 8 }, (_, y) => Array.from({ length: 8 }, (_, x) => <button key={`${x}:${y}`}
-          className="planning-placement-cell" disabled={locked || state.selected === undefined || !!board[y][x]}
-          aria-label={text.cellLabel(y + 1, x + 1)} onClick={() => place(x, y)} />))}</div>
+        <div className="planning-placement-grid">{Array.from({ length: 8 }, (_, y) => Array.from({ length: 8 }, (_, x) => {
+          const hinted = state.hintCell !== undefined && state.hintCell.catId === state.selected && state.hintCell.x === x && state.hintCell.y === y
+          return <button key={`${x}:${y}`} className={`planning-placement-cell${hinted ? ' is-hint' : ''}`} disabled={locked || state.selected === undefined || !!board[y][x]}
+            aria-label={text.cellLabel(y + 1, x + 1)} onClick={() => place(x, y)} />
+        }))}</div>
         {board.flatMap((row, y) => row.flatMap((cat, x) => {
           if (!cat) return []
           const order = state.placements.findIndex(p => p.catId === cat.id)
@@ -107,9 +109,10 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     </div>
     <div className="planning-edit-actions">
       <button disabled={locked || !state.placements.length || state.undoUses <= 0} onClick={() => dispatch({ type: 'undo' })}>{text.undo} <span className="planning-undo-count">{state.undoUses}</span></button>
-      <button disabled={locked || !state.placements.length} onClick={() => dispatch({ type: 'clear' })}>{text.clear}</button>
+      <button disabled={locked || state.hintUses <= 0 || state.selected === undefined} onClick={() => dispatch({ type: 'hint' })}>{text.useHint} <span className="planning-undo-count">{state.hintUses}</span></button>
       <button disabled={state.phase === 'running'} onClick={() => setRules(true)}>{text.rules}</button>
     </div>
+    {state.hintCell && <p className="planning-hint-status" role="status">{text.hintUsed}</p>}
     <AppButton className="planning-start" disabled={locked || left > 0} onClick={() => dispatch({ type: 'start' })}>{text.start}</AppButton>
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
     <PlanningDiagonalTutorial open={tutorial.open} onClose={tutorial.close} />

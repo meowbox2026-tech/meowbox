@@ -8,16 +8,18 @@ export interface PlanningState {
   failures: number
   retries: number
   undoUses: number
+  hintUses: number
+  hintCell?: Placement
   completedWaves: number
   frame: number
   result?: PlanningResult
 }
 export type PlanningAction = { type: 'select' | 'remove'; id: number } | { type: 'place'; x: number; y: number }
-  | { type: 'undo' | 'clear' | 'start' | 'tick' | 'edit' | 'ad-retry' | 'ad-undo' | 'restart' }
+  | { type: 'undo' | 'clear' | 'hint' | 'start' | 'tick' | 'edit' | 'ad-retry' | 'ad-undo' | 'restart' }
 
 export const freshPlanning = (level: PlanningLevel): PlanningState => ({
   puzzle: level, placements: [], selected: level.cats[0]?.id, phase: 'editing',
-  failures: 0, retries: 2, undoUses: 1, completedWaves: 0, frame: 0
+  failures: 0, retries: 2, undoUses: 1, hintUses: 1, completedWaves: 0, frame: 0
 })
 
 export function stoppedBoard(state: PlanningState) {
@@ -66,25 +68,30 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
   switch (action.type) {
     case 'select':
       return state
+    case 'hint': {
+      if (state.hintUses <= 0 || state.selected === undefined) return state
+      const hintCell = level.solution.find(item => item.catId === state.selected)
+      return hintCell ? { ...state, hintUses: state.hintUses - 1, hintCell: { ...hintCell } } : state
+    }
     case 'remove':
       return state.undoUses > 0 && state.placements.at(-1)?.catId === action.id
-        ? { ...state, placements: state.placements.slice(0, -1), selected: action.id, undoUses: state.undoUses - 1 } : state
+        ? { ...state, placements: state.placements.slice(0, -1), selected: action.id, undoUses: state.undoUses - 1, hintCell: undefined } : state
     case 'undo':
       return state.undoUses > 0 && state.placements.length
-        ? { ...state, selected: state.placements.at(-1)!.catId, placements: state.placements.slice(0, -1), undoUses: state.undoUses - 1 } : state
+        ? { ...state, selected: state.placements.at(-1)!.catId, placements: state.placements.slice(0, -1), undoUses: state.undoUses - 1, hintCell: undefined } : state
     case 'clear':
-      return { ...state, placements: [], selected: level.cats[0]?.id }
+      return { ...state, placements: [], selected: level.cats[0]?.id, hintCell: undefined }
     case 'place': {
       if (state.selected === undefined) return state
       const placements = [...state.placements, { catId: state.selected, x: action.x, y: action.y }]
       if (!arrangeCats(level, placements)) return state
-      return { ...state, placements, selected: level.cats[placements.length]?.id }
+      return { ...state, placements, selected: level.cats[placements.length]?.id, hintCell: undefined }
     }
     case 'start': {
       if (state.placements.length !== level.cats.length) return state
       const board = arrangeCats(level, state.placements)
       if (!board) return state
-      const next: PlanningState = { ...state, phase: 'running', frame: 0, result: resolvePlanning(board) }
+      const next: PlanningState = { ...state, phase: 'running', frame: 0, hintCell: undefined, result: resolvePlanning(board) }
       return next.result!.frames.length ? next : finish(next)
     }
     default: return state

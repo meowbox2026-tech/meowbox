@@ -51,6 +51,19 @@ describe('planning checkpoint retries', () => {
     expect(reduce(rewarded, { type: 'ad-undo' }).undoUses).toBe(2)
   })
 
+  it('reveals the next cat solution cell once and resets on restart', () => {
+    let state = freshPlanning(level)
+    expect(state.hintUses).toBe(1)
+    expect(state.hintCell).toBeUndefined()
+    const hinted = reduce(state, { type: 'hint' })
+    expect(hinted.hintUses).toBe(0)
+    expect(hinted.hintCell).toEqual(level.solution[0])
+    expect(reduce(hinted, { type: 'hint' })).toBe(hinted)
+    const placed = reduce(hinted, { type: 'place', x: level.solution[0].x, y: level.solution[0].y })
+    expect(placed.hintCell).toBeUndefined()
+    expect(reduce(placed, { type: 'restart' }).hintUses).toBe(1)
+  })
+
   it('keeps cleared progress and allows only surviving player cats to move', () => {
     const failed = interrupted()
     expect(failed.result?.remaining).toBe(6)
