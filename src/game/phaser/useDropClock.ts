@@ -10,7 +10,10 @@ export function useDropClock(running: boolean, durationSeconds = FIRST_LEVEL_SEC
   useEffect(() => {
     if (!running) return
     stamp.current = Date.now()
-    const timer = window.setInterval(() => setSecondsLeft(Math.ceil(read() / 1000)), 100)
+    const timer = window.setInterval(() => setSecondsLeft((current) => {
+      const next = Math.ceil(read() / 1000)
+      return current === next ? current : next
+    }), 250)
     return () => {
       remaining.current = read()
       stamp.current = undefined

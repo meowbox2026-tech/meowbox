@@ -161,11 +161,14 @@ export function useDropGame(
 
     const sequence: Frame[] = []
     let previous = currentState.board
-    sequence.push({ board: result.landed, previous, duration: 300, routedColumn: result.resolvedColumn, routed: result.routed, patrolMoved: result.patrolMoved })
+    const landingDuration = level.id >= 31 ? 180 : 300
+    const waveDuration = level.id >= 31 ? 240 : 380
+    const settleDuration = level.id >= 31 ? 180 : 300
+    sequence.push({ board: result.landed, previous, duration: landingDuration, routedColumn: result.resolvedColumn, routed: result.routed, patrolMoved: result.patrolMoved })
     previous = result.landed
     result.waves.forEach(wave => {
-      sequence.push({ board: wave.board, previous, wave, duration: 380 })
-      sequence.push({ board: wave.after, previous: wave.board, duration: 300 })
+      sequence.push({ board: wave.board, previous, wave, duration: waveDuration })
+      sequence.push({ board: wave.after, previous: wave.board, duration: settleDuration })
       previous = wave.after
     })
     callback.current(0)

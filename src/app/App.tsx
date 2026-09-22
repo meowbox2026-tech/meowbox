@@ -8,10 +8,9 @@ import { LevelSelectScreen } from './screens/LevelSelectScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { ShopScreen } from './screens/ShopScreen'
 import { LegalScreen } from './screens/LegalScreen'
+import { GameScreen } from './screens/GameScreen'
 import type { LegalDocumentId } from './legal/legalContent'
 import { usePlayer } from '../state/PlayerContext'
-
-const GameScreen = lazy(() => import('./screens/GameScreen').then((module) => ({ default: module.GameScreen })))
 
 type Screen = 'home' | 'levels' | 'game' | 'collection' | 'shop' | 'settings' | 'legal'
 
@@ -58,7 +57,7 @@ export function App() {
       <div className="app-stage">
       {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={setScreen} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
-      {screen === 'game' && <Suspense fallback={<div className="app-loading"><span>🐱</span><strong>{strings.app.organizingBox}</strong></div>}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} /></Suspense>}
+      {screen === 'game' && <GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} />}
       {screen === 'collection' && <CollectionScreen onBack={() => setScreen('home')} onShop={() => setScreen('shop')} />}
       {screen === 'shop' && <ShopScreen onBack={() => setScreen('home')} onToast={setToast} />}
       {screen === 'settings' && <SettingsScreen onBack={() => setScreen('home')} onToast={setToast} onLegal={openLegal} />}

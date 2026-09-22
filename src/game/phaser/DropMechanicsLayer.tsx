@@ -22,21 +22,29 @@ export function DropMechanicsLayer({ width, height, scratchPosts, fishTreats, tu
     {scratchPosts.filter((post) => post.hp > 0).map((post) => <span
       className={`drop-mechanic drop-mechanic--scratch${post.hp > 1 ? ' is-double' : ''}`}
       data-mechanic="scratch-post" data-hp={post.hp} key={post.id}
-      style={{ left: `${post.x / width * 100}%`, top: `${post.y / height * 100}%` }}
+      style={cellAnchor(post.x, post.y, width, height)}
     >🪵<small>{post.hp}</small></span>)}
     {fishTreats.map((treat) => <span
       className="drop-mechanic drop-mechanic--fish" data-mechanic="fish-treat" key={treat.id}
-      style={{ left: `${treat.x / width * 100}%`, top: `${treat.y / height * 100}%` }}
+      style={cellAnchor(treat.x, treat.y, width, height)}
     >🐟</span>)}
     {tunnels.map((tunnel) => <span className="drop-tunnel-route" data-tunnel-id={tunnel.id} key={tunnel.id}>
-      <i style={{ left: `${tunnel.entryColumn / width * 100}%` }}>↘</i>
-      <i style={{ left: `${tunnel.exitColumn / width * 100}%` }}>↗</i>
+      <i style={{ left: columnAnchor(tunnel.entryColumn, width) }}>↘</i>
+      <i style={{ left: columnAnchor(tunnel.exitColumn, width) }}>↗</i>
     </span>)}
     {blocked !== undefined && <span className="drop-patrol-block" data-mechanic="patrol" style={{ '--patrol-left': `${blocked / width * 100}%` } as CSSProperties}>🐾</span>}
-    {wave?.damagedScratchPosts.map((post) => <span className="drop-effect drop-effect--scratch" key={`hit-${post.id}`} style={{ left: `${post.x / width * 100}%`, top: `${post.y / height * 100}%` }}>{strings.game.tutorialScratchEffect}</span>)}
-    {wave?.collectedFishTreats.map((treat) => <span className="drop-effect drop-effect--fish" key={`eat-${treat.id}`} style={{ left: `${treat.x / width * 100}%`, top: `${treat.y / height * 100}%` }}>{strings.game.tutorialFishEffect}</span>)}
-    {wave?.traitEffects.map(({ cell, trait }, index) => <span className={`drop-effect drop-effect--trait-${trait}`} key={`trait-${cell.x}-${cell.y}-${index}`} style={{ left: `${cell.x / width * 100}%`, top: `${cell.y / height * 100}%` }}>{trait === 'scratch' ? strings.game.traitScratchEffect : strings.game.tutorialHungryEffect}</span>)}
-    {routed && routedColumn !== undefined && <span className="drop-effect drop-effect--tunnel" style={{ left: `${routedColumn / width * 100}%` }}>{strings.game.tutorialTunnelEffect}</span>}
+    {wave?.damagedScratchPosts.map((post) => <span className="drop-effect drop-effect--scratch" key={`hit-${post.id}`} style={cellAnchor(post.x, post.y, width, height)}>{strings.game.tutorialScratchEffect}</span>)}
+    {wave?.collectedFishTreats.map((treat) => <span className="drop-effect drop-effect--fish" key={`eat-${treat.id}`} style={cellAnchor(treat.x, treat.y, width, height)}>{strings.game.tutorialFishEffect}</span>)}
+    {wave?.traitEffects.map(({ cell, trait }, index) => <span className={`drop-effect drop-effect--trait-${trait}`} key={`trait-${cell.x}-${cell.y}-${index}`} style={cellAnchor(cell.x, cell.y, width, height)}>{trait === 'scratch' ? strings.game.traitScratchEffect : strings.game.tutorialHungryEffect}</span>)}
+    {routed && routedColumn !== undefined && <span className="drop-effect drop-effect--tunnel" style={{ left: columnAnchor(routedColumn, width) }}>{strings.game.tutorialTunnelEffect}</span>}
     {patrolMoved && <span className="drop-effect drop-effect--patrol">{strings.game.tutorialPatrolEffect}</span>}
   </div>
+}
+
+function cellAnchor(x: number, y: number, width: number, height: number): CSSProperties {
+  return { left: `${(x + .5) / width * 100}%`, top: `${(y + .5) / height * 100}%` }
+}
+
+function columnAnchor(column: number, width: number): string {
+  return `${(column + .5) / width * 100}%`
 }
