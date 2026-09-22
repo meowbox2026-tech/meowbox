@@ -1,4 +1,4 @@
-import { type CSSProperties } from 'react'
+import { memo, type CSSProperties } from 'react'
 import { getCatAssetPath } from '../data/catAssets'
 import { landingRow, type DropBoard as Board, type DropWave } from '../core/dropEngine'
 import { patrolColumn, resolveDropColumn } from '../core/dropRouting'
@@ -7,7 +7,7 @@ import { format, getDropCatName, useLocale, useStrings } from '../../i18n'
 import type { CatAsset } from '../types'
 import { DropMechanicsLayer } from './DropMechanicsLayer'
 
-export function DropBoard({ board, previous, current, paused, wave, hintColumn, terminal = false, onDrop, scratchPosts = [], fishTreats = [], tunnels = [], patrol, routedColumn, routed = false, patrolMoved = false }: {
+export const DropBoard = memo(function DropBoard({ board, previous, current, paused, wave, hintColumn, terminal = false, onDrop, scratchPosts = [], fishTreats = [], tunnels = [], patrol, routedColumn, routed = false, patrolMoved = false }: {
   board: Board; previous: Board; current: string; paused: boolean
   wave?: DropWave; hintColumn?: number; terminal?: boolean; onDrop: (column: number) => void
   scratchPosts?: ScratchPost[]; fishTreats?: FishTreat[]; tunnels?: CatTunnel[]; patrol?: DropPatrol
@@ -53,4 +53,4 @@ export function DropBoard({ board, previous, current, paused, wave, hintColumn, 
     </div>
     <div className="drop-box-label">MEOWBOX <span>{strings.game.boxTagline}</span></div>
   </div>
-}
+})

@@ -1,10 +1,10 @@
-import type { CSSProperties } from 'react'
+import { memo, type CSSProperties } from 'react'
 import { patrolColumn } from '../core/dropRouting'
 import type { DropWave } from '../core/dropEngine'
 import type { CatTunnel, DropPatrol, FishTreat, ScratchPost } from '../core/dropTypes'
 import { useStrings } from '../../i18n'
 
-export function DropMechanicsLayer({ width, height, scratchPosts, fishTreats, tunnels, patrol, wave, routedColumn, routed = false, patrolMoved = false }: {
+export const DropMechanicsLayer = memo(function DropMechanicsLayer({ width, height, scratchPosts, fishTreats, tunnels, patrol, wave, routedColumn, routed = false, patrolMoved = false }: {
   width: number
   height: number
   scratchPosts: ScratchPost[]
@@ -39,7 +39,7 @@ export function DropMechanicsLayer({ width, height, scratchPosts, fishTreats, tu
     {routed && routedColumn !== undefined && <span className="drop-effect drop-effect--tunnel" style={{ left: columnAnchor(routedColumn, width) }}>{strings.game.tutorialTunnelEffect}</span>}
     {patrolMoved && <span className="drop-effect drop-effect--patrol">{strings.game.tutorialPatrolEffect}</span>}
   </div>
-}
+})
 
 function cellAnchor(x: number, y: number, width: number, height: number): CSSProperties {
   return { left: `${(x + .5) / width * 100}%`, top: `${(y + .5) / height * 100}%` }

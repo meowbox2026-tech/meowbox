@@ -14,7 +14,7 @@
 .drop-effect--trait-hungry { background: #488c88dd; }
 .drop-effect--tunnel { top: 20%; left: 50%; background: #8365a8e6; }
 .drop-effect--patrol { top: 9%; left: 50%; background: #a94f68e8; }
-@keyframes drop-fish-bob { to { transform: translate(-50%, -3px) rotate(8deg); } }
+@keyframes drop-fish-bob { from { transform: translate(-50%, -50%) rotate(-8deg); } to { transform: translate(-50%, calc(-50% - 3px)) rotate(8deg); } }
 @keyframes drop-mechanic-pop { 0% { opacity: 0; transform: translate(-50%, 0) scale(.55) rotate(-8deg); } 25% { opacity: 1; transform: translate(-50%, -16px) scale(1.08) rotate(4deg); } 100% { opacity: 0; transform: translate(-50%, -39px) scale(.86) rotate(0); } }
 @media (prefers-reduced-motion: reduce) { .drop-mechanics * { animation: none !important; } }
 .drop-tutorial__demo { position: relative; display: grid; min-height: 92px; place-items: center; overflow: hidden; border: 2px dashed #d59b69; border-radius: 16px; background: linear-gradient(135deg, #fff8e8, #f6dfc4); }
