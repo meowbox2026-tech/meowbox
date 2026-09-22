@@ -45,4 +45,32 @@ describe('drop mechanic effects', () => {
     expect(container).toHaveTextContent('穿過去！')
     expect(container).toHaveTextContent('跑跑～')
   })
+
+  it('anchors every grid mechanic at the center of its cell', () => {
+    const { container } = render(<DropMechanicsLayer
+      width={4}
+      height={8}
+      scratchPosts={[{ id: 'post', x: 1, y: 2, hp: 1 }]}
+      fishTreats={[{ id: 'fish', x: 2, y: 3 }]}
+      tunnels={[{ id: 'tunnel', entryColumn: 0, exitColumn: 3 }]}
+      patrol={{ columns: [0, 2, 3], index: 1, dropsUntilMove: 1 }}
+      wave={wave}
+      routed
+      routedColumn={3}
+      patrolMoved
+    />)
+
+    const scratch = container.querySelector('[data-mechanic="scratch-post"]') as HTMLElement
+    const fish = container.querySelector('[data-mechanic="fish-treat"]') as HTMLElement
+    const tunnelEnds = [...container.querySelectorAll('.drop-tunnel-route i')] as HTMLElement[]
+    const effect = container.querySelector('.drop-effect--trait-scratch') as HTMLElement
+
+    expect(scratch.style.left).toBe('37.5%')
+    expect(scratch.style.top).toBe('31.25%')
+    expect(fish.style.left).toBe('62.5%')
+    expect(fish.style.top).toBe('43.75%')
+    expect(tunnelEnds.map((end) => end.style.left)).toEqual(['12.5%', '87.5%'])
+    expect(effect.style.left).toBe('37.5%')
+    expect(effect.style.top).toBe('31.25%')
+  })
 })

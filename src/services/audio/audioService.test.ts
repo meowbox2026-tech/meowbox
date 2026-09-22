@@ -40,7 +40,7 @@ describe('audio service', () => {
 
     expect(AudioMock).toHaveBeenCalledTimes(1)
     expect(AudioMock).toHaveBeenCalledWith(BACKGROUND_MUSIC_PATH)
-    expect(play).toHaveBeenCalledTimes(2)
+    expect(play).toHaveBeenCalledTimes(1)
     expect(pause).toHaveBeenCalledTimes(1)
   })
 
