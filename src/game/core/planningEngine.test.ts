@@ -113,6 +113,30 @@ describe('first planning puzzle', () => {
     expect(result.frames[2].clearing).toEqual([4, 5, 6])
   })
 
+  it('clears a crossing shape as one connected group', () => {
+    const board = Array.from({ length: 8 }, () => Array(8).fill(null))
+    board[2][3] = { id: 1, type: 'blue' }
+    board[3][3] = { id: 2, type: 'blue' }
+    board[4][3] = { id: 3, type: 'blue' }
+    board[3][2] = { id: 4, type: 'blue' }
+    board[3][4] = { id: 5, type: 'blue' }
+    const result = resolvePlanning(board)
+    expect(new Set(result.frames[0].clearing)).toEqual(new Set([1, 2, 3, 4, 5]))
+    expect(result.waves).toBe(1)
+  })
+
+  it('uses top-to-bottom then left-to-right order for groups made only of fixed cats', () => {
+    const board = Array.from({ length: 8 }, () => Array(8).fill(null))
+    board[1][0] = { id: 1, type: 'orange' }
+    board[1][1] = { id: 2, type: 'orange' }
+    board[1][2] = { id: 3, type: 'orange' }
+    board[0][5] = { id: 4, type: 'blue' }
+    board[0][6] = { id: 5, type: 'blue' }
+    board[0][7] = { id: 6, type: 'blue' }
+    const result = resolvePlanning(board)
+    expect(result.frames[0].clearing).toEqual([4, 5, 6])
+  })
+
   it('settles only columns touched by the cleared group', () => {
     const board = Array.from({ length: 8 }, () => Array(8).fill(null))
     board[5][0] = { id: 1, type: 'orange', placementOrder: 1 }

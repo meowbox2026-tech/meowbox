@@ -114,17 +114,13 @@ describe('8x8 planning level through the game entry point', () => {
     fireEvent.click(screen.getByRole('button', { name: '前往第 2 關' }))
     expect(next).toHaveBeenCalledWith(2)
   })
-  it('spends lives only after a full failed configuration and resets before the next try', () => {
+  it('spends lives immediately on a proven dead click and resets before the next try', () => {
     mount()
     const fail = () => {
-      fireEvent.click(cell(4, 5))
       fireEvent.click(cell(1, 1))
-      fireEvent.click(cell(1, 2))
-      start()
-      finish()
     }
     fail()
-    expect(screen.queryByRole('dialog', { name: '本次配置失敗' })).toBeNull()
+    expect(screen.queryByRole('dialog', { name: '點擊判定失敗' })).toBeNull()
     expect(screen.queryByRole('button', { name: /從中斷處修改/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /看廣告/ })).toBeNull()
     expect(screen.getByText('失敗 1 次')).toBeInTheDocument()
@@ -136,7 +132,7 @@ describe('8x8 planning level through the game entry point', () => {
     expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
 
     fail()
-    expect(screen.getByRole('dialog', { name: '本次配置失敗' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '點擊判定失敗' })).toBeInTheDocument()
     expect(screen.getByLabelText('生命 0')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /看廣告/ })).toBeNull()
   })

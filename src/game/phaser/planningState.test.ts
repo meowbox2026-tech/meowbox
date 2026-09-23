@@ -4,17 +4,10 @@ import { freshPlanning, planningReducer, type PlanningState } from './planningSt
 
 const reduce = (state: PlanningState, action: Parameters<typeof planningReducer>[1]) => planningReducer(state, action, level)
 
-function play(state: PlanningState): PlanningState {
-  state = reduce(state, { type: 'start' })
-  while (state.phase === 'running') state = reduce(state, { type: 'tick' })
-  return state
-}
-
 function failedAttempt(): PlanningState {
   let state = freshPlanning(level)
-  // Orange clears, but the two other cats are separated from its support.
-  for (const [x, y] of [[4, 3], [0, 0], [1, 0]]) state = reduce(state, { type: 'place', x, y })
-  return play(state)
+  // The first cat at (0, 0) is already proven to make the puzzle unsolvable.
+  return reduce(state, { type: 'place', x: 0, y: 0 })
 }
 
 describe('planning failure boundaries', () => {
@@ -26,10 +19,11 @@ describe('planning failure boundaries', () => {
 
     const skipped = reduce(state, { type: 'select', id: level.cats[2].id })
     expect(skipped).toBe(state)
-    state = reduce(state, { type: 'place', x: 0, y: 0 })
+    state = reduce(state, { type: 'place', x: level.solution[0].x, y: level.solution[0].y })
     expect(state.placements[0].catId).toBe(level.cats[0].id)
     expect(state.selected).toBe(level.cats[1].id)
-    state = reduce(state, { type: 'place', x: 1, y: 0 })
+    expect(state.lives).toBe(3)
+    state = reduce(state, { type: 'place', x: level.solution[1].x, y: level.solution[1].y })
 
     expect(reduce(state, { type: 'remove', id: level.cats[0].id })).toBe(state)
     const recalled = reduce(state, { type: 'remove', id: level.cats[1].id })
@@ -41,7 +35,7 @@ describe('planning failure boundaries', () => {
 
   it('allows one undo per configuration attempt without a failure-recovery ad action', () => {
     let state = freshPlanning(level)
-    state = reduce(state, { type: 'place', x: 0, y: 0 })
+    state = reduce(state, { type: 'place', x: level.solution[0].x, y: level.solution[0].y })
     const undone = reduce(state, { type: 'undo' })
     expect(undone.placements).toEqual([])
     expect(undone.selected).toBe(level.cats[0].id)
@@ -63,7 +57,7 @@ describe('planning failure boundaries', () => {
     expect(reduce(placed, { type: 'restart' }).hintUses).toBe(1)
   })
 
-  it('spends one life and resets the whole configuration after a failed attempt', () => {
+  it('spends one life immediately when a clicked placement is proven dead', () => {
     const failed = failedAttempt()
 
     expect(failed.phase).toBe('editing')
@@ -75,6 +69,7 @@ describe('planning failure boundaries', () => {
     expect(failed.undoUses).toBe(1)
     expect(failed.puzzle.cats).toEqual(level.cats)
     expect(failed.completedWaves).toBe(0)
+    expect(failed.failureReason).toBe('placement')
   })
 
   it('only opens the terminal failure state after all three lives are spent', () => {
@@ -86,14 +81,13 @@ describe('planning failure boundaries', () => {
     expect(state.phase).toBe('failed')
     expect(state.lives).toBe(0)
     expect(state.failures).toBe(3)
-    expect(state.placements).toHaveLength(level.cats.length)
-    expect(state.result?.remaining).toBe(6)
+    expect(state.placements).toEqual([])
+    expect(state.result).toBeUndefined()
+    expect(state.failureReason).toBe('placement')
     expect(reduce(state, { type: 'restart' })).toEqual(freshPlanning(level))
   })
 })
 
 function failedAttemptFrom(start: PlanningState): PlanningState {
-  let state = start
-  for (const [x, y] of [[4, 3], [0, 0], [1, 0]]) state = reduce(state, { type: 'place', x, y })
-  return play(state)
+  return reduce(start, { type: 'place', x: 0, y: 0 })
 }

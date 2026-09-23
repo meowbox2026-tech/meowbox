@@ -1,4 +1,7 @@
 import { arrangeCats, resolvePlanning, type Placement, type PlanningLevel, type PlanningResult } from '../core/planningEngine'
+import { canCompletePlanning, findSafePlacement, shouldValidatePlacementImmediately } from '../core/planningSolvability'
+
+export type PlanningFailureReason = 'placement' | 'resolution'
 
 export interface PlanningState {
   puzzle: PlanningLevel
@@ -13,6 +16,7 @@ export interface PlanningState {
   completedWaves: number
   frame: number
   result?: PlanningResult
+  failureReason?: PlanningFailureReason
 }
 export type PlanningAction = { type: 'select' | 'remove'; id: number } | { type: 'place'; x: number; y: number }
   | { type: 'undo' | 'clear' | 'hint' | 'start' | 'tick' | 'restart' }
@@ -24,17 +28,11 @@ export const freshPlanning = (level: PlanningLevel): PlanningState => ({
   lives: PLANNING_STARTING_LIVES, failures: 0, undoUses: 1, hintUses: 1, completedWaves: 0, frame: 0
 })
 
-function finish(state: PlanningState): PlanningState {
-  const won = state.result?.remaining === 0
-  if (won) return { ...state, phase: 'completed' }
-
+function spendLife(state: PlanningState, failureReason: PlanningFailureReason): PlanningState {
   const lives = Math.max(0, state.lives - 1)
   const failures = state.failures + 1
-  if (lives === 0) return { ...state, phase: 'failed', lives, failures }
-
-  return {
+  const reset = {
     ...state,
-    phase: 'editing',
     lives,
     failures,
     placements: [],
@@ -43,8 +41,17 @@ function finish(state: PlanningState): PlanningState {
     hintCell: undefined,
     completedWaves: 0,
     frame: 0,
-    result: undefined
+    result: undefined,
+    failureReason
   }
+  if (lives === 0 && failureReason === 'resolution') return { ...state, phase: 'failed', lives, failures, failureReason }
+  if (lives === 0) return { ...reset, phase: 'failed' }
+  return { ...reset, phase: 'editing' }
+}
+
+function finish(state: PlanningState): PlanningState {
+  const won = state.result?.remaining === 0
+  return won ? { ...state, phase: 'completed', failureReason: undefined } : spendLife(state, 'resolution')
 }
 
 export function planningReducer(state: PlanningState, action: PlanningAction, original: PlanningLevel): PlanningState {
@@ -59,28 +66,33 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
       return state
     case 'hint': {
       if (state.hintUses <= 0 || state.selected === undefined) return state
-      const hintCell = level.solution.find(item => item.catId === state.selected)
+      const hintCell = shouldValidatePlacementImmediately(level)
+        ? findSafePlacement(level, state.placements)
+        : level.solution.find(item => item.catId === state.selected)
       return hintCell ? { ...state, hintUses: state.hintUses - 1, hintCell: { ...hintCell } } : state
     }
     case 'remove':
       return state.undoUses > 0 && state.placements.at(-1)?.catId === action.id
-        ? { ...state, placements: state.placements.slice(0, -1), selected: action.id, undoUses: state.undoUses - 1, hintCell: undefined } : state
+        ? { ...state, placements: state.placements.slice(0, -1), selected: action.id, undoUses: state.undoUses - 1, hintCell: undefined, failureReason: undefined } : state
     case 'undo':
       return state.undoUses > 0 && state.placements.length
-        ? { ...state, selected: state.placements.at(-1)!.catId, placements: state.placements.slice(0, -1), undoUses: state.undoUses - 1, hintCell: undefined } : state
+        ? { ...state, selected: state.placements.at(-1)!.catId, placements: state.placements.slice(0, -1), undoUses: state.undoUses - 1, hintCell: undefined, failureReason: undefined } : state
     case 'clear':
-      return { ...state, placements: [], selected: level.cats[0]?.id, hintCell: undefined }
+      return { ...state, placements: [], selected: level.cats[0]?.id, hintCell: undefined, failureReason: undefined }
     case 'place': {
       if (state.selected === undefined) return state
       const placements = [...state.placements, { catId: state.selected, x: action.x, y: action.y }]
       if (!arrangeCats(level, placements)) return state
-      return { ...state, placements, selected: level.cats[placements.length]?.id, hintCell: undefined }
+      if (shouldValidatePlacementImmediately(level) && !canCompletePlanning(level, placements)) {
+        return spendLife(state, 'placement')
+      }
+      return { ...state, placements, selected: level.cats[placements.length]?.id, hintCell: undefined, failureReason: undefined }
     }
     case 'start': {
       if (state.placements.length !== level.cats.length) return state
       const board = arrangeCats(level, state.placements)
       if (!board) return state
-      const next: PlanningState = { ...state, phase: 'running', frame: 0, hintCell: undefined, result: resolvePlanning(board) }
+      const next: PlanningState = { ...state, phase: 'running', frame: 0, hintCell: undefined, failureReason: undefined, result: resolvePlanning(board) }
       return next.result!.frames.length ? next : finish(next)
     }
     default: return state

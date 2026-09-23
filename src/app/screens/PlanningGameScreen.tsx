@@ -39,6 +39,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
+  const placementFailure = state.failureReason === 'placement'
   useEffect(() => {
     if (paused || rules || tutorial.open || hidden || state.phase === 'completed' || state.phase === 'failed') stopBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
@@ -91,7 +92,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
           if (!cat) return []
           const order = state.placements.findIndex(p => p.catId === cat.id)
           const canTakeBack = editing && state.undoUses > 0 && order >= 0 && order === state.placements.length - 1
-          const content = <><img src={getCatAssetPath(cat.type as CatAsset)} alt="" />{editing && order >= 0 && <b>{order + 1}</b>}</>
+          const content = <><img src={getCatAssetPath(cat.type as CatAsset)} alt="" />{order >= 0 && <b>{order + 1}</b>}</>
           const style = { left: `${x * 12.5}%`, top: `${y * 12.5}%` }
           const className = `planning-cat${clearing.includes(cat.id) ? ' is-clearing' : ''}${order >= 0 ? ' is-added' : ''}`
           return canTakeBack
@@ -103,7 +104,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       </div>
       <div className="planning-box__label">MEOWBOX <span>8 × 8</span></div>
     </div>
-    {editing && state.failures > 0 && state.placements.length === 0 && <p className="planning-life-status" role="status">{text.retryNotice(state.lives)}</p>}
+    {editing && state.failures > 0 && state.placements.length === 0 && <p className="planning-life-status" role="status">{placementFailure ? text.placementRetryNotice(state.lives) : text.retryNotice(state.lives)}</p>}
     <div className="planning-edit-actions">
       <button disabled={locked || !state.placements.length || state.undoUses <= 0} onClick={() => dispatch({ type: 'undo' })}>{text.undo} <span className="planning-undo-count">{state.undoUses}</span></button>
       <button disabled={locked || state.hintUses <= 0 || state.selected === undefined} onClick={() => dispatch({ type: 'hint' })}>{text.useHint} <span className="planning-undo-count">{state.hintUses}</span></button>
@@ -117,9 +118,9 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       <h2>{text.rulesTitle}</h2><ol>{[text.rule1, text.rule2, text.rule3, text.rule4(totalCats), text.rule5].map(rule => <li key={rule}>{rule}</li>)}</ol>
       <AppButton onClick={() => setRules(false)}>{text.close}</AppButton>
     </Modal>
-    <Modal open={state.phase === 'failed' && !paused} ariaLabel={text.failed} className="drop-result">
-      <img src={getCatAssetPath('sleeping')} alt="" /><h2>{text.failed}</h2>
-      <p>{text.wave} {wave} · {text.remaining} {state.result?.remaining} {text.cats}<br />{text.failedTip}</p>
+    <Modal open={state.phase === 'failed' && !paused} ariaLabel={placementFailure ? text.placementFailed : text.failed} className="drop-result">
+      <img src={getCatAssetPath('sleeping')} alt="" /><h2>{placementFailure ? text.placementFailed : text.failed}</h2>
+      <p>{state.result ? <>{text.wave} {wave} · {text.remaining} {state.result.remaining} {text.cats}<br /></> : null}{placementFailure ? text.placementFailedTip : text.failedTip}</p>
       <AppButton variant="cream" onClick={restart}>{text.restart}</AppButton>
       <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>
     </Modal>

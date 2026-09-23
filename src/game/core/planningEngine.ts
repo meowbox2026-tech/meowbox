@@ -70,16 +70,20 @@ function findDropMatchGroups(board: DropBoard): MatchGroup[] {
 }
 
 function chooseMatchGroup(groups: MatchGroup[], board: DropBoard): MatchGroup {
+  // A placed cat's number is the public priority. Fixed cats have no number,
+  // so their only tie-break is the visible top-to-bottom, left-to-right anchor.
   return [...groups].sort((left, right) => {
-    const leftPriority = groupPriority(left, board)
-    const rightPriority = groupPriority(right, board)
-    return leftPriority - rightPriority
+    const leftKey = groupSortKey(left, board)
+    const rightKey = groupSortKey(right, board)
+    return leftKey.priority - rightKey.priority || leftKey.y - rightKey.y || leftKey.x - rightKey.x
   })[0]
 }
 
-function groupPriority(group: MatchGroup, board: DropBoard): number {
-  return Math.min(...group.cells.map(({ x, y }) => {
+function groupSortKey(group: MatchGroup, board: DropBoard): { priority: number; y: number; x: number } {
+  const priority = Math.min(...group.cells.map(({ x, y }) => {
     const order = board[y][x]?.placementOrder
     return order ?? Number.MAX_SAFE_INTEGER
   }))
+  const anchor = group.cells[0]
+  return { priority, y: anchor.y, x: anchor.x }
 }
