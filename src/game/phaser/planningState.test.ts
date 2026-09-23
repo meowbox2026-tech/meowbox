@@ -53,16 +53,18 @@ describe('planning failure boundaries', () => {
     expect(reduce(undone, { type: 'remove', id: level.cats[0].id })).toBe(undone)
   })
 
-  it('reveals the next authored solution cell once and resets on restart', () => {
+  it('auto-places the next cat at the authored solution cell once and resets on restart', () => {
     let state = freshPlanning(level)
     expect(state.hintUses).toBe(1)
     expect(state.hintCell).toBeUndefined()
     const hinted = reduce(state, { type: 'hint' })
     expect(hinted.hintUses).toBe(0)
+    expect(hinted.placements).toEqual([level.solution[0]])
+    expect(hinted.selected).toBe(level.cats[1].id)
     expect(hinted.hintCell).toEqual(level.solution[0])
     expect(reduce(hinted, { type: 'hint' })).toBe(hinted)
     const placed = reduce(hinted, { type: 'place', x: level.solution[0].x, y: level.solution[0].y })
-    expect(placed.hintCell).toBeUndefined()
+    expect(placed).toBe(hinted)
     expect(reduce(placed, { type: 'restart' }).hintUses).toBe(1)
   })
 
@@ -74,6 +76,8 @@ describe('planning failure boundaries', () => {
     state = reduce(state, { type: 'hint-result', hintCell: level.solution[0] })
     expect(state.pendingHint).toBe(false)
     expect(state.hintUses).toBe(0)
+    expect(state.placements).toEqual([level.solution[0]])
+    expect(state.selected).toBe(level.cats[1].id)
     expect(state.hintCell).toEqual(level.solution[0])
   })
 

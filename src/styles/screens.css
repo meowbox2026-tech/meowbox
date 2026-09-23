@@ -1,7 +1,5 @@
 .screen--home { background-image: url('/assets/bg-main.webp'); }
 .screen--levels { background-image: url('/assets/bg-main.webp'); }
-.screen--collection { background-image: url('/assets/bg-main.webp'); }
-.screen--shop { background-image: url('/assets/bg-main.webp'); }
 .screen--settings { background-image: url('/assets/bg-main.webp'); }
 
 .screen--home .top-bar { justify-content: flex-start; }
@@ -12,41 +10,20 @@
 .home-start { display: flex; width: min(86%, 375px); min-height: 72px; margin: 10px auto 0; border-radius: 26px; font-size: clamp(23px, 7vw, 32px); } .home-start .app-button__icon { display: none; } .home-start b { margin-left: 3px; font-size: .7em; }
 .home-nav { position: absolute; right: 8%; bottom: calc(env(safe-area-inset-bottom) + 26px); left: 8%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .home-nav .app-button { min-width: 0; min-height: 86px; flex-direction: column; padding: 6px 3px; border-radius: 19px; font-size: clamp(12px,3.5vw,16px); } .home-nav .app-button__icon { width: 42px; height: 42px; } .home-footer { position: absolute; right: 0; bottom: calc(env(safe-area-inset-bottom) + 132px); left: 0; margin: 0; color: #75452f; font-size: 12px; font-weight: 800; text-align: center; text-shadow: 0 1px 0 #ffe8c9; }
 
-.screen--collection, .screen--shop, .screen--settings { height: 100%; overflow-y: auto; scrollbar-width: none; }
-.screen--collection::-webkit-scrollbar, .screen--shop::-webkit-scrollbar, .screen--settings::-webkit-scrollbar { display: none; }
-.collection-feature { display: grid; grid-template-columns: .87fr 1.13fr; align-items: center; gap: 10px; max-width: 440px; margin: 4px auto 11px; padding: 17px 12px; border: 2px solid #d0a57d; border-radius: 23px; background: rgba(255,247,232,.88); } .collection-feature > .cat-portrait { justify-self: center; transform: scale(.94); } .collection-feature__detail h2 { margin: 0 0 7px; font-size: clamp(20px,5.5vw,28px); } .collection-feature__detail p { margin: 0 0 10px; color: #9b6547; font-size: 12px; font-weight: 700; line-height: 1.45; } .collection-feature__detail .app-button { min-height: 41px; padding: 6px 12px; font-size: 14px; }
-.collection-tabs, .shop-tabs { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 440px; margin: 0 auto 9px; overflow: hidden; border: 2px solid #d4aa87; border-radius: 15px; background: rgba(255,247,236,.9); } .collection-tabs button, .shop-tabs button { min-height: 47px; border: 0; border-right: 1px solid #dec0a7; color: #71432e; font-weight: 900; background: transparent; cursor: pointer; } .collection-tabs button:last-child, .shop-tabs button:last-child { border: 0; } .collection-tabs .is-active, .shop-tabs .is-active { color: #6c452a; background: linear-gradient(180deg,#fff580,#ffc949); box-shadow: inset 0 -4px 0 #ed9a37; }
-.skin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; max-width: 440px; margin: 0 auto; padding: 10px; border: 2px solid #d6ab86; border-radius: 22px; background: rgba(255,246,232,.9); } .skin-card { display: grid; min-height: 116px; place-items: center; align-content: center; gap: 3px; padding: 6px 2px; border: 2px solid #efd1b5; border-radius: 15px; color: #70432f; background: #fffaf1; cursor: pointer; } .skin-card .cat-portrait { transform: scale(.82); } .skin-card strong { font-size: 12px; } .skin-card small { color: #a1663f; font-size: 10px; font-weight: 800; } .skin-card.is-selected { border-color: #69b93c; box-shadow: 0 0 0 2px #d8f692; } .skin-card.is-locked { background: #f0e4d8; filter: saturate(.8); } .skin-card--mystery { cursor: default; background: #d2bfaf; } .skin-card--mystery span { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 50%; color: #fff; font-size: 29px; background: #745849; }
-.collection-note { max-width: 400px; margin: 13px auto 5px; padding: 11px; border: 2px solid #eb9baa; border-radius: 16px; color: #c65e75; font-size: 13px; font-weight: 900; text-align: center; background: rgba(255,213,219,.94); }
 
-.shop-section { max-width: 440px; margin: 0 auto 12px; padding: 14px 10px; border: 2px solid #d1a57f; border-radius: 22px; background: rgba(255,247,234,.91); } .shop-section__heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 4px 9px; } .shop-section h2 { margin: 0; font-size: 23px; } .shop-section__heading span { color: #a96f50; font-size: 10px; font-weight: 800; text-align: right; }
-.coin-pack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; } .coin-pack { display: grid; min-height: 137px; place-items: center; align-content: center; gap: 5px; padding: 6px 3px; border: 2px solid #eccaa9; border-radius: 14px; background: #fffaf0; } .coin-pack > span { font-size: 34px; } .coin-pack strong { font-size: 14px; } .coin-pack .app-button { min-height: 35px; padding: 5px 4px; border-radius: 12px; font-size: 10px; } .shop-disclaimer { margin: 10px 3px 0; color: #a36b50; font-size: 10px; line-height: 1.4; }
-.shop-item-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; } .shop-item { display: grid; min-height: 148px; place-items: center; align-content: center; gap: 6px; padding: 7px 3px; border: 2px solid #eccaa9; border-radius: 15px; background: #fffaf0; } .shop-item .cat-portrait { transform: scale(.87); } .shop-item strong { font-size: 12px; } .shop-item .app-button { min-height: 34px; padding: 4px 5px; border-radius: 11px; font-size: 10px; } .box-swatch { display: grid; width: 58px; height: 47px; place-items: center; border: 2px solid #9b633b; border-radius: 8px; font-size: 30px; background: #d9a266; } .box-swatch--strawberry { background: #ffb3c6; } .box-swatch--night { background: #53699d; } .box-swatch--garden { background: #a8c797; }
-.remove-ads { display: flex; max-width: 440px; align-items: center; gap: 10px; margin: 0 auto 12px; padding: 10px; border: 2px solid #eaa0ad; border-radius: 19px; color: #9a344e; background: rgba(255,213,218,.91); } .remove-ads .cat-portrait { flex: 0 0 auto; transform: scale(.9); } .remove-ads div { display: grid; flex: 1; gap: 3px; } .remove-ads strong { font-size: 18px; } .remove-ads small { font-size: 10px; font-weight: 700; } .remove-ads .app-button { min-height: 39px; padding: 6px 8px; font-size: 13px; }
+.screen--settings { height: 100%; overflow-y: auto; scrollbar-width: none; }
+.screen--settings::-webkit-scrollbar { display: none; }
 
 .settings-card { max-width: 440px; margin: 2px auto 12px; padding: 7px 14px 14px; border: 3px solid #d1a47e; border-radius: 25px; background: rgba(255,249,239,.91); box-shadow: inset 0 2px 0 white, 0 5px 0 rgba(103,52,25,.18); }
 .settings-language { display: grid; grid-template-columns: 40px .8fr 2fr; min-height: 70px; align-items: center; gap: 6px; border-bottom: 1px solid #e2b993; } .settings-language > span { font-size: 29px; } .settings-language strong { font-size: 17px; } .settings-language div { display: flex; overflow: hidden; border: 1px solid #d3a77e; border-radius: 12px; } .settings-language button { min-height: 34px; flex: 1; border: 0; border-right: 1px solid #ddb99b; color: #8a5b43; font-size: 10px; font-weight: 800; background: transparent; } .settings-language button:last-child { border: 0; } .settings-language .is-active { color: #684128; background: #ffe181; }
 .settings-link { display: grid; grid-template-columns: 40px 1fr 22px; width: 100%; min-height: 54px; align-items: center; gap: 7px; border: 0; border-bottom: 1px solid #e2b993; color: #703e2e; text-align: left; background: transparent; cursor: pointer; } .settings-link span { font-size: 23px; } .settings-link strong { font-size: 17px; } .settings-link b { color: #c0825c; font-size: 35px; font-weight: 500; }
 .settings-home { display: flex; width: min(80%, 300px); min-height: 50px; margin: 0 auto; }
 
-/* Shop tabs and packs keep the supplied coin, collection, and gift artwork visible. */
-.shop-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-family: var(--font-cute); }
-.shop-tabs button img { width: 30px; height: 30px; object-fit: contain; }
-.shop-section__heading h2 { display: inline-flex; align-items: center; gap: 5px; }
-.shop-section__heading h2 img { width: 29px; height: 29px; object-fit: contain; }
-.coin-pack { min-height: 157px; }
-.coin-pack__art { width: 56px; height: 56px; object-fit: contain; }
-.coin-pack small { color: #a36b50; font-size: 9px; font-weight: 800; }
-.shop-item .app-button__icon { width: 18px; height: 18px; }
-
-.daily-modal__gift { display: block; font-size: 58px; } .daily-modal h2 { color: #8b3d55; } .daily-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; padding: 8px 3px; border: 2px solid #f0c795; border-radius: 13px; background: #fffaf1; } .daily-days div { display: grid; min-height: 72px; place-items: center; align-content: center; gap: 2px; border-radius: 9px; color: #9b745f; } .daily-days .is-today { color: #75412e; background: #ffdf6b; box-shadow: 0 0 0 2px #e99c45; } .daily-days .is-done { opacity: .62; } .daily-days small { font-size: 8px; font-weight: 800; } .daily-days strong { font-size: 22px; } .daily-days em { font-size: 10px; font-style: normal; font-weight: 900; } .daily-modal__current { padding: 8px; border-radius: 10px; background: rgba(255,217,105,.35); }
-
 @media (max-height: 760px) {
   .home-brand { margin-top: 55px; transform: scale(.9); transform-origin: top center; margin-bottom: -6px; }
   .home-nav .app-button { min-height: 71px; }
   .home-footer { bottom: 112px; }
   .screen-title { margin-top: 4px; padding-block: 11px; }
-  .skin-card { min-height: 101px; }
 }
 
 /* The home screen now uses the supplied logo, progress card, and button art. */

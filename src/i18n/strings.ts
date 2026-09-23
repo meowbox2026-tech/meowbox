@@ -2,8 +2,6 @@ export interface Strings {
   app: {
     openingBox: string
     organizingBox: string
-    hintClaimed: string
-    coinClaimed: string
     title: string
   }
   topbar: {
@@ -40,8 +38,6 @@ export interface Strings {
     soundLabel: string
     hapticsLabel: string
     language: string
-    restore: string
-    restoreToast: string
     about: string
     aboutToast: string
     backHome: string
@@ -50,46 +46,12 @@ export interface Strings {
     support: string
   }
   legal: { backToSettings: string; emailCta: string }
-  shop: {
+  ads: {
+    dialogAria: string
     title: string
-    subtitle: string
-    coinsTab: string
-    catsTab: string
-    boxesTab: string
-    coinsHeading: string
-    coinsDesc: string
-    claim: string
-    testClaimed: string
-    disclaimer: string
-    catsHeading: string
-    catsDesc: string
-    use: string
-    using: string
-    boxesHeading: string
-    boxesDesc: string
-    newCat: string
-    notEnough: string
-    newBox: string
-    removeAdsTitle: string
-    removeAdsDesc: string
-    removeAdsToast: string
-  }
-  collection: {
-    title: string
-    subtitle: string
-    gridLabel: string
-    companionUnlocked: string
-    unlockPrice: string
-    useCat: string
-    goShop: string
-    using: string
-    unlocked: string
-    catsTab: string
-    boxesTab: string
-    specialTab: string
-    mysteryName: string
-    mysteryHint: string
-    note: string
+    description: string
+    remaining: string
+    ready: string
   }
   game: {
     rescue: string
@@ -116,7 +78,6 @@ export interface Strings {
     actions: string
     howTo: string
     hintUsed: string
-    hintAd: string
     replay: string
     rulesAria: string
     rulesTitle: string
@@ -134,7 +95,6 @@ export interface Strings {
     starsAria: string
     summary: string
     summaryLine2: string
-    reward: string
     nextLevel: string
     playAgain: string
     backToLevels: string
@@ -149,8 +109,6 @@ export interface Strings {
     otherTip: string
     retry: string
     backCottage: string
-    hintTitle: string
-    hintDesc: string
     comboSuccess: string
     combo: string
     matchCombo: string
@@ -187,47 +145,6 @@ export interface Strings {
     restart: string
     home: string
     settings: string
-  }
-  result: {
-    dialogAria: string
-    title: string
-    starsAria: string
-    perfect: string
-    good: string
-    rewards: string
-    rewardLabel: string
-    claim: string
-    claimed: string
-    claimedLabel: string
-    double: string
-    doubleClaimedLabel: string
-    levelNav: string
-    next: string
-    replay: string
-    nav: string
-  }
-  daily: {
-    giftAlt: string
-    title: string
-    desc: string
-    today: string
-    claim: string
-    watchAd: string
-    loading: string
-    tomorrow: string
-    gotIt: string
-    day: string
-    hintReward: string
-    coinReward: string
-  }
-  rewarded: {
-    testMode: string
-    watchAndClaim: string
-    loadingClaim: string
-    later: string
-    incomplete: string
-    unavailable: string
-    watchAlt: string
   }
   tray: { label: string; placed: string }
   match3: { board: string; empty: string; cell: string }

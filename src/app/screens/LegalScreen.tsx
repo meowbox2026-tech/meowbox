@@ -16,7 +16,7 @@ export function LegalScreen({ documentId, onBack }: LegalScreenProps) {
 
   return (
     <main className="screen screen--legal">
-      <TopBar coins={0} onBack={onBack} />
+      <TopBar onBack={onBack} />
       <ScreenTitle title={document.title} subtitle={document.subtitle} />
       <article className="legal-card">
         {document.sections.map((section) => (

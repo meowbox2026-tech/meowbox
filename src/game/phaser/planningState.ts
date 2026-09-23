@@ -49,6 +49,21 @@ function finish(state: PlanningState): PlanningState {
   return won ? { ...state, phase: 'completed', failureReason: undefined } : resetAfterFailure(state)
 }
 
+function applyHintPlacement(state: PlanningState, hintCell: Placement): PlanningState {
+  if (state.hintUses <= 0 || state.selected !== hintCell.catId) return { ...state, pendingHint: false }
+  const placements = [...state.placements, { ...hintCell }]
+  if (!arrangeCats(state.puzzle, placements)) return { ...state, pendingHint: false }
+  return {
+    ...state,
+    placements,
+    selected: state.puzzle.cats[placements.length]?.id,
+    pendingHint: false,
+    hintUses: state.hintUses - 1,
+    hintCell: { ...hintCell },
+    failureReason: undefined
+  }
+}
+
 export function planningReducer(state: PlanningState, action: PlanningAction, original: PlanningLevel): PlanningState {
   if (action.type === 'restart') return freshPlanning(original)
   if (action.type === 'tick' && state.phase === 'running') {
@@ -63,7 +78,7 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
       if (state.pendingHint) return state
       if (state.hintUses <= 0 || state.selected === undefined) return state
       const hintCell = findSafePlacement(level, state.placements)
-      return hintCell ? { ...state, hintUses: state.hintUses - 1, hintCell: { ...hintCell } } : state
+      return hintCell ? applyHintPlacement(state, hintCell) : state
     }
     case 'hint-pending':
       return state.pendingHint || state.hintUses <= 0 || state.selected === undefined
@@ -71,9 +86,7 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
         : { ...state, pendingHint: true, hintCell: undefined }
     case 'hint-result':
       if (!state.pendingHint) return state
-      return action.hintCell
-        ? { ...state, pendingHint: false, hintUses: state.hintUses - 1, hintCell: { ...action.hintCell } }
-        : { ...state, pendingHint: false }
+      return action.hintCell ? applyHintPlacement(state, action.hintCell) : { ...state, pendingHint: false }
     case 'remove':
       if (state.pendingHint) return state
       return state.undoUses > 0 && state.placements.at(-1)?.catId === action.id

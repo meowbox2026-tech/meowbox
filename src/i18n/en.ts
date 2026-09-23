@@ -4,16 +4,14 @@ export const en: Strings = {
   app: {
     openingBox: 'Opening the box…',
     organizingBox: 'Tidying the box…',
-    hintClaimed: 'Claimed hints ×{amount}',
-    coinClaimed: 'Claimed 🐾 {amount}',
-    title: 'MEOW BOX｜Cat Drop Puzzle'
+    title: 'MEOW BOX｜Cat Packing Puzzle'
   },
   topbar: {
     back: 'Back', settings: 'Settings', pause: 'Pause', level: 'Level',
     levelAria: 'Level {level}', starsAria: '{stars} stars', moves: 'Moves'
   },
   home: {
-    brandSub: 'Cat Drop Puzzle', brandAria: 'Meow Box Cat Drop Puzzle',
+    brandSub: 'Cat Packing Puzzle', brandAria: 'Meow Box Cat Packing Puzzle',
     progress: 'Progress', progressAria: 'Progress, level {level}',
     collected: 'Collected {count} stars', start: 'Start Game', levels: 'Levels', mainNav: 'Main menu'
   },
@@ -24,32 +22,13 @@ export const en: Strings = {
   settings: {
     title: 'Settings', subtitle: 'Make every play session just right!',
     musicLabel: 'Music', soundLabel: 'Sound', hapticsLabel: 'Haptics',
-    language: 'Language', restore: 'Restore Purchases',
-    restoreToast: 'Native restore is reserved; connect your store product IDs.',
+    language: 'Language',
     about: 'About', aboutToast: 'Meow Box Cat Packing Puzzle, version 1.0.0.',
     backHome: '⌂　Back Home', privacy: 'Privacy Policy', terms: 'Terms of Service', support: 'Support'
   },
   legal: { backToSettings: '‹　Back to Settings', emailCta: 'Email Support' },
-  shop: {
-    title: 'Shop', subtitle: 'More cute cats, more happy days!',
-    coinsTab: 'Coins', catsTab: 'Cats', boxesTab: 'Boxes',
-    coinsHeading: 'Paw Coins', coinsDesc: 'Coins unlock more cute styles!',
-    claim: 'Claim', testClaimed: 'Test shop: added {amount} Paw Coins',
-    disclaimer: 'At launch, these buttons will use the App Store / Google Play secure payment flow.',
-    catsHeading: 'Cat Styles', catsDesc: 'Collect every unique cat!',
-    use: 'Use', using: 'In use', boxesHeading: 'Box Styles', boxesDesc: 'Make a cozier home for your cats!',
-    newCat: 'A new cat joined your collection!', notEnough: 'Not enough Paw Coins—clear more levels!',
-    newBox: 'New box style equipped!', removeAdsTitle: 'Remove Ads',
-    removeAdsDesc: 'Enjoy a smoother, happier puzzle time!',
-    removeAdsToast: 'The release build will use the native store with Restore Purchases.'
-  },
-  collection: {
-    title: 'Cat Collection', subtitle: 'Collect more cats, gather more happiness!', gridLabel: 'Cat style collection',
-    companionUnlocked: 'A warm, healing companion—your daily little joy ♡',
-    unlockPrice: 'Needs {price} Paw Coins to unlock', useCat: 'Use this cat', goShop: 'Go to Shop',
-    using: 'In use', unlocked: 'Unlocked', catsTab: '🐱 Cats', boxesTab: '📦 Boxes',
-    specialTab: '★ Special', mysteryName: 'Mystery Cat', mysteryHint: 'Unlocks at Lv.50',
-    note: '🐾 Keep playing to unlock more cute cats!'
+  ads: {
+    dialogAria: 'Advertisement playing', title: 'Advertisement playing', description: 'Please wait for the ad to finish before returning to the game.', remaining: '{seconds}s remaining', ready: 'The ad is ending'
   },
   game: {
     rescue: 'Rescued {done} / {target}', statusLabel: 'Level status', timeLeft: 'Time note',
@@ -57,7 +36,7 @@ export const en: Strings = {
     nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', soonAlt: 'Soon: {name}', laterAlt: 'Later: {name}', traitScratch: 'Scratch', traitHungry: 'Hungry', board: 'Cat box',
     columnAction: 'Column {col}, drop {name}', ceilingDanger: '⚠ Careful! Almost at the top',
     ceilingSafe: 'Stay below this line', boxTagline: '♡ a box of happiness', actions: 'Game actions',
-    howTo: '? How to Play', hintUsed: 'Hint used this round', hintAd: '▶ Ad Hint', replay: '↻ Retry',
+    howTo: '? How to Play', hintUsed: 'Hint used this round', replay: '↻ Retry',
     rulesAria: 'How to play Cat Drop', rulesTitle: 'Tap, drop, meow!',
     rule1Title: 'Pick a column', rule1Desc: 'The NOW cat falls to the lowest empty slot. NEXT is up after that.',
     rule2Title: 'Match 3 of a kind', rule2Desc: 'Horizontal, vertical, or either diagonal—3 or more in a row clears.',
@@ -65,15 +44,14 @@ export const en: Strings = {
     rule4Title: 'Watch the top', rule4Desc: 'If any cat still fills the top row after clears and drops, you fail.',
     rulesCta: 'Got it, let’s play!', completedAria: 'Level complete!', completedTitle: 'Level {id} complete!',
     starsAria: '{stars} stars', summary: 'Rescued {cleared} · {score} pts',
-    summaryLine2: 'Best Combo ×{best} · {moves} drops', reward: '🐾 {amount} Paw Coins saved',
+    summaryLine2: 'Best Combo ×{best} · {moves} drops',
     nextLevel: 'Next: {id}', playAgain: 'Play again for a high score', backToLevels: 'Back to Levels',
     partyDone: 'The captain’s party is complete ♡', nextHappiness: 'The next box of happiness awaits ♡',
     failedCeilingAria: 'Box is full', failedGenericAria: 'Challenge over',
     failedCeilingTitle: 'Oh no, the box is full!',
     failedTimeTitle: 'Time’s up—take a breather, meow!', failedProgress: 'Rescued {cleared} / {target} cats.',
     ceilingTip: 'Try spreading stacks to leave more room.', otherTip: 'Look for lines of three—your cats are waiting.',
-    retry: 'Try again, meow', backCottage: 'Back to Cottage', hintTitle: 'Let a cat take a peek',
-    hintDesc: 'After watching, a safer column is marked. Once per round.',
+    retry: 'Try again, meow', backCottage: 'Back to Cottage',
     comboSuccess: 'Meow! Matched', combo: 'COMBO ×{count}', matchCombo: 'Meow ×{count}',
     objectivesLabel: 'Level objectives', objectiveRescue: 'Rescue {done}/{target}', objectiveScratch: 'Scratch posts {done}/{target}', objectiveFish: 'Fish treats {done}/{target}',
     patrolCounter: 'Patrol moves in {count}', patrolNext: 'Next blocked lane: {column}', holdLabel: 'Cat teaser hold', holdEmpty: 'Empty hold', holdStored: 'Stored {name}', holdAction: 'Hold',
@@ -84,25 +62,6 @@ export const en: Strings = {
   pause: {
     dialogAria: 'Pause menu', pausedAlt: 'Game paused', title: 'Paused', close: 'Close pause menu',
     continue: 'Continue', restart: 'Restart Level', home: 'Back Home', settings: 'Settings'
-  },
-  result: {
-    dialogAria: 'Level complete!', title: 'Level Complete!', starsAria: '{stars} stars',
-    perfect: 'Purr-fect!', good: 'Nicely done—go for three stars!',
-    rewards: 'Level rewards', rewardLabel: 'Reward', claim: 'Claim Reward', claimed: 'Claimed',
-    claimedLabel: 'Reward claimed', double: 'Double Reward', doubleClaimedLabel: 'Double reward claimed',
-    levelNav: 'Levels', next: 'Next', replay: 'Replay', nav: 'After-level actions'
-  },
-  daily: {
-    giftAlt: 'Daily reward gift', title: 'Daily Reward', desc: 'A little joy with your cats, every day!',
-    today: 'Today: {reward}', claim: 'Claim', watchAd: '▶ Watch Ad ×2',
-    loading: 'Loading reward…', tomorrow: 'Come back tomorrow for a richer streak!', gotIt: 'Got it',
-    day: 'Day {n}', hintReward: 'Hints ×{amount}', coinReward: '🐾 {amount}'
-  },
-  rewarded: {
-    testMode: 'Rewarded-ad test mode', watchAndClaim: 'Watch & Claim', loadingClaim: 'Loading reward…',
-    later: 'Maybe later', incomplete: 'Not fully watched—no reward used. Please try again.',
-    unavailable: 'Ads are unavailable right now. No reward was used.',
-    watchAlt: 'Watch an ad to earn a reward'
   },
   tray: { label: 'Cat picker', placed: 'Placed' },
   match3: { board: 'Match-3 board', empty: 'Empty', cell: 'Column {col}, row {row}, {name}' }

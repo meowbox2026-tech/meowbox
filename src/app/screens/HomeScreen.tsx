@@ -15,7 +15,7 @@ export function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
 
   return (
     <main className="screen screen--home">
-      <TopBar coins={player.pawCoins} onSettings={() => onNavigate('settings')} />
+      <TopBar onSettings={() => onNavigate('settings')} />
       <section className="home-brand" aria-label={strings.home.brandAria}>
         <GameImage asset="meowlogo" className="home-brand__logo" alt="MEOW BOX" />
         <p>{strings.home.brandSub}</p>

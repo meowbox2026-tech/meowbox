@@ -13,7 +13,7 @@ export interface LegalDocument {
 }
 
 export const SUPPORT_EMAIL = 'meowbox2026@gmail.com'
-export const LEGAL_UPDATED_AT = '2026 年 9 月 18 日'
+export const LEGAL_UPDATED_AT = '2026 年 9 月 23 日'
 
 export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
   privacy: {
@@ -28,7 +28,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
         heading: '目前版本會處理哪些資料？',
         paragraphs: ['本遊戲不要求建立帳號，也不會主動要求你的姓名、電話、地址、位置、聯絡人、照片、相機或麥克風資料。'],
         bullets: [
-          '遊戲進度、設定、提示數量與解鎖內容會儲存在你的裝置上。',
+          '遊戲進度、星等與設定會儲存在你的裝置上。',
           'iPhone App 使用系統偏好儲存；手機網頁版使用瀏覽器本機儲存。',
           '如果你寄信給客服，我們會收到你主動提供的電子郵件地址、信件內容與附件。'
         ]
@@ -39,7 +39,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
       },
       {
         heading: '第三方服務',
-        paragraphs: ['目前版本未整合第三方廣告、分析或跨網站追蹤 SDK，也沒有把遊戲進度上傳到 Meow Box 的伺服器。App 使用 Apple 與 Capacitor 提供的系統能力（例如本機儲存與震動），這些能力不會把遊戲進度交給我們。Apple App Store、作業系統與電子郵件服務商可能依其各自政策處理必要的技術資料。'],
+        paragraphs: ['目前版本會在累計五次遊玩操作後顯示測試廣告畫面；這個畫面由本機測試 gateway 模擬，尚未向第三方廣告 SDK 發出廣告請求。正式接入 AdMob 或其他廣告供應商後，供應商可能依其政策處理廣告請求、裝置識別、同意訊息與曝光資料；我們不會把遊戲進度上傳到 Meow Box 的伺服器。App 使用 Apple 與 Capacitor 提供的系統能力（例如本機儲存與震動），這些能力不會把遊戲進度交給我們。Apple App Store、作業系統與電子郵件服務商也可能依其各自政策處理必要的技術資料。'],
       },
       {
         heading: '兒童隱私',
@@ -51,7 +51,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
       },
       {
         heading: '政策更新與聯絡方式',
-        paragraphs: [`如果未來加入帳號、雲端同步、廣告、分析或付費服務，我們會在啟用前更新本政策與 App Store 的隱私標示。若你有隱私問題，請寄信至 ${SUPPORT_EMAIL}。`]
+        paragraphs: [`如果未來正式接入廣告 SDK、帳號、雲端同步、分析或付費服務，我們會在啟用前更新本政策與 App Store 的隱私標示。若你有隱私問題，請寄信至 ${SUPPORT_EMAIL}。`]
       }
     ]
   },
@@ -68,7 +68,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
         paragraphs: ['本遊戲提供貓咪裝箱拼圖與相關的遊戲內容，供個人、非商業用途使用。你應以合法且不影響其他人或服務運作的方式使用本遊戲。'],
         bullets: [
           '不得反向工程、修改、破解、轉售或重新散布本遊戲或其素材。',
-          '不得利用錯誤、機器人或其他未授權方式取得遊戲進度、獎勵或內容。',
+          '不得利用錯誤、機器人或其他未授權方式取得遊戲進度或內容。',
           '不得移除著作權、商標或其他權利聲明。'
         ]
       },
@@ -78,7 +78,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
       },
       {
         heading: '付費內容與廣告',
-        paragraphs: ['目前版本中的商店、獎勵或廣告相關畫面可能包含測試內容，不代表已提供可購買商品或實際廣告服務。若未來提供 App 內購買，交易會透過 Apple App Store 處理，並會在提供前更新相關說明。']
+        paragraphs: ['目前版本不提供遊戲內貨幣、商店、每日獎勵或購買獎勵。主線每累計五次開始新局、從選關進入關卡、前往下一關或點擊重新開始後，會顯示測試廣告畫面；測試畫面至少維持五秒且不能提前關閉。正式接入廣告 SDK 後，廣告的載入、曝光、完成與關閉時機會由廣告供應商回呼控制，並會在上線前更新相關說明。若未來提供 App 內購買，交易會透過 Apple App Store 處理。']
       },
       {
         heading: '智慧財產權',

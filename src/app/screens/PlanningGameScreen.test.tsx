@@ -3,12 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { GameScreen } from './GameScreen'
 
 const completeLevel = vi.hoisted(() => vi.fn())
-const showAd = vi.hoisted(() => vi.fn())
+const playAction = vi.hoisted(() => vi.fn())
 const startBackgroundMusic = vi.hoisted(() => vi.fn())
 const stopBackgroundMusic = vi.hoisted(() => vi.fn())
-vi.mock('../../services/ads/rewardedAds', () => ({ showRewardedAd: showAd }))
 vi.mock('../../state/PlayerContext', () => ({ usePlayer: () => ({
-  player: { pawCoins: 0, settings: { music: false, haptics: false } }, completeLevel
+  player: { settings: { music: false, sound: false, haptics: false } }, completeLevel
 }) }))
 vi.mock('../../services/audio/audioService', () => ({ startBackgroundMusic, stopBackgroundMusic }))
 vi.mock('../../services/haptics/hapticsService', () => ({ playPlacementHaptic: vi.fn() }))
@@ -17,12 +16,12 @@ afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks() })
 function mount() {
   vi.useFakeTimers()
   const next = vi.fn()
-  const view = render(<GameScreen levelId={1} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={next} onLevelSelect={vi.fn()} onToast={vi.fn()} />)
+  const view = render(<GameScreen levelId={1} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={next} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={playAction} />)
   return { ...view, next }
 }
 function mountLevel(levelId: number) {
   vi.useFakeTimers()
-  const view = render(<GameScreen levelId={levelId} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} />)
+  const view = render(<GameScreen levelId={levelId} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={playAction} />)
   return view
 }
 function cell(row: number, column: number) { return screen.getByRole('button', { name: `放在第 ${row} 排、第 ${column} 欄` }) }
@@ -110,8 +109,10 @@ describe('8x8 planning level through the game entry point', () => {
     expect(hint).toBeDisabled()
     await flushAsyncState()
     expect(screen.queryByText('正在確認這個位置是否仍可解⋯')).toBeNull()
-    expect(container.querySelector('.planning-placement-cell.is-hint')).toBeInTheDocument()
-    expect(screen.getByText('提示已標出下一隻貓咪的推薦位置')).toBeInTheDocument()
+    expect(container.querySelector('.planning-placement-cell.is-hint')).toBeNull()
+    expect(container.querySelectorAll('.planning-cat.is-added')).toHaveLength(1)
+    expect(screen.getByText('已安排 1 / 3')).toBeInTheDocument()
+    expect(screen.getByText('提示已自動放置下一隻貓咪的最佳位置')).toBeInTheDocument()
   })
 
   it('suspends input, playback and audio while the app window is inactive', () => {
@@ -136,7 +137,7 @@ describe('8x8 planning level through the game entry point', () => {
     expect(completeLevel).not.toHaveBeenCalled()
     finish()
     expect(screen.getByRole('dialog', { name: '全部回家了！' })).toBeInTheDocument()
-    expect(completeLevel).toHaveBeenCalledExactlyOnceWith(1, 3, 50)
+    expect(completeLevel).toHaveBeenCalledExactlyOnceWith(1, 3)
     finish()
     expect(completeLevel).toHaveBeenCalledTimes(1)
     fireEvent.click(screen.getByRole('button', { name: '前往第 2 關' }))
@@ -161,6 +162,7 @@ describe('8x8 planning level through the game entry point', () => {
     finish()
     expect(completeLevel).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: '重新開始本關' }))
+    expect(playAction).toHaveBeenCalledOnce()
     finish()
     expect(completeLevel).not.toHaveBeenCalled()
     expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()

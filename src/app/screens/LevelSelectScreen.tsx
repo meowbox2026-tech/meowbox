@@ -18,7 +18,7 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
 
   return (
     <main className="screen screen--levels">
-      <TopBar coins={player.pawCoins} onBack={onBack} />
+      <TopBar onBack={onBack} />
       <ScreenTitle title={strings.levels.title} subtitle={strings.levels.subtitle} />
       <section className="level-board" aria-label={strings.levels.board} tabIndex={0}>
         {PLANNING_LEVELS.map((level) => {

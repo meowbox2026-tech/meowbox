@@ -6,8 +6,8 @@ describe('player save', () => {
     const save = normalisePlayerSave({ pawCoins: 120 })
 
     expect(save.version).toBe(1)
-    expect(save.pawCoins).toBe(120)
-    expect(save.unlockedCatSkins).toContain('orange')
+    expect(save).not.toHaveProperty('pawCoins')
+    expect(save).not.toHaveProperty('dailyReward')
     expect(save.settings.haptics).toBe(true)
   })
 
@@ -17,7 +17,8 @@ describe('player save', () => {
       currentLevel: 90,
       completedLevels: [1, 25, 30, 60, 90],
       stars: { 25: 3, 31: 3, 60: 2 },
-      pawCoins: 912
+      pawCoins: 912,
+      unlockedCatSkins: ['orange', 'black']
     }
 
     const migrated = normalisePlayerSave(legacy)
@@ -27,36 +28,37 @@ describe('player save', () => {
     expect(migratedAgain.currentLevel).toBe(25)
     expect(migrated.completedLevels).toEqual([1, 25])
     expect(migrated.stars).toEqual({ 25: 3 })
-    expect(migrated.pawCoins).toBe(912)
+    expect(migrated).not.toHaveProperty('pawCoins')
+    expect(migrated).not.toHaveProperty('unlockedCatSkins')
     expect(normalisePlayerSave({ ...legacy, currentLevel: 26, completedLevels: [1, 25] }).currentLevel).toBe(25)
   })
 
-  it('prefers newer cloud progress but unions durable unlocks and completions', () => {
+  it('prefers newer cloud settings while preserving the union of completions', () => {
     const local = {
       ...createDefaultPlayerSave(),
       updatedAt: '2026-09-17T01:00:00.000Z',
       currentLevel: 4,
       completedLevels: [1, 2, 3],
-      unlockedCatSkins: ['orange', 'black']
+      settings: { ...createDefaultPlayerSave().settings, language: 'en' as const }
     }
     const cloud = {
       ...createDefaultPlayerSave(),
       updatedAt: '2026-09-18T01:00:00.000Z',
       currentLevel: 3,
       completedLevels: [1, 2],
-      unlockedCatSkins: ['orange', 'white']
+      settings: { ...createDefaultPlayerSave().settings, language: 'ja' as const }
     }
 
     const merged = mergePlayerSaves(local, cloud)
 
     expect(merged.currentLevel).toBe(3)
     expect(merged.completedLevels).toEqual([1, 2, 3])
-    expect(merged.unlockedCatSkins).toEqual(['orange', 'black', 'white'])
+    expect(merged.settings.language).toBe('ja')
   })
 
   it('clamps merged progress to the active mainline', () => {
-    const local = { ...createDefaultPlayerSave(), currentLevel: 90, completedLevels: [25, 60], pawCoins: 100 }
-    const cloud = { ...createDefaultPlayerSave(), currentLevel: 60, completedLevels: [24], pawCoins: 200 }
+    const local = { ...createDefaultPlayerSave(), currentLevel: 90, completedLevels: [25, 60] }
+    const cloud = { ...createDefaultPlayerSave(), currentLevel: 60, completedLevels: [24] }
 
     expect(mergePlayerSaves(local, cloud).currentLevel).toBe(25)
     expect(mergePlayerSaves(local, cloud).completedLevels).toEqual([24, 25])
@@ -74,12 +76,11 @@ describe('player save', () => {
 
   it('persists and reloads the browser local save', async () => {
     window.localStorage.clear()
-    const save = { ...createDefaultPlayerSave(), pawCoins: 777, currentLevel: 8 }
+    const save = { ...createDefaultPlayerSave(), currentLevel: 8 }
 
     await persistPlayerSave(save)
     const loaded = await loadPlayerSave()
 
-    expect(loaded.pawCoins).toBe(777)
     expect(loaded.currentLevel).toBe(8)
   })
 })

@@ -6,7 +6,7 @@ afterEach(cleanup)
 
 describe('TopBar', () => {
   it('renders the supplied level card artwork with an accessible level label', () => {
-    const { container } = render(<TopBar coins={580} level={3} stars={3} moves={14} />)
+    const { container } = render(<TopBar level={3} stars={3} moves={14} />)
 
     expect(screen.getByLabelText('關卡 3')).toBeInTheDocument()
     expect(screen.getByText('關卡')).toBeInTheDocument()

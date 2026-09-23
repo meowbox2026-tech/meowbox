@@ -2,10 +2,8 @@ import type { ReactNode } from 'react'
 import { format, useStrings } from '../../i18n'
 import { ArtworkButton } from './ArtworkButton'
 import { GameImage } from './GameImage'
-import { ECONOMY_UI_ENABLED } from '../config'
 
 interface TopBarProps {
-  coins: number
   onBack?: () => void
   onSettings?: () => void
   level?: number
@@ -15,7 +13,7 @@ interface TopBarProps {
   status?: ReactNode
 }
 
-export function TopBar({ coins, onBack, onSettings, level, stars, moves, onPause, status }: TopBarProps) {
+export function TopBar({ onBack, onSettings, level, stars, moves, onPause, status }: TopBarProps) {
   const strings = useStrings()
   return (
     <header className="top-bar">
@@ -31,7 +29,6 @@ export function TopBar({ coins, onBack, onSettings, level, stars, moves, onPause
       {stars !== undefined && <div className="star-meter" aria-label={format(strings.topbar.starsAria, { stars })}>{[1, 2, 3].map((star) => <GameImage asset="stars" key={star} className={star <= stars ? 'is-earned' : ''} alt="" aria-hidden="true" />)}</div>}
       {moves !== undefined && <div className="moves-pill">{strings.topbar.moves} <strong>{moves}</strong></div>}
       <div className="top-bar__right">
-        {ECONOMY_UI_ENABLED && <div className="coin-pill" aria-label={`${coins.toLocaleString()} Paw Coins`}><GameImage asset="cat+" className="coin-pill__art" alt="" aria-hidden="true" /><strong>{coins.toLocaleString()}</strong></div>}
         {onSettings && <ArtworkButton asset="setting" className="top-bar__round" onClick={onSettings} aria-label={strings.topbar.settings} />}
         {onPause && <ArtworkButton asset="stop" className="top-bar__round" onClick={onPause} aria-label={strings.topbar.pause} />}
       </div>

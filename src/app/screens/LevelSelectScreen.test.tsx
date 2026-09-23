@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { LevelSelectScreen } from './LevelSelectScreen'
 
 const player = vi.hoisted(() => ({
-  pawCoins: 630,
   currentLevel: 1,
   stars: { 1: 3 }
 }))

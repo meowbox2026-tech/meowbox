@@ -8,10 +8,11 @@ interface GameScreenProps {
   onLevelSelect: () => void
   onNextLevel: (levelId: number) => void
   onToast: (message: string) => void
+  onPlayAction: () => void | Promise<void>
 }
 
 /** The active game is deliberately bounded to the authored 1–25 mainline. */
-export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel }: GameScreenProps) {
+export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction }: GameScreenProps) {
   const activeLevelId = Math.min(MAX_PLANNING_LEVEL, Math.max(1, levelId))
   return <PlanningGameScreen
     levelId={activeLevelId}
@@ -19,5 +20,6 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
     onSettings={onSettings}
     onLevelSelect={onLevelSelect}
     onNextLevel={onNextLevel}
+    onPlayAction={onPlayAction}
   />
 }

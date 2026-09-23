@@ -8,9 +8,6 @@
 
 .screen--game .top-bar { padding: 0 6px; }
 .screen--game .top-bar__right { gap: 5px; }
-.screen--game .coin-pill { min-height: 48px; padding: 0; }
-.screen--game .coin-pill span { width: 27px; height: 27px; }
-.screen--game .coin-pill b { width: 22px; height: 22px; font-size: 18px; }
 .screen--game .top-bar__round { width: 40px; min-width: 40px; min-height: 40px; font-size: 20px; }
 .screen--game .level-pill { width: 90px; min-width: 90px; min-height: 40px; flex: 0 0 90px; padding: 3px 7px; }
 
@@ -145,10 +142,6 @@
 .result-modal__header > p { margin: 5px 0 8px; font-size: 14px; }
 .result-stars { display: flex; justify-content: center; gap: 4px; color: #c7b9af; font-size: 48px; text-shadow: 0 4px 0 #ad6422; }
 .result-stars .is-earned { color: #ffd442; }
-.result-rewards { margin: 4px 0 10px; padding: 8px 8px 7px; border: 2px solid #ebbe8c; border-radius: 18px; background: #fffaf0; }
-.result-rewards__heading { display: flex; align-items: center; justify-content: center; gap: 7px; margin-bottom: 2px; color: #70402b; font-size: 17px; }
-.result-rewards__heading strong { color: #b66a21; }
-.result-rewards__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
 .result-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
 .failed-modal h2 { color: #ae4c58; }
 
@@ -196,9 +189,6 @@
 
 .result-stars img { width: 48px; height: 48px; object-fit: contain; filter: grayscale(.75) saturate(.25) brightness(.94); }
 .result-stars img.is-earned { filter: none; }
-.result-rewards__button { width: 100%; height: 90px; margin: 0 auto; font-size: clamp(13px, 3.5vw, 16px); }
-.result-rewards__button .artwork-button__label { position: absolute; right: 12%; bottom: 22%; left: 12%; }
-.result-rewards__button--dark { color: #6d3d2b; text-shadow: 0 1px 0 rgba(255, 250, 232, .85); }
 .result-nav { align-items: end; }
 .result-nav .result-nav__button { width: 100%; aspect-ratio: 1; min-height: 0; font-size: clamp(12px, 3.4vw, 16px); }
 .result-nav__button .artwork-button__label { position: absolute; right: 3%; bottom: 10%; left: 3%; white-space: nowrap; }
@@ -210,8 +200,6 @@
   .result-modal__celebration { width: 52px; height: 52px; margin: -9px auto -4px; }
   .result-modal__header > p { margin-bottom: 4px; }
   .result-stars img { width: 38px; height: 38px; }
-  .result-rewards { margin-bottom: 5px; }
-  .result-rewards__button { height: 72px; }
 }
 
 /* SE 375x667 @100% baseline: one fluid game composition for every phone. */

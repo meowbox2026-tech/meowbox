@@ -8,24 +8,12 @@ export interface PlayerSettings {
   language: 'zh-TW' | 'en' | 'ja'
 }
 
-export interface DailyRewardState {
-  lastClaimDate?: string
-  streak: number
-}
-
 export interface PlayerSave {
   version: 1
   updatedAt: string
   currentLevel: number
   completedLevels: number[]
   stars: Record<number, number>
-  pawCoins: number
-  hints: number
-  unlockedCatSkins: string[]
-  unlockedBoxSkins: string[]
-  selectedCatSkin: string
-  selectedBoxSkin: string
-  dailyReward: DailyRewardState
   settings: PlayerSettings
 }
 
@@ -39,13 +27,6 @@ export function createDefaultPlayerSave(): PlayerSave {
     currentLevel: 1,
     completedLevels: [],
     stars: {},
-    pawCoins: 480,
-    hints: 3,
-    unlockedCatSkins: ['orange'],
-    unlockedBoxSkins: ['classic'],
-    selectedCatSkin: 'orange',
-    selectedBoxSkin: 'classic',
-    dailyReward: { streak: 0 },
     settings: { music: true, sound: true, haptics: true, language: 'zh-TW' }
   }
 }
@@ -55,7 +36,6 @@ export function normalisePlayerSave(value: unknown): PlayerSave {
   if (!isRecord(value)) return defaults
 
   const rawSettings = isRecord(value.settings) ? value.settings : {}
-  const rawDaily = isRecord(value.dailyReward) ? value.dailyReward : {}
   const completedLevels = uniqueNumbers(value.completedLevels).filter((level) => level <= MAX_SAVED_LEVEL)
   const storedCurrentLevel = Math.min(MAX_SAVED_LEVEL, toPositiveInteger(value.currentLevel, defaults.currentLevel))
   return {
@@ -65,16 +45,6 @@ export function normalisePlayerSave(value: unknown): PlayerSave {
     currentLevel: storedCurrentLevel,
     completedLevels,
     stars: normaliseStars(value.stars),
-    pawCoins: toNonNegativeInteger(value.pawCoins, defaults.pawCoins),
-    hints: toNonNegativeInteger(value.hints, defaults.hints),
-    unlockedCatSkins: uniqueStrings(value.unlockedCatSkins, defaults.unlockedCatSkins),
-    unlockedBoxSkins: uniqueStrings(value.unlockedBoxSkins, defaults.unlockedBoxSkins),
-    selectedCatSkin: typeof value.selectedCatSkin === 'string' ? value.selectedCatSkin : defaults.selectedCatSkin,
-    selectedBoxSkin: typeof value.selectedBoxSkin === 'string' ? value.selectedBoxSkin : defaults.selectedBoxSkin,
-    dailyReward: {
-      lastClaimDate: typeof rawDaily.lastClaimDate === 'string' ? rawDaily.lastClaimDate : undefined,
-      streak: toNonNegativeInteger(rawDaily.streak, 0)
-    },
     settings: {
       music: typeof rawSettings.music === 'boolean' ? rawSettings.music : defaults.settings.music,
       sound: typeof rawSettings.sound === 'boolean' ? rawSettings.sound : defaults.settings.sound,
@@ -89,8 +59,6 @@ export function mergePlayerSaves(local: PlayerSave, cloud: PlayerSave): PlayerSa
   return normalisePlayerSave({
     ...newest,
     completedLevels: uniqueNumbers([...local.completedLevels, ...cloud.completedLevels]),
-    unlockedCatSkins: uniqueStrings([...local.unlockedCatSkins, ...cloud.unlockedCatSkins], []),
-    unlockedBoxSkins: uniqueStrings([...local.unlockedBoxSkins, ...cloud.unlockedBoxSkins], []),
     stars: mergeStars(local.stars, cloud.stars)
   })
 }
@@ -133,17 +101,8 @@ function uniqueNumbers(value: unknown): number[] {
   return [...new Set(value.filter((item): item is number => typeof item === 'number' && Number.isInteger(item) && item > 0))].sort((a, b) => a - b)
 }
 
-function uniqueStrings(value: unknown, fallback: string[]): string[] {
-  if (!Array.isArray(value)) return fallback
-  return [...new Set(value.filter((item): item is string => typeof item === 'string' && item.length > 0))]
-}
-
 function toPositiveInteger(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : fallback
-}
-
-function toNonNegativeInteger(value: unknown, fallback: number): number {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? Math.floor(value) : fallback
 }
 
 function isLanguage(value: unknown): value is PlayerSettings['language'] {

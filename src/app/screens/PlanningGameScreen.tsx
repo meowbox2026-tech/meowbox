@@ -21,9 +21,10 @@ interface Props {
   onSettings: () => void
   onLevelSelect: () => void
   onNextLevel: (id: number) => void
+  onPlayAction: () => void | Promise<void>
 }
 
-export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel }: Props) {
+export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction }: Props) {
   const activeLevelId = Math.min(MAX_PLANNING_LEVEL, Math.max(1, levelId))
   const { player, completeLevel } = usePlayer()
   const locale = useLocale()
@@ -33,7 +34,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const [rules, setRules] = useState(false)
   const tutorial = useDiagonalTutorial(activeLevelId)
   const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || rules || tutorial.open, activeLevelId)
-  const rewarded = useRef(false)
+  const completionRecorded = useRef(false)
   const editing = state.phase === 'editing'
   const locked = paused || rules || tutorial.open || hidden || !editing || state.pendingHint
   const stars = Math.max(1, 3 - state.failures)
@@ -52,14 +53,15 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     return () => stopBackgroundMusic()
   }, [paused, rules, tutorial.open, hidden, state.phase, player.settings.music])
   useEffect(() => {
-    if (state.phase === 'completed' && !rewarded.current) {
-      rewarded.current = true
-      completeLevel(activeLevelId, stars, 50)
+    if (state.phase === 'completed' && !completionRecorded.current) {
+      completionRecorded.current = true
+      completeLevel(activeLevelId, stars)
     }
   }, [state.phase, completeLevel, activeLevelId, stars])
   const restart = () => {
-    rewarded.current = false
+    completionRecorded.current = false
     dispatch({ type: 'restart' })
+    void onPlayAction()
     setPaused(false)
     setRules(false)
   }
@@ -70,7 +72,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   }
   const catName = (type: string) => getDropCatName(type, locale)
   return <main className={`screen screen--game screen--drop screen--planning${hidden ? ' is-suspended' : ''}`}>
-    <TopBar level={activeLevelId} coins={player.pawCoins} onPause={() => setPaused(true)} status={<div className="planning-top-status">
+    <TopBar level={activeLevelId} onPause={() => setPaused(true)} status={<div className="planning-top-status">
       <strong>{localized.name}</strong><small>{text.failures} {state.failures} {text.times}</small>
     </div>} />
     <section className="planning-intro"><strong>{text.goal(totalCats)}</strong><span>{text.calm}</span></section>
@@ -137,7 +139,6 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       <img src={getCatAssetPath('orange')} alt="" /><h2>{text.completed}</h2>
       <div className="drop-result__stars" aria-label={`${stars} ★`}>{[1, 2, 3].map(i => <span className={i <= stars ? 'is-earned' : ''} key={i}>★</span>)}</div>
       <p>{text.wave} {wave} · {text.failures} {state.failures} {text.times}</p>
-      <strong className="drop-reward">{text.reward}</strong>
       {activeLevelId < MAX_PLANNING_LEVEL && <AppButton onClick={() => onNextLevel(activeLevelId + 1)}>{text.next(activeLevelId + 1)}</AppButton>}
       {activeLevelId === MAX_PLANNING_LEVEL && <p className="planning-mainline-done">{text.mainlineDone}</p>}
       <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>

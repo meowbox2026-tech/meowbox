@@ -27,8 +27,6 @@
 
 .app-bleed[data-screen='home'] { background-image: url('/assets/bg-main.webp'); }
 .app-bleed[data-screen='levels'] { background-image: url('/assets/bg-main.webp'); }
-.app-bleed[data-screen='collection'] { background-image: url('/assets/bg-main.webp'); }
-.app-bleed[data-screen='shop'] { background-image: url('/assets/bg-main.webp'); }
 .app-bleed[data-screen='settings'] { background-image: url('/assets/bg-main.webp'); }
 .app-bleed[data-screen='legal'] { background-image: url('/assets/bg-main.webp'); }
 .app-bleed[data-screen='game'] { background-image: url('/assets/bg-main.webp'); }

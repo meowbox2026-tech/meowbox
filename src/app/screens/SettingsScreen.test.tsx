@@ -4,7 +4,6 @@ import { SettingsScreen } from './SettingsScreen'
 
 const mocks = vi.hoisted(() => ({
   player: {
-    pawCoins: 0,
     settings: { music: false, sound: true, haptics: false, language: 'zh-TW' as const }
   },
   updateSettings: vi.fn()
@@ -35,6 +34,7 @@ describe('SettingsScreen controls', () => {
     expect(screen.getByRole('checkbox', { name: '音樂' })).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: '音效' })).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: '震動' })).toBeInTheDocument()
+    expect(screen.queryByText('恢復購買項目')).not.toBeInTheDocument()
     expect(toggleRow).not.toHaveTextContent('陪伴拼圖時光的輕鬆背景音樂')
     expect(toggleRow).not.toHaveTextContent('每一個可愛動作都有回應')
     expect(toggleRow).not.toHaveTextContent('放好貓咪時的小小提示')
