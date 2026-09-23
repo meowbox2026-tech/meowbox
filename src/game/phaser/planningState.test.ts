@@ -11,6 +11,19 @@ function failedAttempt(): PlanningState {
 }
 
 describe('planning failure boundaries', () => {
+  it('defers the whole attempt after an unknown result instead of blaming a later click', () => {
+    let state = reduce(freshPlanning(level), { type: 'place-pending', x: 0, y: 0 })
+    state = reduce(state, { type: 'placement-result', safe: true, deferred: true })
+    state = reduce(state, { type: 'place', x: 1, y: 0 })
+    state = reduce(state, { type: 'place', x: 2, y: 0 })
+    expect(state.placements).toHaveLength(3)
+    expect(state.lives).toBe(3)
+    state = reduce(state, { type: 'start' })
+    while (state.phase === 'running') state = reduce(state, { type: 'tick' })
+    expect(state.lives).toBe(2)
+    expect(state.failureReason).toBe('resolution')
+    expect(state.validationDeferred).toBe(false)
+  })
   it('always places cats in card order and only takes back the latest placement', () => {
     let state = freshPlanning(level)
     expect(state.selected).toBe(level.cats[0].id)

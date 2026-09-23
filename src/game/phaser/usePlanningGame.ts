@@ -13,7 +13,7 @@ export function usePlanningGame(paused: boolean, levelId = 1) {
     () => freshPlanning(level)
   )
   const send = useCallback((action: PlanningAction) => {
-    if (action.type === 'place' && shouldValidatePlacementImmediately(level)) {
+    if (action.type === 'place' && !state.validationDeferred && shouldValidatePlacementImmediately(level)) {
       dispatch({ type: 'place-pending', x: action.x, y: action.y })
       return
     }
@@ -22,16 +22,16 @@ export function usePlanningGame(paused: boolean, levelId = 1) {
       return
     }
     dispatch(action)
-  }, [level])
+  }, [level, state.validationDeferred])
   const hidden = usePageSuspended()
   useEffect(() => {
     if (!state.validatingPlacement) return
     const controller = new AbortController()
     const placements = [...state.placements, state.validatingPlacement]
     void canCompletePlanningAsync(level, placements, controller.signal).then(safe => {
-      if (!controller.signal.aborted) dispatch({ type: 'placement-result', safe: safe !== false })
+      if (!controller.signal.aborted) dispatch({ type: 'placement-result', safe: safe !== false, deferred: safe === undefined })
     }).catch(() => {
-      if (!controller.signal.aborted) dispatch({ type: 'placement-result', safe: true })
+      if (!controller.signal.aborted) dispatch({ type: 'placement-result', safe: true, deferred: true })
     })
     return () => controller.abort()
   }, [level, state.placements, state.validatingPlacement])

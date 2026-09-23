@@ -15,13 +15,14 @@ export interface PlanningState {
   hintCell?: Placement
   validatingPlacement?: Placement
   pendingHint: boolean
+  validationDeferred?: boolean
   completedWaves: number
   frame: number
   result?: PlanningResult
   failureReason?: PlanningFailureReason
 }
 export type PlanningAction = { type: 'select' | 'remove'; id: number } | { type: 'place' | 'place-pending'; x: number; y: number }
-  | { type: 'placement-result'; safe: boolean } | { type: 'hint-pending' } | { type: 'hint-result'; hintCell?: Placement }
+  | { type: 'placement-result'; safe: boolean; deferred?: boolean } | { type: 'hint-pending' } | { type: 'hint-result'; hintCell?: Placement }
   | { type: 'undo' | 'clear' | 'hint' | 'start' | 'tick' | 'restart' }
 
 export const PLANNING_STARTING_LIVES = 3
@@ -44,6 +45,7 @@ function spendLife(state: PlanningState, failureReason: PlanningFailureReason): 
     hintCell: undefined,
     validatingPlacement: undefined,
     pendingHint: false,
+    validationDeferred: false,
     completedWaves: 0,
     frame: 0,
     result: undefined,
@@ -106,16 +108,16 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
     }
     case 'placement-result': {
       if (!state.validatingPlacement) return state
-      if (!action.safe) return spendLife(state, 'placement')
+      if (!action.safe && !state.validationDeferred) return spendLife(state, 'placement')
       const placements = [...state.placements, state.validatingPlacement]
-      return { ...state, validatingPlacement: undefined, placements, selected: level.cats[placements.length]?.id, hintCell: undefined, failureReason: undefined }
+      return { ...state, validationDeferred: state.validationDeferred || action.deferred, validatingPlacement: undefined, placements, selected: level.cats[placements.length]?.id, hintCell: undefined, failureReason: undefined }
     }
     case 'place': {
       if (state.validatingPlacement || state.pendingHint) return state
       if (state.selected === undefined) return state
       const placements = [...state.placements, { catId: state.selected, x: action.x, y: action.y }]
       if (!arrangeCats(level, placements)) return state
-      if (shouldValidatePlacementImmediately(level) && !canCompletePlanning(level, placements)) {
+      if (!state.validationDeferred && shouldValidatePlacementImmediately(level) && !canCompletePlanning(level, placements)) {
         return spendLife(state, 'placement')
       }
       return { ...state, placements, selected: level.cats[placements.length]?.id, hintCell: undefined, failureReason: undefined }
