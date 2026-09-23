@@ -132,11 +132,12 @@ describe('first drop level', () => {
     fireEvent.click(screen.getByRole('button', { name: '？ 玩法說明' }))
     expect(screen.getByRole('button', { name: /第 1 欄/ })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: '知道了，來玩喵！' }))
-    for (let i = 0; i < 10 && !screen.queryByRole('dialog', { name: '紙箱裝滿了' }); i++) {
+    for (let i = 0; i < 10 && !screen.queryByRole('dialog', { name: '三條生命用完了' }); i++) {
       fireEvent.click(screen.getByRole('button', { name: /第 1 欄/ }))
       finishAnimation()
     }
-    expect(screen.getByRole('dialog', { name: '紙箱裝滿了' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '挑戰結束' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '三條生命用完了' })).toBeInTheDocument()
     expect(completeLevel).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: '再試一次喵' }))
     expect(screen.getByAltText('現在：橘子')).toBeInTheDocument()

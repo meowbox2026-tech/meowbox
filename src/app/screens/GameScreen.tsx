@@ -80,12 +80,12 @@ function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect,
   const localized = useLocalizedLevel(level.id)
   const [paused, setPaused] = useState(false)
   const [rules, setRules] = useState(false)
-  const [ad, setAd] = useState<'hint' | 'revive'>()
+  const [ad, setAd] = useState<'hint'>()
   const [tutorial, setTutorial] = useState(false)
   const [run, setRun] = useState(0)
   const rewarded = useRef(false)
   useEffect(() => setTutorial(shouldShowTutorial(level.tutorial)), [level.id, level.tutorial])
-  const { state, display, busy, drop, hold, reset, secondsLeft, started, failure, reviveUsed, canReviveFromCeiling, extraDrops, revive, hint, hintColumn, hintUsed, hidden } = useDropGame(paused || rules || !!ad || tutorial, combo => {
+  const { state, display, busy, drop, hold, reset, secondsLeft, started, failure, lives, deadNotice, hint, hintColumn, hintUsed, hidden } = useDropGame(paused || rules || !!ad || tutorial, combo => {
     startBackgroundMusic(player.settings.music)
     void playPlacementHaptic(player.settings.haptics)
   }, level)
@@ -117,12 +117,14 @@ function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect,
   const progress = Math.min(state.progress.rescued, state.goals.rescued)
   const hintAvailable = !busy && state.phase === 'playing' && !hintUsed && recommendColumn(state) !== undefined
   const timeText = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`
-  const failureTitle = failure === 'ceiling' ? strings.game.failedCeilingTitle : failure === 'no-route' ? strings.game.noRouteTitle : failure === 'moves' ? strings.game.failedMovesTitle : strings.game.failedTimeTitle
+  const failureTitle = failure === 'ceiling' ? strings.game.failedCeilingTitle : failure === 'no-route' ? strings.game.noRouteTitle : failure === 'lives' ? strings.game.failedLivesTitle : strings.game.failedTimeTitle
+  const failureTip = failure === 'ceiling' ? strings.game.ceilingTip : failure === 'no-route' ? strings.game.noRouteTip : failure === 'lives' ? strings.game.livesTip : strings.game.otherTip
   void started
   return <main className={`screen screen--game screen--drop${hidden ? ' is-suspended' : ''}`}>
     <TopBar coins={player.pawCoins} level={level.id} onPause={() => setPaused(true)} status={<div className="drop-top-status" aria-label={strings.game.statusLabel}>
       <strong>{format(strings.game.rescue, { done: progress, target: state.target })}</strong>
-      <span className={secondsLeft <= 15 && extraDrops === undefined ? 'drop-time is-urgent' : 'drop-time'} role="timer" aria-label={strings.game.timeLeft}>{extraDrops !== undefined ? format(strings.game.overtime, { count: extraDrops }) : `⏱ ${timeText}`}</span>
+      <span className="drop-lives" aria-label={strings.game.livesLabel}>♡ {lives}</span>
+      <span className={secondsLeft <= 15 ? 'drop-time is-urgent' : 'drop-time'} role="timer" aria-label={strings.game.timeLeft}>⏱ {timeText}</span>
     </div>} />
     <DropObjectives goals={state.goals} progress={state.progress} patrolDrops={state.patrol?.dropsUntilMove}
       patrolColumn={state.patrol ? state.patrol.columns[state.patrol.index % state.patrol.columns.length] : undefined} />
@@ -134,6 +136,7 @@ function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect,
       paused={paused || rules || !!ad || tutorial || hidden || (level.id >= 31 && busy)} terminal={state.phase !== 'playing'} onDrop={drop}
       scratchPosts={state.scratchPosts} fishTreats={state.fishTreats} tunnels={state.tunnels} patrol={state.patrol}
       routedColumn={display.routedColumn} routed={display.routed} patrolMoved={display.patrolMoved} />
+    {deadNotice && <p className="drop-action-notice" role="status">{strings.game.deadDropNotice}</p>}
     <nav className="drop-actions" aria-label={strings.game.actions}><button onClick={() => setRules(true)}>{strings.game.howTo}</button><button disabled={!hintAvailable} onClick={() => setAd('hint')}>{hintUsed ? strings.game.hintUsed : strings.game.hintAd}</button><button onClick={restart}>{strings.game.replay}</button></nav>
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
     <DropTutorial level={level} open={tutorial} onClose={() => { dismissTutorial(level.tutorial); setTutorial(false) }} />
@@ -152,14 +155,12 @@ function LoadedGameScreen({ level, onRestart, onHome, onSettings, onLevelSelect,
       <AppButton onClick={restart}>{strings.game.playAgain}</AppButton><AppButton variant="cream" onClick={onLevelSelect}>{strings.game.backToLevels}</AppButton><small>{isLastLevel(level.id) ? strings.game.partyDone : strings.game.nextHappiness}</small>
     </Modal>
     <Modal open={state.phase === 'failed' && !busy && !ad} ariaLabel={failure === 'ceiling' ? strings.game.failedCeilingAria : strings.game.failedGenericAria} className="drop-result">
-      <img src={getCatAssetPath('sleeping')} alt={getDropCatName('sleeping', locale)} /><h2>{failureTitle}</h2><p>{format(strings.game.failedProgress, { cleared: state.progress.rescued, target: state.goals.rescued })}<br />{failure === 'ceiling' ? strings.game.ceilingTip : failure === 'no-route' ? strings.game.noRouteTip : strings.game.otherTip}</p>
-      {!reviveUsed && failure !== 'no-route' && (failure !== 'ceiling' || canReviveFromCeiling) && <AppButton variant="purple" onClick={() => setAd('revive')}>{failure === 'ceiling' ? strings.game.reviveCeiling : strings.game.reviveMoves}</AppButton>}
+      <img src={getCatAssetPath('sleeping')} alt={getDropCatName('sleeping', locale)} /><h2>{failureTitle}</h2><p>{format(strings.game.failedProgress, { cleared: state.progress.rescued, target: state.goals.rescued })}<br />{failureTip}</p>
       <AppButton onClick={restart}>{strings.game.retry}</AppButton><AppButton variant="cream" onClick={onHome}>{strings.game.backCottage}</AppButton>
     </Modal>
-    {ad && <RewardedAdModal key={`${run}-${ad}`} open kind={ad === 'hint' ? 'hint' : failure === 'ceiling' ? 'clear-bottom-row' : 'challenge-moves'}
-      title={ad === 'hint' ? strings.game.hintTitle : strings.game.reviveTitle}
-      description={ad === 'hint' ? strings.game.hintDesc : failure === 'ceiling' ? strings.game.reviveCeilingDesc : strings.game.reviveMovesDesc}
-      onClose={() => setAd(undefined)} onReward={() => { if (ad === 'hint') hint(); else revive(); setAd(undefined) }} />}
+    {ad === 'hint' && <RewardedAdModal key={`${run}-${ad}`} open kind="hint"
+      title={strings.game.hintTitle} description={strings.game.hintDesc}
+      onClose={() => setAd(undefined)} onReward={() => { hint(); setAd(undefined) }} />}
   </main>
 }
 

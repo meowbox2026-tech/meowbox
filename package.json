@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "validate:drop": "vite-node --script scripts/levels/validateDropLevels.ts",
+    "analyze:planning": "vite-node --script scripts/levels/analyzePlanningDifficulty.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "tsc -b --pretty false"

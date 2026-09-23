@@ -11,8 +11,8 @@ const zh = {
   rule2: '放下後卡片會消失；每局只有 1 次撤銷機會，可收回最新一隻。安排時不消除也不掉落，原有貓咪不能移動。',
   rule3: '全部放好才按開始。同款橫、直或斜線連續 3 隻以上會消除；同時有多組時，先消除較早放置貓咪所在的那一組，一次只處理一組。',
   rule4: (count: number) => `只有直接疊在被消除貓咪上方、失去支撐的那一串會掉落；中間隔著空格的貓不會跟著掉。再形成三連就繼續，救出全部 ${count} 隻便過關。`,
-  rule5: '沒有倒數。連鎖停住才算失敗；每局 1 次撤銷、每關 1 次提示，提示之後可接獎勵廣告。每關有 2 次中途重試，只能移動自己放下且還沒消除的貓。',
-  close: '知道了', wave: '連鎖', failed: '再調整一下', remaining: '還有', cats: '隻貓咪', swipe: '左右滑動看更多貓咪',
+  rule5: '沒有倒數。連鎖停住就失敗；每局 1 次撤銷、每關 1 次提示。失敗後不從半盤繼續，只能重新配置本關。',
+  close: '知道了', wave: '連鎖', failed: '本次配置失敗', failedTip: '這次連鎖已經結束；不保留半盤進度，重新配置才能公平判定。', restart: '整關重來', remaining: '還有', cats: '隻貓咪', swipe: '左右滑動看更多貓咪',
   failures: '失敗', times: '次', edit: '修改配置', completed: '全部回家了！',
   next: (id: number) => `前往第 ${id} 關`, levels: '返回關卡', reward: '+50 貓掌幣', hint: '小提示：先消掉支撐，上面的貓才會落到一起。'
 }
@@ -28,8 +28,8 @@ const en: Copy = {
   rule2: 'A card disappears after placement. Each round has one undo for the latest cat. Nothing clears or falls while arranging.',
   rule3: 'Place all cats, then start. Lines of 3 or more match horizontally, vertically or diagonally. If several groups are ready, the group containing an earlier placed cat clears first, one group at a time.',
   rule4: (count: number) => `Only cats stacked directly on a cleared support fall. A gap breaks the stack; other cats stay in place. New matches continue the chain. Rescue all ${count} cats to win.`,
-  rule5: 'No timer. A stopped chain counts as one failure. Each level has one undo and one hint; the hint can connect to a rewarded ad later. Each level has 2 checkpoint retries for your surviving placed cats.',
-  close: 'Got it', wave: 'Chain', failed: 'Try another arrangement', remaining: 'Remaining:', cats: 'cats', swipe: 'Swipe sideways to see more cats',
+  rule5: 'No timer. A stopped chain is a failure. Each level has one undo and one hint. A failed chain never resumes from a half-cleared board; restart the level for a fair retry.',
+  close: 'Got it', wave: 'Chain', failed: 'This arrangement failed', failedTip: 'The chain has ended. A half-cleared board is not reusable, so restart for a fair attempt.', restart: 'Restart level', remaining: 'Remaining:', cats: 'cats', swipe: 'Swipe sideways to see more cats',
   failures: 'Failed attempts:', times: '', edit: 'Edit arrangement', completed: 'Everyone is home!',
   next: (id: number) => `Go to level ${id}`, levels: 'Level select', reward: '+50 Paw Coins', hint: 'Tip: clear the support so the cats above can meet.'
 }
@@ -44,8 +44,8 @@ const ja: Copy = {
   rule2: '置いたカードは消え、各ラウンド1回だけ最後の猫を戻せます。配置中は消去も落下も起きません。',
   rule3: '全員を置いてからスタート。同じ猫が縦・横・斜めに3匹以上並びます。複数の組がある時は、先に置いた猫を含む組から1組ずつ消えます。',
   rule4: (count: number) => `消えた猫の真上につながって積まれた猫だけ落ちます。間に空きマスがあれば落ちません。また揃うと連鎖し、${count}匹すべて助ければクリア。`,
-  rule5: '時間制限なし。連鎖が止まると失敗です。各ステージ1回の取り消しとヒントがあり、ヒントは今後リワード広告につなげられます。各ステージ2回、消えていない自分の猫を途中から修正できます。',
-  close: 'わかった', wave: '連鎖', failed: '並べ方を変えてみよう', remaining: '残り', cats: '匹', swipe: '左右にスワイプして猫を見る',
+  rule5: '時間制限なし。連鎖が止まると失敗です。各ステージ1回の取り消しとヒントがあります。失敗した連鎖の途中からは再開せず、ステージを最初からやり直します。',
+  close: 'わかった', wave: '連鎖', failed: 'この配置は失敗', failedTip: '連鎖が終了しました。途中の盤面は使わず、公平な再挑戦のため最初からやり直します。', restart: '最初からやり直す', remaining: '残り', cats: '匹', swipe: '左右にスワイプして猫を見る',
   failures: '失敗', times: '回', edit: '配置を修正', completed: 'みんな帰れた！',
   next: (id: number) => `ステージ${id}へ`, levels: 'ステージ選択', reward: '+50 肉球コイン', hint: 'ヒント：支えを消すと、上の猫が落ちて揃います。'
 }

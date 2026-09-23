@@ -16,7 +16,7 @@ describe('reward confirmation', () => {
     await act(async () => finish({ completed: true, kind: 'hint' }))
     expect(onReward).toHaveBeenCalledTimes(1)
   })
-  it.each([{ completed: false, kind: 'hint' }, { completed: true, kind: 'challenge-moves' }])('does not grant an incomplete or mismatched reward', async result => {
+  it.each([{ completed: false, kind: 'hint' }, { completed: true, kind: 'double-reward' }])('does not grant an incomplete or mismatched reward', async result => {
     show.mockResolvedValue(result)
     const { onReward } = mount()
     await act(async () => fireEvent.click(screen.getByRole('button', { name: '觀看並領取' })))

@@ -5,6 +5,47 @@ import { getDropLevelById } from '../data/dropLevels'
 afterEach(() => { cleanup(); vi.useRealTimers() })
 const advance = (time: number) => act(() => vi.advanceTimersByTime(time))
 describe('drop presentation lifecycle', () => {
+  it('rolls back proven dead drops, spends three lives, and then fails', () => {
+    vi.useFakeTimers()
+    const deadLevel = {
+      ...getDropLevelById(1),
+      width: 3,
+      height: 3,
+      tileAssets: ['orange', 'blue', 'white'] as ['orange', 'blue', 'white'],
+      initialBoard: [
+        [null, null, null],
+        [{ id: 1, type: 'orange' }, null, null],
+        [{ id: 2, type: 'blue' }, null, null]
+      ],
+      initialCurrent: 'white' as const,
+      initialCurrentTrait: 'none' as const,
+      initialNext: 'orange' as const,
+      initialNextTrait: 'none' as const,
+      initialQueue: ['blue'] as ['blue'],
+      initialQueueTraits: ['none'] as ['none'],
+      target: 99,
+      goals: { rescued: 99, scratchPosts: 0, fishTreats: 0 },
+      scratchPosts: [], fishTreats: [], tunnels: [], patrol: undefined
+    }
+    const { result } = renderHook(() => useDropGame(false, vi.fn(), deadLevel))
+    const before = JSON.stringify(result.current.state.board)
+
+    act(() => result.current.drop(0))
+    expect(result.current.lives).toBe(2)
+    expect(result.current.state.phase).toBe('playing')
+    expect(result.current.state.moves).toBe(0)
+    expect(JSON.stringify(result.current.state.board)).toBe(before)
+    expect(result.current.deadNotice).toBe(true)
+
+    act(() => result.current.drop(0))
+    expect(result.current.lives).toBe(1)
+    act(() => result.current.drop(0))
+    expect(result.current.lives).toBe(0)
+    expect(result.current.failure).toBe('lives')
+    expect(result.current.state.phase).toBe('failed')
+    expect(JSON.stringify(result.current.state.board)).toBe(before)
+  })
+
   it('accepts rapid taps and commits each logical drop immediately', () => {
     vi.useFakeTimers()
     const feedback = vi.fn()
@@ -64,7 +105,7 @@ describe('drop presentation lifecycle', () => {
     expect(result.current.state.moves).toBe(1)
     expect(result.current.state.cleared).toBe(0)
   })
-  it('starts the clock on first drop, keeps counting through animation, and pauses explicitly', () => {
+  it('starts the clock on first drop, keeps counting through animation, and has no failure revive', () => {
     vi.useFakeTimers()
     const { result, rerender } = renderHook(({ paused }) => useDropGame(paused, vi.fn()), { initialProps: { paused: false } })
     advance(150000)
@@ -80,15 +121,12 @@ describe('drop presentation lifecycle', () => {
     expect(result.current.state.moves).toBe(1)
     rerender({ paused: false }); advance(120000)
     expect(result.current.failure).toBe('time')
-    act(() => result.current.revive())
-    expect(result.current.extraDrops).toBe(3)
-    for (let i = 0; i < 3; i++) { act(() => result.current.drop(i)); advance(420); advance(580); advance(420) }
     expect(result.current.state.phase).toBe('failed')
-    act(() => result.current.revive())
+    act(() => result.current.drop(0))
     expect(result.current.state.phase).toBe('failed')
     act(() => result.current.reset())
     expect(result.current.secondsLeft).toBe(120)
-    expect(result.current.reviveUsed).toBe(false)
+    expect(result.current.lives).toBe(3)
   })
 
   it('holds a completed result until its final presentation frame settles', () => {

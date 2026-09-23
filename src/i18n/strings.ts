@@ -98,8 +98,9 @@ export interface Strings {
   game: {
     rescue: string
     statusLabel: string
+    livesLabel: string
+    deadDropNotice: string
     timeLeft: string
-    overtime: string
     preview: string
     previewThree: string
     previewFour: string
@@ -150,20 +151,16 @@ export interface Strings {
     failedCeilingAria: string
     failedGenericAria: string
     failedCeilingTitle: string
-    failedMovesTitle: string
     failedTimeTitle: string
+    failedLivesTitle: string
     failedProgress: string
     ceilingTip: string
+    livesTip: string
     otherTip: string
-    reviveCeiling: string
-    reviveMoves: string
     retry: string
     backCottage: string
     hintTitle: string
     hintDesc: string
-    reviveTitle: string
-    reviveCeilingDesc: string
-    reviveMovesDesc: string
     comboSuccess: string
     combo: string
     matchCombo: string

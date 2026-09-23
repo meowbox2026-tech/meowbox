@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { getCatAssetPath } from '../../game/data/catAssets'
 import { usePlanningGame } from '../../game/phaser/usePlanningGame'
 import { planningCopy } from '../../game/phaser/planningCopy'
-import { planningRetryCopy } from '../../game/phaser/planningRetryCopy'
 import { getDropCatName, useLocale, useLocalizedLevel } from '../../i18n'
 import type { CatAsset } from '../../game/types'
 import { usePlayer } from '../../state/PlayerContext'
@@ -12,7 +11,6 @@ import { AppButton } from '../components/AppButton'
 import { Modal } from '../components/Modal'
 import { PauseModal } from '../components/PauseModal'
 import { TopBar } from '../components/TopBar'
-import { RewardedAdModal } from '../components/RewardedAdModal'
 import { PlanningDiagonalTutorial, useDiagonalTutorial } from '../components/PlanningDiagonalTutorial'
 
 interface Props {
@@ -27,25 +25,23 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const { player, completeLevel } = usePlayer()
   const locale = useLocale()
   const text = planningCopy[locale]
-  const retryText = planningRetryCopy[locale]
   const localized = useLocalizedLevel(levelId)
   const [paused, setPaused] = useState(false)
   const [rules, setRules] = useState(false)
-  const [ad, setAd] = useState(false)
   const tutorial = useDiagonalTutorial(levelId)
-  const { level, state, dispatch, board, cats, clearing, wave, canResume, hidden } = usePlanningGame(paused || rules || ad || tutorial.open, levelId)
+  const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || rules || tutorial.open, levelId)
   const rewarded = useRef(false)
   const editing = state.phase === 'editing'
-  const locked = paused || rules || ad || tutorial.open || hidden || !editing
+  const locked = paused || rules || tutorial.open || hidden || !editing
   const stars = Math.max(1, 3 - state.failures)
   const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
   useEffect(() => {
-    if (paused || rules || ad || tutorial.open || hidden || state.phase === 'completed' || state.phase === 'failed') stopBackgroundMusic()
+    if (paused || rules || tutorial.open || hidden || state.phase === 'completed' || state.phase === 'failed') stopBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
     return () => stopBackgroundMusic()
-  }, [paused, rules, ad, tutorial.open, hidden, state.phase, player.settings.music])
+  }, [paused, rules, tutorial.open, hidden, state.phase, player.settings.music])
   useEffect(() => {
     if (state.phase === 'completed' && !rewarded.current) {
       rewarded.current = true
@@ -57,7 +53,6 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     dispatch({ type: 'restart' })
     setPaused(false)
     setRules(false)
-    setAd(false)
   }
   const place = (x: number, y: number) => {
     if (locked) return
@@ -68,11 +63,10 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   return <main className={`screen screen--game screen--drop screen--planning${hidden ? ' is-suspended' : ''}`}>
     <TopBar level={levelId} coins={player.pawCoins} onPause={() => setPaused(true)} status={<div className="planning-top-status">
       <strong>{localized.name}</strong><small>{text.failures} {state.failures} {text.times}</small>
-      <small>{retryText.retries(state.retries)}</small>
     </div>} />
     <section className="planning-intro"><strong>{text.goal(totalCats)}</strong><span>{text.calm}</span></section>
     <section className="planning-tray" aria-label={text.tray}>
-      <div className="planning-tray__heading"><span>{state.failures ? retryText.tray : text.tray}</span>
+      <div className="planning-tray__heading"><span>{text.tray}</span>
         {remainingCats.length > 8 && <small className="planning-tray__hint">↔ {text.swipe}</small>}
         <b>{text.placed} {state.placements.length} / {cats.length}</b>
       </div>
@@ -117,15 +111,13 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
     <PlanningDiagonalTutorial open={tutorial.open} onClose={tutorial.close} />
     <Modal open={rules} ariaLabel={text.rules} className="drop-rules">
-      <h2>{text.rulesTitle}</h2><ol>{[text.rule1, text.rule2, text.rule3, text.rule4(totalCats), retryText.rule].map(rule => <li key={rule}>{rule}</li>)}</ol>
+      <h2>{text.rulesTitle}</h2><ol>{[text.rule1, text.rule2, text.rule3, text.rule4(totalCats), text.rule5].map(rule => <li key={rule}>{rule}</li>)}</ol>
       <AppButton onClick={() => setRules(false)}>{text.close}</AppButton>
     </Modal>
-    <Modal open={state.phase === 'failed' && !paused && !ad} ariaLabel={text.failed} className="drop-result">
+    <Modal open={state.phase === 'failed' && !paused} ariaLabel={text.failed} className="drop-result">
       <img src={getCatAssetPath('sleeping')} alt="" /><h2>{text.failed}</h2>
-      <p>{text.wave} {wave} · {text.remaining} {state.result?.remaining} {text.cats}<br />{!canResume ? retryText.noCats : state.retries ? retryText.hint : retryText.exhausted}</p>
-      {canResume && state.retries > 0 && <AppButton onClick={() => dispatch({ type: 'edit' })}>{retryText.resume}</AppButton>}
-      {canResume && state.retries === 0 && <AppButton onClick={() => setAd(true)}>{retryText.ad}</AppButton>}
-      <AppButton variant="cream" onClick={restart}>{retryText.restart}</AppButton>
+      <p>{text.wave} {wave} · {text.remaining} {state.result?.remaining} {text.cats}<br />{text.failedTip}</p>
+      <AppButton variant="cream" onClick={restart}>{text.restart}</AppButton>
       <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>
     </Modal>
     <Modal open={state.phase === 'completed' && !paused} ariaLabel={text.completed} className="drop-result">
@@ -136,7 +128,5 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       <AppButton onClick={() => onNextLevel(levelId + 1)}>{text.next(levelId + 1)}</AppButton>
       <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>
     </Modal>
-    {ad && <RewardedAdModal open kind="planning-retry" title={retryText.ad} description={retryText.adDescription}
-      onReward={() => { dispatch({ type: 'ad-retry' }); setAd(false) }} onClose={() => setAd(false)} />}
   </main>
 }
