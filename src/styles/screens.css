@@ -107,6 +107,9 @@
   font-size: clamp(22px, 7.2cqw, 30px);
   transform: translateX(-50%);
 }
+.screen--home .home-start:active:not(:disabled) {
+  transform: translateX(-50%) translateY(3px) scale(.98);
+}
 /* One centered column (a single 關卡 button today); explicit track overrides the 4-up base. */
 .screen--home .home-nav {
   position: absolute;
