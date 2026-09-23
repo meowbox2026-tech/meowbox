@@ -11,6 +11,12 @@
 .planning-intro span { font-size: 11px; color: #967455; }
 .planning-tray { width: min(100%, 330px); margin-inline: auto; padding: 7px 8px; border: 1px solid #dec1a0; border-radius: 16px; background: #fffaf0e8; }
 .planning-tray__heading { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 5px; font-size: 12px; color: #8e674a; }
+.planning-objective { margin: 0 0 6px; padding: 5px 6px; border: 1px solid #ebc58d; border-radius: 11px; background: #fff4d8; }
+.planning-objective__heading { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; color: #77472e; }
+.planning-objective__heading strong { font-size: 11px; }
+.planning-objective__heading small { color: #a27150; font-size: 9px; font-weight: 700; }
+.planning-objective__chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 4px; }
+.planning-objective__chips span { padding: 2px 5px; border: 1px solid #e0b77e; border-radius: 7px; color: #805034; font-size: 9px; font-weight: 800; white-space: nowrap; background: #fffaf0; }
 .planning-tray__cats { display: flex; gap: 0; overflow-x: auto; padding-bottom: 3px; scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none; }
 .planning-tray__cats::-webkit-scrollbar { display: none; }
 .planning-tray__cat { position: relative; display: flex; align-items: center; justify-content: center; flex: 0 0 12.5%; min-width: 0; aspect-ratio: 1; padding: 2px; border-radius: 9px; background: #fff8e9; box-shadow: inset 0 0 0 1px #ead5b9; scroll-snap-align: start; }
@@ -66,6 +72,11 @@ button.planning-cat { z-index: 3; pointer-events: auto; cursor: pointer; }
   .planning-tray { padding-block: 4px; }
   .planning-tray__heading { margin-bottom: 2px; font-size: 10px; }
   .planning-tray__hint { font-size: 8px; }
+  .planning-objective { margin-bottom: 3px; padding: 3px 4px; }
+  .planning-objective__heading strong { font-size: 9px; }
+  .planning-objective__heading small { font-size: 8px; }
+  .planning-objective__chips { gap: 2px; margin-top: 2px; }
+  .planning-objective__chips span { padding: 1px 3px; font-size: 8px; }
   .planning-edit-actions { gap: 4px; }
   .planning-edit-actions button { min-height: 28px; font-size: 9px; }
   .screen--planning .planning-start { min-height: 37px; font-size: 15px; }

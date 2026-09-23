@@ -1,13 +1,22 @@
 import { findDropMatches, type DropBoard, type DropCell } from './dropEngine'
 import { clearPlanningSupport } from './planningGravity'
 import type { CatAsset } from '../types'
+import type { PlanningObjective } from './planningObjective'
 
 export interface PlanningCat { id: number; type: CatAsset }
 export interface Placement { catId: number; x: number; y: number }
-export interface PlanningLevel { id: number; width: number; height: number; board: DropBoard; cats: PlanningCat[]; solution: Placement[] }
+export interface PlanningLevel {
+  id: number
+  width: number
+  height: number
+  board: DropBoard
+  cats: PlanningCat[]
+  solution: Placement[]
+  objective?: PlanningObjective
+}
 export interface PlanningFrame { board: DropBoard; clearing: number[]; wave: number }
 export interface PlanningResult { frames: PlanningFrame[]; remaining: number; waves: number }
-interface MatchGroup { cells: DropCell[] }
+export interface PlanningMatchGroup { cells: DropCell[] }
 
 const copy = (board: DropBoard): DropBoard => board.map(row => row.map(cat => cat && { ...cat }))
 
@@ -33,7 +42,7 @@ export function resolvePlanning(board: DropBoard): PlanningResult {
   const frames: PlanningFrame[] = []
   let waves = 0
   while (true) {
-    const groups = findDropMatchGroups(current)
+    const groups = findPlanningMatchGroups(current)
     if (!groups.length) break
     const matches = chooseMatchGroup(groups, current).cells
     waves += 1
@@ -44,10 +53,10 @@ export function resolvePlanning(board: DropBoard): PlanningResult {
   return { frames, remaining: current.flat().filter(Boolean).length, waves }
 }
 
-function findDropMatchGroups(board: DropBoard): MatchGroup[] {
+export function findPlanningMatchGroups(board: DropBoard): PlanningMatchGroup[] {
   const matches = findDropMatches(board)
   const remaining = new Map(matches.map(cell => [`${cell.x}:${cell.y}`, cell]))
-  const groups: MatchGroup[] = []
+  const groups: PlanningMatchGroup[] = []
 
   while (remaining.size) {
     const first = remaining.values().next().value as DropCell
@@ -69,7 +78,7 @@ function findDropMatchGroups(board: DropBoard): MatchGroup[] {
   return groups
 }
 
-function chooseMatchGroup(groups: MatchGroup[], board: DropBoard): MatchGroup {
+function chooseMatchGroup(groups: PlanningMatchGroup[], board: DropBoard): PlanningMatchGroup {
   // A placed cat's number is the public priority. Fixed cats have no number,
   // so their only tie-break is the visible top-to-bottom, left-to-right anchor.
   return [...groups].sort((left, right) => {
@@ -79,7 +88,7 @@ function chooseMatchGroup(groups: MatchGroup[], board: DropBoard): MatchGroup {
   })[0]
 }
 
-function groupSortKey(group: MatchGroup, board: DropBoard): { priority: number; y: number; x: number } {
+function groupSortKey(group: PlanningMatchGroup, board: DropBoard): { priority: number; y: number; x: number } {
   const priority = Math.min(...group.cells.map(({ x, y }) => {
     const order = board[y][x]?.placementOrder
     return order ?? Number.MAX_SAFE_INTEGER

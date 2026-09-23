@@ -1,5 +1,6 @@
 import type { PlanningLevel } from '../core/planningEngine'
 import type { DropBoard } from '../core/dropEngine'
+import { validateAuthoredPlanningLevel } from '../core/planningValidation'
 
 const board: DropBoard = Array.from({ length: 8 }, () => Array(8).fill(null))
 board[7][2] = { id: 1, type: 'white' }
@@ -14,11 +15,11 @@ export const PLANNING_LEVEL_ONE_SOLUTION = [
   { catId: 7, x: 4, y: 3 }, { catId: 8, x: 4, y: 2 }, { catId: 9, x: 4, y: 1 }
 ]
 
-export const PLANNING_LEVEL_ONE: PlanningLevel = {
+export const PLANNING_LEVEL_ONE: PlanningLevel = validateAuthoredPlanningLevel({
   id: 1,
   width: 8,
   height: 8,
   board,
   cats: [{ id: 7, type: 'orange' }, { id: 8, type: 'blue' }, { id: 9, type: 'white' }],
   solution: PLANNING_LEVEL_ONE_SOLUTION
-}
+})

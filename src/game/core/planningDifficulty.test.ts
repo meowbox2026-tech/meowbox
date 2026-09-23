@@ -45,7 +45,8 @@ describe('planning difficulty analysis', () => {
     const reports = PLANNING_LEVELS.map(analyzePlanningLevel)
 
     expect(reports.every(report => report.valid && report.warnings.length === 0)).toBe(true)
-    expect(reports.slice(0, 3).map(report => report.directions[0])).toEqual(['vertical', 'horizontal', 'diagonal'])
+    expect(new Set(reports.slice(0, 3).map(report => report.directions[0]))).toEqual(new Set(['vertical', 'horizontal']))
+    expect(reports[2].directions).toContain('diagonal')
     expect(reports.slice(20).every(report => report.directions.includes('mixed'))).toBe(true)
     expect(reports[3].palettePressure).toBe(0.5)
   })
@@ -55,10 +56,7 @@ describe('planning difficulty analysis', () => {
     const outOfBand = reports.filter(report => report.score < report.target.minimum || report.score > report.target.maximum)
 
     expect(outOfBand).toEqual([])
-    expect(getPlanningProgressionWarnings(reports)).toEqual(expect.arrayContaining([
-      'level-15-jump-too-large',
-      'level-21-jump-too-large'
-    ]))
+    expect(getPlanningProgressionWarnings(reports)).toEqual([])
     expect(getPlanningProgressionWarnings(reports)).not.toEqual(expect.arrayContaining([
       'level-16-jump-too-large',
       'level-17-jump-too-large',
@@ -66,10 +64,6 @@ describe('planning difficulty analysis', () => {
       'level-19-jump-too-large',
       'level-20-jump-too-large'
     ]))
-    expect(getPlanningReadabilityWarnings(reports)).toEqual(expect.arrayContaining([
-      'level-6-solution-too-brittle',
-      'level-8-solution-too-brittle',
-      'level-10-solution-too-brittle'
-    ]))
+    expect(getPlanningReadabilityWarnings(reports)).toEqual([])
   })
 })

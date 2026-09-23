@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { getCatAssetPath } from '../../game/data/catAssets'
 import { MAX_PLANNING_LEVEL } from '../../game/data/planningLevels'
+import { getPlanningObjective, type PlanningObjectiveDirection } from '../../game/core/planningObjective'
 import { usePlanningGame } from '../../game/phaser/usePlanningGame'
 import { planningCopy } from '../../game/phaser/planningCopy'
 import { getDropCatName, useLocale, useLocalizedLevel } from '../../i18n'
@@ -34,12 +35,18 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || rules || tutorial.open, activeLevelId)
   const rewarded = useRef(false)
   const editing = state.phase === 'editing'
-  const locked = paused || rules || tutorial.open || hidden || !editing
+  const locked = paused || rules || tutorial.open || hidden || !editing || Boolean(state.validatingPlacement || state.pendingHint)
   const stars = Math.max(1, 3 - state.failures)
   const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
   const placementFailure = state.failureReason === 'placement'
+  const objective = getPlanningObjective(level)
+  const objectiveLines: Array<[PlanningObjectiveDirection, string, string, number]> = [
+    ['horizontal', '━', text.horizontalLine, objective.lineCounts.horizontal],
+    ['vertical', '┃', text.verticalLine, objective.lineCounts.vertical],
+    ['diagonal', '╱', text.diagonalLine, objective.lineCounts.diagonal]
+  ]
   useEffect(() => {
     if (paused || rules || tutorial.open || hidden || state.phase === 'completed' || state.phase === 'failed') stopBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
@@ -73,6 +80,15 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         {remainingCats.length > 8 && <small className="planning-tray__hint">↔ {text.swipe}</small>}
         <b>{text.placed} {state.placements.length} / {cats.length}</b>
       </div>
+      <section className="planning-objective" data-testid="planning-objective" aria-label={text.conditions}>
+        <div className="planning-objective__heading"><strong>{text.conditions}</strong><small>{text.conditionHint}</small></div>
+        <div className="planning-objective__chips">
+          {objectiveLines.filter(([, , , count]) => count > 0).map(([direction, symbol, label, count]) => <span aria-label={`${label} ${count}`} data-testid={`planning-objective-line-${direction}`} key={direction}>{symbol}×{count}</span>)}
+          <span aria-label={`${text.clearCount} ${objective.totalClearingCells}`} data-testid="planning-objective-cleared">▦×{objective.totalClearingCells}</span>
+          {objective.gravityWaves > 0 && <span aria-label={`${text.gravityCount} ${objective.gravityWaves}`} data-testid="planning-objective-gravity">↓×{objective.gravityWaves}</span>}
+          {objective.largestGroup > 3 && <span aria-label={`${text.mergedGroup} ${objective.largestGroup}`} data-testid="planning-objective-merge">◎×{objective.largestGroup}</span>}
+        </div>
+      </section>
       <div className="planning-tray__cats" role="list">{remainingCats.map((cat, index) =>
         <div key={cat.id} role="listitem" className={`planning-tray__cat${index === 0 ? ' is-next' : ''}`}
           aria-label={text.cardLabel(index + 1, catName(cat.type))}>
@@ -104,7 +120,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       </div>
       <div className="planning-box__label">MEOWBOX <span>8 × 8</span></div>
     </div>
-    {editing && state.failures > 0 && state.placements.length === 0 && <p className="planning-life-status" role="status">{placementFailure ? text.placementRetryNotice(state.lives) : text.retryNotice(state.lives)}</p>}
+    {state.validatingPlacement || state.pendingHint ? <p className="planning-life-status" role="status">{text.checkingPlacement}</p> : editing && state.failures > 0 && state.placements.length === 0 && <p className="planning-life-status" role="status">{placementFailure ? text.placementRetryNotice(state.lives) : text.retryNotice(state.lives)}</p>}
     <div className="planning-edit-actions">
       <button disabled={locked || !state.placements.length || state.undoUses <= 0} onClick={() => dispatch({ type: 'undo' })}>{text.undo} <span className="planning-undo-count">{state.undoUses}</span></button>
       <button disabled={locked || state.hintUses <= 0 || state.selected === undefined} onClick={() => dispatch({ type: 'hint' })}>{text.useHint} <span className="planning-undo-count">{state.hintUses}</span></button>

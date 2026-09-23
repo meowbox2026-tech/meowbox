@@ -1,5 +1,6 @@
 import type { CatAsset } from '../types'
 import type { Placement, PlanningLevel, PlanningCat } from '../core/planningEngine'
+import { validateAuthoredPlanningLevel } from '../core/planningValidation'
 import { PLANNING_LEVEL_ONE, PLANNING_LEVEL_ONE_SOLUTION } from './planningLevelOne'
 import { PLANNING_LEVELS_TWO } from './planningLevelTwo'
 import { PLANNING_LEVELS_THREE } from './planningLevelThree'
@@ -11,7 +12,10 @@ interface MatchPattern { cells: [Point, Point, Point]; placed: 0 | 1 | 2 }
 
 function boardFrom(cells: Cell[]) {
   const board = Array.from({ length: 8 }, () => Array<null | { id: number; type: CatAsset }>(8).fill(null))
-  cells.forEach(([x, y, type], index) => { board[y][x] = { id: index + 1, type } })
+  cells.forEach(([x, y, type], index) => {
+    if (board[y][x]) throw new Error(`Planning layout overlaps at ${x}:${y}`)
+    board[y][x] = { id: index + 1, type }
+  })
   return board
 }
 
@@ -22,7 +26,7 @@ function catsFrom(types: CatAsset[], startId: number): PlanningCat[] {
 function makeLevel(id: number, cells: Cell[], catTypes: CatAsset[], solutionCells: Array<[number, number]>): PlanningLevel {
   const cats = catsFrom(catTypes, id * 100 + 1)
   const solution: Placement[] = cats.map((cat, index) => ({ catId: cat.id, x: solutionCells[index][0], y: solutionCells[index][1] }))
-  return { id, width: 8, height: 8, board: boardFrom(cells), cats, solution }
+  return validateAuthoredPlanningLevel({ id, width: 8, height: 8, board: boardFrom(cells), cats, solution })
 }
 
 const PATTERNS: MatchPattern[] = [
@@ -38,15 +42,33 @@ const PATTERNS: MatchPattern[] = [
   { cells: [[1, 7], [2, 6], [3, 5]], placed: 1 }
 ]
 
+type PatternTransform = (point: Point) => Point
+
+function transformPatterns(patterns: MatchPattern[], transform: PatternTransform): MatchPattern[] {
+  return patterns.map(pattern => ({
+    ...pattern,
+    cells: pattern.cells.map(point => transform(point)) as MatchPattern['cells']
+  }))
+}
+
+const PATTERN_VARIANTS = [
+  PATTERNS,
+  transformPatterns(PATTERNS, ([x, y]) => [7 - x, y]),
+  transformPatterns(PATTERNS, ([x, y]) => [x, 7 - y]),
+  transformPatterns(PATTERNS, ([x, y]) => [y, 7 - x]),
+  transformPatterns(PATTERNS, ([x, y]) => [7 - x, 7 - y])
+]
+
 const FOUR_CATS: CatAsset[] = ['orange', 'blue', 'white', 'alone']
 
-function makeMixedLevel(id: number, patternOrder: number[]): PlanningLevel {
+function makeMixedLevel(id: number, patternSet: number, patternOrder: number[]): PlanningLevel {
   const palette = id <= 3 ? FOUR_CATS.slice(0, 3) : FOUR_CATS
+  const patterns = PATTERN_VARIANTS[patternSet]
   const cells: Cell[] = []
   const catTypes: CatAsset[] = []
   const solutionCells: Point[] = []
   patternOrder.forEach((patternIndex, index) => {
-    const pattern = PATTERNS[patternIndex]
+    const pattern = patterns[patternIndex]
     const type = palette[(index + id) % palette.length]
     pattern.cells.forEach(([x, y], cellIndex) => {
       if (cellIndex === pattern.placed) solutionCells.push([x, y])
@@ -59,15 +81,15 @@ function makeMixedLevel(id: number, patternOrder: number[]): PlanningLevel {
 
 // The first ready group deliberately rotates: horizontal, diagonal, then mixed.
 // Later layouts reuse every direction with gaps and an uneven silhouette.
-export const PLANNING_LEVEL_TWO = makeMixedLevel(2, [0, 2, 8, 9])
-export const PLANNING_LEVEL_THREE = makeMixedLevel(3, [8, 0, 2, 9, 4])
-export const PLANNING_LEVEL_FOUR = makeMixedLevel(4, [2, 9, 0, 8, 4, 7])
-export const PLANNING_LEVEL_FIVE = makeMixedLevel(5, [0, 8, 2, 9, 4, 7, 1])
-export const PLANNING_LEVEL_SIX = makeMixedLevel(6, [8, 1, 3, 9, 6, 2, 5, 0])
-export const PLANNING_LEVEL_SEVEN = makeMixedLevel(7, [2, 8, 0, 9, 4, 7, 1, 5, 6])
-export const PLANNING_LEVEL_EIGHT = makeMixedLevel(8, [0, 2, 8, 1, 3, 9, 4, 7, 5, 6])
-export const PLANNING_LEVEL_NINE = makeMixedLevel(9, [8, 9, 2, 3, 0, 1, 7, 4, 6, 5])
-export const PLANNING_LEVEL_TEN = makeMixedLevel(10, [3, 1, 9, 6, 8, 2, 5, 0, 7, 4])
+export const PLANNING_LEVEL_TWO = makeMixedLevel(2, 0, [0, 2, 8, 9])
+export const PLANNING_LEVEL_THREE = makeMixedLevel(3, 1, [1, 3, 7, 5, 9])
+export const PLANNING_LEVEL_FOUR = makeMixedLevel(4, 2, [2, 4, 0, 7, 8, 3])
+export const PLANNING_LEVEL_FIVE = makeMixedLevel(5, 3, [8, 9, 6, 4, 1, 7, 0])
+export const PLANNING_LEVEL_SIX = makeMixedLevel(6, 4, [3, 5, 2, 8, 0, 6, 9, 7])
+export const PLANNING_LEVEL_SEVEN = makeMixedLevel(7, 0, [2, 8, 0, 9, 4, 7, 1, 5, 6])
+export const PLANNING_LEVEL_EIGHT = makeMixedLevel(8, 2, [0, 2, 8, 1, 3, 9, 4, 7, 5, 6])
+export const PLANNING_LEVEL_NINE = makeMixedLevel(9, 1, [8, 9, 2, 3, 0, 1, 7, 4, 6, 5])
+export const PLANNING_LEVEL_TEN = makeMixedLevel(10, 4, [3, 1, 9, 6, 8, 2, 5, 0, 7, 4])
 
 export const PLANNING_LEVELS = [
   PLANNING_LEVEL_ONE,

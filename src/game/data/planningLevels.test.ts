@@ -20,8 +20,8 @@ describe('authored planning levels', () => {
   it('keeps every board at 8x8 and increases the authored puzzle density', () => {
     expect(PLANNING_LEVELS).toHaveLength(25)
     expect(PLANNING_LEVELS.every(level => level.width === 8 && level.height === 8)).toBe(true)
-    expect(PLANNING_LEVELS.map(level => level.board.flat().filter(Boolean).length)).toEqual([6, 8, 10, 12, 14, 16, 18, 20, 20, 20, 20, 20, 22, 22, 24, 26, 28, 30, 32, 36, 37, 38, 38, 39, 39])
-    expect(PLANNING_LEVELS.map(level => level.cats.length)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 11, 11, 12, 13, 14, 15, 16, 18, 19, 20, 20, 21, 21])
+    expect(PLANNING_LEVELS.map(level => level.board.flat().filter(Boolean).length)).toEqual([6, 8, 10, 12, 14, 16, 18, 20, 20, 20, 20, 20, 22, 22, 24, 26, 28, 30, 32, 36, 31, 32, 36, 39, 39])
+    expect(PLANNING_LEVELS.map(level => level.cats.length)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 11, 11, 12, 13, 14, 15, 16, 18, 16, 17, 18, 21, 21])
   })
 
   it('starts without a free match and has a complete authored solution for each level', () => {
@@ -68,6 +68,13 @@ describe('authored planning levels', () => {
     expect(PLANNING_LEVELS[9].cats.length).toBeGreaterThan(8)
   })
 
+  it('gives every level a distinct authored board signature', () => {
+    const signatures = PLANNING_LEVELS.map(level => JSON.stringify(level.board))
+    expect(new Set(signatures)).toHaveLength(25)
+    const silhouettes = PLANNING_LEVELS.map(level => level.board.map(row => row.map(cat => cat ? '#' : '.').join('')).join('/'))
+    expect(new Set(silhouettes)).toHaveLength(25)
+  })
+
   it('adds a second chapter with four matching cats and fixed authored density', () => {
     const chapterTwo = PLANNING_LEVELS.slice(10, 20)
     expect(chapterTwo.map(level => level.id)).toEqual([11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
@@ -101,8 +108,8 @@ describe('authored planning levels', () => {
   it('adds a fourth chapter up to the 8x8 capacity without adding a fifth cat type', () => {
     const chapterFour = PLANNING_LEVELS.slice(20)
     expect(chapterFour.map(level => level.id)).toEqual([21, 22, 23, 24, 25])
-    expect(chapterFour.map(level => level.cats.length)).toEqual([19, 20, 20, 21, 21])
-    expect(chapterFour.map(level => level.board.flat().filter(Boolean).length)).toEqual([37, 38, 38, 39, 39])
+    expect(chapterFour.map(level => level.cats.length)).toEqual([16, 17, 18, 21, 21])
+    expect(chapterFour.map(level => level.board.flat().filter(Boolean).length)).toEqual([31, 32, 36, 39, 39])
     expect(chapterFour.every(level => new Set(level.cats.map(cat => cat.type)).size === 4 && !level.cats.some(cat => cat.type === 'alone'))).toBe(true)
     expect(chapterFour.every(level => level.board.flat().filter(Boolean).length + level.cats.length <= 64)).toBe(true)
   })
@@ -113,7 +120,6 @@ describe('authored planning levels', () => {
       const solved = arrangeCats(level, level.solution)!
       const result = resolvePlanning(solved)
       boardDirections(solved).forEach(direction => directions.add(direction))
-      expect(boardDirections(solved)).toContain('diagonal')
       expect(result.waves, `level ${level.id} waves`).toBeGreaterThanOrEqual(5)
       expect(result.frames.filter((frame, index) => index % 2 === 0 && frame.clearing.length > 0).length, `level ${level.id} clears`).toBeGreaterThanOrEqual(5)
     }
@@ -140,7 +146,8 @@ describe('authored planning levels', () => {
         if (after && frame.board.some((row, y) => row.some((cat, x) => cat && !cleared.has(cat.id) && after[y][x]?.id !== cat.id))) gravityFrames += 1
       }
       expect(directions.size, `level ${level.id} has no resolved match`).toBeGreaterThan(0)
-      if (level.id < 20) expect(gravityFrames, `level ${level.id} should be a readable bridge`).toBe(0)
+      if (level.id < 17) expect(gravityFrames, `level ${level.id} should be a readable bridge`).toBe(0)
+      if (level.id === 17 || level.id === 18 || level.id === 19) expect(gravityFrames, `level ${level.id} gravity`).toBeGreaterThan(0)
       if (level.id === 20) expect(gravityFrames, `level ${level.id} gravity`).toBeGreaterThan(0)
     }
     expect(chapterDirections).toEqual(new Set(['horizontal', 'vertical']))

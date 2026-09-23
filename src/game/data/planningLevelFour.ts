@@ -1,5 +1,6 @@
 import type { DropBoard } from '../core/dropEngine'
 import type { PlanningLevel } from '../core/planningEngine'
+import { validateAuthoredPlanningLevel } from '../core/planningValidation'
 import type { CatAsset } from '../types'
 
 type Point = readonly [x: number, y: number]
@@ -28,6 +29,16 @@ const CENTER_BRANCH_TYPE: CatAsset = 'white'
 const DIAGONAL_BRANCH = pattern([[5, 4], [4, 5], [3, 6]], 1)
 const DIAGONAL_BRANCH_TYPE: CatAsset = 'fishLover'
 
+type Transform = (point: Point) => Point
+
+function transformPattern(item: Pattern, transform: Transform): Pattern {
+  return { ...item, cells: item.cells.map(point => transform(point)) as Pattern['cells'] }
+}
+
+function transformPatterns(items: Pattern[], transform: Transform): Pattern[] {
+  return items.map(item => transformPattern(item, transform))
+}
+
 function overlapLevel(id: number, patterns: Pattern[], types: CatAsset[]): PlanningLevel {
   const board: DropBoard = Array.from({ length: 8 }, () => Array<null | { id: number; type: CatAsset }>(8).fill(null))
   const cats = patterns.map((_, index) => ({ id: id * 100 + index + 1, type: types[index] }))
@@ -43,18 +54,24 @@ function overlapLevel(id: number, patterns: Pattern[], types: CatAsset[]): Plann
     if (board[y][x] && board[y][x]!.type !== type) throw new Error(`Planning level ${id} type overlap at ${x}:${y}`)
     if (!board[y][x]) { board[y][x] = { id: fixedId, type }; fixedId += 1 }
   }))
-  return { id, width: 8, height: 8, board, cats, solution }
+  return validateAuthoredPlanningLevel({ id, width: 8, height: 8, board, cats, solution })
 }
 
-function chapterLevel(id: number, extras: Array<[Pattern, CatAsset]>): PlanningLevel {
-  return overlapLevel(id, [...BASE_PATTERNS, ...extras.map(([item]) => item)], [...BASE_TYPES, ...extras.map(([, type]) => type)])
+function chapterLevel(id: number, transform: Transform, baseCount: number, extras: Array<[Pattern, CatAsset]>): PlanningLevel {
+  const patterns = [...transformPatterns(BASE_PATTERNS, transform).slice(0, baseCount), ...extras.map(([item]) => transformPattern(item, transform))]
+  return overlapLevel(id, patterns, [...BASE_TYPES.slice(0, baseCount), ...extras.map(([, type]) => type)])
 }
 
-export const PLANNING_LEVEL_TWENTY_ONE = chapterLevel(21, [[RIGHT_BRANCH, RIGHT_BRANCH_TYPE]])
-export const PLANNING_LEVEL_TWENTY_TWO = chapterLevel(22, [[RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [HORIZONTAL_BRANCH, HORIZONTAL_BRANCH_TYPE]])
-export const PLANNING_LEVEL_TWENTY_THREE = chapterLevel(23, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [DIAGONAL_BRANCH, DIAGONAL_BRANCH_TYPE]])
-export const PLANNING_LEVEL_TWENTY_FOUR = chapterLevel(24, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [pattern([[5, 4], [4, 5], [3, 6]], 0), DIAGONAL_BRANCH_TYPE]])
-export const PLANNING_LEVEL_TWENTY_FIVE = chapterLevel(25, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [DIAGONAL_BRANCH, DIAGONAL_BRANCH_TYPE]])
+const IDENTITY: Transform = ([x, y]) => [x, y]
+const FLIP_X: Transform = ([x, y]) => [7 - x, y]
+// 21–25 share the expert rules but change the density and branch shape each
+// time: a right branch, a mirrored branch, a full lattice, a merge, then a
+// final mirrored merge.
+export const PLANNING_LEVEL_TWENTY_ONE = chapterLevel(21, IDENTITY, 15, [[RIGHT_BRANCH, RIGHT_BRANCH_TYPE]])
+export const PLANNING_LEVEL_TWENTY_TWO = chapterLevel(22, FLIP_X, 15, [[RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [HORIZONTAL_BRANCH, HORIZONTAL_BRANCH_TYPE]])
+export const PLANNING_LEVEL_TWENTY_THREE = chapterLevel(23, FLIP_X, 18, [])
+export const PLANNING_LEVEL_TWENTY_FOUR = chapterLevel(24, IDENTITY, 18, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [pattern([[5, 4], [4, 5], [3, 6]], 0), DIAGONAL_BRANCH_TYPE]])
+export const PLANNING_LEVEL_TWENTY_FIVE = chapterLevel(25, FLIP_X, 18, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [DIAGONAL_BRANCH, DIAGONAL_BRANCH_TYPE]])
 
 export const PLANNING_LEVELS_FOUR = [
   PLANNING_LEVEL_TWENTY_ONE,

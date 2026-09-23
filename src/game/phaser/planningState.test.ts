@@ -72,6 +72,40 @@ describe('planning failure boundaries', () => {
     expect(failed.failureReason).toBe('placement')
   })
 
+  it('keeps the board locked until an off-thread placement result arrives', () => {
+    let state = freshPlanning(level)
+    state = reduce(state, { type: 'place-pending', x: level.solution[0].x, y: level.solution[0].y })
+    expect(state.validatingPlacement).toEqual(level.solution[0])
+    expect(state.placements).toEqual([])
+    expect(reduce(state, { type: 'place', x: level.solution[1].x, y: level.solution[1].y })).toBe(state)
+
+    state = reduce(state, { type: 'placement-result', safe: true })
+    expect(state.validatingPlacement).toBeUndefined()
+    expect(state.placements).toEqual([level.solution[0]])
+    expect(state.selected).toBe(level.cats[1].id)
+  })
+
+  it('spends a life only after the async result proves a pending placement dead', () => {
+    let state = freshPlanning(level)
+    state = reduce(state, { type: 'place-pending', x: 0, y: 0 })
+    expect(state.lives).toBe(3)
+    state = reduce(state, { type: 'placement-result', safe: false })
+    expect(state.lives).toBe(2)
+    expect(state.placements).toEqual([])
+    expect(state.failureReason).toBe('placement')
+  })
+
+  it('keeps hint search pending without consuming the hint twice', () => {
+    let state = freshPlanning(level)
+    state = reduce(state, { type: 'hint-pending' })
+    expect(state.pendingHint).toBe(true)
+    expect(reduce(state, { type: 'hint-pending' })).toBe(state)
+    state = reduce(state, { type: 'hint-result', hintCell: level.solution[0] })
+    expect(state.pendingHint).toBe(false)
+    expect(state.hintUses).toBe(0)
+    expect(state.hintCell).toEqual(level.solution[0])
+  })
+
   it('only opens the terminal failure state after all three lives are spent', () => {
     let state = failedAttempt()
     expect(state.phase).toBe('editing')
