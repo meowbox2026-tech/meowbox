@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { PLANNING_LEVEL_ONE as level } from '../data/planningLevelOne'
 import { PLANNING_LEVELS } from '../data/planningLevels'
-import { canCompletePlanning, findSafePlacement, shouldValidatePlacementImmediately } from './planningSolvability'
+import { canCompletePlanning, findSafePlacement } from './planningSolvability'
 
 describe('planning placement solvability', () => {
   it('accepts the authored route and rejects a proven dead first placement', () => {
@@ -24,11 +24,6 @@ describe('planning placement solvability', () => {
       solution: [{ catId: 1, x: 5, y: 7 }, { catId: 2, x: 6, y: 7 }, { catId: 3, x: 7, y: 7 }]
     }
     expect(canCompletePlanning(multiple, [{ catId: 1, x: 0, y: 0 }])).toBe(true)
-  })
-
-  it('limits immediate validation to levels 1 through 20', () => {
-    expect(shouldValidatePlacementImmediately({ ...level, id: 20 })).toBe(true)
-    expect(shouldValidatePlacementImmediately({ ...level, id: 21 })).toBe(false)
   })
 
   it('recognizes every authored prefix through level twenty', () => {

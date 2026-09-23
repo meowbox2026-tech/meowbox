@@ -52,7 +52,7 @@ export const ja: Strings = {
     note: '🐾 遊び続けて、もっとかわいい猫を解放しよう！'
   },
   game: {
-    rescue: '{done} / {target} 匹救出', statusLabel: 'ステージ状態', livesLabel: '残りライフ', deadDropNotice: '配置全体の判定に失敗したため、ライフを1つ使って配置をリセットしました。', timeLeft: '時間メモ',
+    rescue: '{done} / {target} 匹救出', statusLabel: 'ステージ状態', timeLeft: '時間メモ',
     preview: '次に落ちる2匹', previewThree: '次に落ちる3匹', previewFour: '次に落ちる4匹', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
     nowAlt: '今：{name}', nextAlt: '次：{name}', soonAlt: 'その次：{name}', laterAlt: 'その後：{name}', traitScratch: 'ひっかき', traitHungry: 'くいしんぼ', board: '猫の箱',
     columnAction: '{col}列目、{name}を落とす', ceilingDanger: '⚠ 注意！天井が近いよ',
@@ -63,8 +63,6 @@ export const ja: Strings = {
     rule2Title: '同じ猫3匹で消える', rule2Desc: 'タテ・ヨコ・2種のナナメで、3匹以上つながると消えます。',
     rule3Title: '落ちて連鎖', rule3Desc: '上の猫が落ちて、またつながるとコンボ発生！',
     rule4Title: '箱の天井に注意', rule4Desc: '消去と落下の後、最上段に猫が残ると失敗です。',
-    rulesFooter: 'このステージ：猫をすべて配置してから、消去と重力を見ます。ライフは3つです。',
-    rulesExtra: '現在のメインラインは25面までです。失敗後の復活や途中盤面の続行はありません。配置全体の判定に失敗した時だけライフが減り、3つ使い切ったらやり直します。',
     rulesCta: 'わかった、遊ぼう！', completedAria: 'クリア！', completedTitle: 'レベル {id} クリア！',
     starsAria: '{stars}スター', summary: '{cleared}匹救出 · {score}点',
     summaryLine2: '最高コンボ ×{best} · {moves}回落下', reward: '🐾 {amount} 肉球コインを保存',
@@ -72,8 +70,8 @@ export const ja: Strings = {
     partyDone: '箱長のパーティーは大成功 ♡', nextHappiness: '次の幸せの箱が待ってるよ ♡',
     failedCeilingAria: '箱がいっぱい', failedGenericAria: 'チャレンジ終了',
     failedCeilingTitle: 'あわわ、箱がいっぱい！',
-    failedTimeTitle: '時間切れ、ひと休みしようニャ！', failedLivesTitle: '3つのライフを使い切った', failedProgress: '{cleared} / {target} 匹救出。',
-    ceilingTip: '積み方を散らして、余白を作ってみて。', livesTip: 'ライフは、落下が行き止まりになると証明された時だけ減ります。3つ使い切ったらレベルを最初からやり直します。', otherTip: '3匹ラインを探して、猫を連れて帰ろう。',
+    failedTimeTitle: '時間切れ、ひと休みしようニャ！', failedProgress: '{cleared} / {target} 匹救出。',
+    ceilingTip: '積み方を散らして、余白を作ってみて。', otherTip: '3匹ラインを探して、猫を連れて帰ろう。',
     retry: 'もう一度ニャ', backCottage: 'お家へ帰る', hintTitle: '猫にのぞいてもらう',
     hintDesc: '視聴後、安全めの列に印をつけます。1回につき1回まで。',
     comboSuccess: 'ニャ！マッチ成功', combo: 'COMBO ×{count}', matchCombo: 'ニャーニャー ×{count}',

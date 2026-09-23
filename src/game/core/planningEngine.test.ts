@@ -113,6 +113,27 @@ describe('first planning puzzle', () => {
     expect(result.frames[2].clearing).toEqual([4, 5, 6])
   })
 
+  it('clears a gravity cascade before returning to another original group', () => {
+    const board = Array.from({ length: 8 }, () => Array(8).fill(null))
+    board[4][0] = { id: 4, type: 'blue' }
+    board[5][0] = { id: 1, type: 'orange', placementOrder: 1 }
+    board[6][0] = { id: 2, type: 'orange', placementOrder: 2 }
+    board[7][0] = { id: 3, type: 'orange', placementOrder: 3 }
+    board[7][1] = { id: 5, type: 'blue' }
+    board[7][2] = { id: 6, type: 'blue' }
+    board[7][5] = { id: 7, type: 'orange', placementOrder: 4 }
+    board[7][6] = { id: 8, type: 'orange', placementOrder: 5 }
+    board[7][7] = { id: 9, type: 'orange', placementOrder: 6 }
+
+    const result = resolvePlanning(board)
+
+    expect(result.frames.filter(frame => frame.clearing.length).map(frame => frame.clearing)).toEqual([
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9]
+    ])
+  })
+
   it('clears a crossing shape as one connected group', () => {
     const board = Array.from({ length: 8 }, () => Array(8).fill(null))
     board[2][3] = { id: 1, type: 'blue' }

@@ -2,21 +2,15 @@ import { arrangeCats, resolvePlanning, type Placement, type PlanningLevel } from
 import type { DropBoard } from './dropEngine'
 
 type SolvabilityWorkerRequest =
-  | { kind: 'can-complete'; level: PlanningLevel; placements: Placement[] }
   | { kind: 'find-safe'; level: PlanningLevel; placements: Placement[] }
 type SolvabilityWorkerResponse =
-  | { kind: 'can-complete'; safe: boolean }
   | { kind: 'find-safe'; placement?: Placement }
-
-export const IMMEDIATE_PLACEMENT_VALIDATION_MAX_LEVEL = 20
 
 interface SearchContext {
   level: PlanningLevel
   memo: Map<string, boolean>
-  deadline?: number
 }
 
-const SEARCH_EXPIRED = Symbol('search-expired')
 export const PLANNING_CHECK_TIMEOUT_MS = 150
 
 const copyBoard = (board: DropBoard): DropBoard => board.map(row => row.map(cat => cat && { ...cat }))
@@ -38,7 +32,6 @@ function placeNext(board: DropBoard, level: PlanningLevel, placements: Placement
 }
 
 function canComplete(board: DropBoard, placements: Placement[], context: SearchContext): boolean {
-  if (context.deadline !== undefined && performance.now() >= context.deadline) throw SEARCH_EXPIRED
   const key = prefixKey(placements)
   const cached = context.memo.get(key)
   if (cached !== undefined) return cached
@@ -83,14 +76,11 @@ export function canCompletePlanning(level: PlanningLevel, placements: Placement[
   return canComplete(board, placements, { level, memo: new Map() })
 }
 
-export function shouldValidatePlacementImmediately(level: PlanningLevel): boolean {
-  return level.id <= IMMEDIATE_PLACEMENT_VALIDATION_MAX_LEVEL
-}
-
 /** Finds a safe cell for the currently selected cat without assuming one unique answer. */
 export function findSafePlacement(level: PlanningLevel, placements: Placement[]): Placement | undefined {
   const cat = level.cats[placements.length]
   if (!cat) return undefined
+  if (knownCompletion(level, placements)) return level.solution[placements.length]
   const board = arrangeCats(level, placements)
   if (!board) return undefined
   for (let y = 0; y < level.height; y += 1) for (let x = 0; x < level.width; x += 1) {
@@ -131,26 +121,7 @@ function runSolvabilityWorker(request: SolvabilityWorkerRequest, signal?: AbortS
   })
 }
 
-/** Runs the exact solver off the UI thread so a dense level cannot freeze taps. */
-export async function canCompletePlanningAsync(level: PlanningLevel, placements: Placement[], signal?: AbortSignal): Promise<boolean | undefined> {
-  if (signal?.aborted) return undefined
-  const board = arrangeCats(level, placements)
-  if (!board) return false
-  if (placements.length === level.cats.length) return resolvePlanning(board).remaining === 0
-  if (knownCompletion(level, placements)) return true
-  const response = await runSolvabilityWorker({ kind: 'can-complete', level, placements }, signal)
-  if (response?.kind === 'can-complete') return response.safe
-  if (typeof Worker === 'undefined') {
-    try {
-      return canComplete(board, placements, { level, memo: new Map(), deadline: performance.now() + 16 })
-    } catch (error) {
-      if (error !== SEARCH_EXPIRED) throw error
-    }
-  }
-  return undefined
-}
-
-/** Runs hint search off the UI thread for the same reason as placement validation. */
+/** Runs hint search off the UI thread so a dense level cannot freeze the board. */
 export async function findSafePlacementAsync(level: PlanningLevel, placements: Placement[], signal?: AbortSignal): Promise<Placement | undefined> {
   if (signal?.aborted) return undefined
   if (knownCompletion(level, placements)) return level.solution[placements.length]

@@ -5,8 +5,6 @@
 .screen--settings { background-image: url('/assets/bg-main.webp'); }
 
 .screen--home .top-bar { justify-content: flex-start; }
-.home-lives { position: absolute; z-index: 3; top: max(21px, calc(env(safe-area-inset-top) + 7px)); left: 16px; display: flex; min-height: 43px; align-items: center; gap: 5px; padding: 4px 7px; border: 2px solid rgba(123,67,34,.4); border-radius: 16px; color: #764130; background: linear-gradient(180deg, #fffdf7, #f1d2b7); box-shadow: 0 3px 0 rgba(105,52,25,.28); }
-.home-lives span { color: #f35176; font-size: 30px; line-height: .5; text-shadow: 0 2px 0 #a92f4d; } .home-lives strong { font-size: 21px; } .home-lives small { color: #925e44; font-size: 12px; font-weight: 800; } .home-lives b { display: grid; width: 26px; height: 26px; place-items: center; border: 2px solid #237d2a; border-radius: 50%; color: white; font-size: 21px; background: #58c839; }
 .home-brand { width: min(72%, 310px); margin: clamp(58px, 11dvh, 96px) auto 8px; padding: 16px 10px 14px; border: 5px solid #6d3a26; border-radius: 28px; color: #fff3d7; text-align: center; background: #63301e; box-shadow: inset 0 0 0 4px rgba(255,214,141,.24), 0 7px 0 rgba(70,31,18,.45); transform: rotate(-1deg); }
 .home-brand__ears { position: absolute; margin-top: -31px; margin-left: -17px; color: #ffb0b7; font-size: 42px; text-shadow: 0 3px 0 #63301e; }
 .home-brand h1 { margin: 0; color: #fff4de; font-size: clamp(44px, 13vw, 68px); font-weight: 1000; letter-spacing: -.09em; line-height: .76; text-shadow: 0 5px 0 #9a4c2e; } .home-brand h1 b { color: #ffd162; } .home-brand p { margin: 12px -4px -3px; color: #ffe1a0; font-size: clamp(15px,4.1vw,20px); font-weight: 900; letter-spacing: .08em; }
@@ -90,49 +88,6 @@
   .home-start { min-height: 90px; margin-top: -6px; }
   .home-nav { bottom: calc(env(safe-area-inset-bottom) + 15px); }
   .home-nav__button { font-size: 12px; }
-}
-
-/* The supplied life artwork owns the heart and add affordance; HTML keeps the value readable. */
-.home-lives {
-  width: 120px;
-  height: 48px;
-  min-height: 48px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  gap: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.home-lives__art {
-  position: absolute;
-  top: 50%;
-  left: 55%;
-  width: 123%;
-  max-width: none;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-.home-lives strong,
-.home-lives small {
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  margin: 0;
-  transform: translateY(-50%);
-  font-family: var(--font-cute);
-}
-.home-lives strong {
-  left: 42%;
-  color: #70402b;
-  font-size: clamp(19px, 5.2vw, 23px);
-}
-.home-lives small {
-  left: 52%;
-  color: #70402b;
-  font-size: clamp(10px, 2.8vw, 12px);
-  font-weight: 900;
-  white-space: nowrap;
 }
 
 /* iPhone SE 375x667 @100% is the development baseline; larger phones scale up. */

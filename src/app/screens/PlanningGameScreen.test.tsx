@@ -90,7 +90,7 @@ describe('8x8 planning level through the game entry point', () => {
     expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
     expect([...container.querySelectorAll('.planning-cat b')].map(node => node.textContent).sort()).toEqual(['1', '2', '3'])
     expect(screen.getByRole('button', { name: '開始救援' })).toBeEnabled()
-    expect(screen.getByLabelText('生命 3')).toBeInTheDocument()
+    expect(screen.queryByLabelText(/生命/)).toBeNull()
     act(() => vi.advanceTimersByTime(120000))
     expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
     fireEvent.click(screen.getByRole('button', { name: '拿回 3 奶霜' }))
@@ -142,29 +142,14 @@ describe('8x8 planning level through the game entry point', () => {
     fireEvent.click(screen.getByRole('button', { name: '前往第 2 關' }))
     expect(next).toHaveBeenCalledWith(2)
   })
-  it('spends lives immediately on a proven dead click and resets before the next try', async () => {
+  it('keeps arbitrary placements playable and removes the life UI', async () => {
     mount()
-    const fail = async (lives: number) => {
-      fireEvent.click(cell(1, 1))
-      await flushAsyncState()
-      expect(screen.getByLabelText(`生命 ${lives}`)).toBeInTheDocument()
-    }
-    await fail(2)
-    expect(screen.queryByRole('dialog', { name: '點擊判定失敗' })).toBeNull()
-    expect(screen.queryByRole('button', { name: /從中斷處修改/ })).toBeNull()
-    expect(screen.queryByRole('button', { name: /看廣告/ })).toBeNull()
-    expect(screen.getByText('失敗 1 次')).toBeInTheDocument()
-    expect(screen.getByLabelText('生命 2')).toBeInTheDocument()
-    expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
-
-    await fail(1)
-    expect(screen.getByLabelText('生命 1')).toBeInTheDocument()
-    expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
-
-    await fail(0)
-    expect(screen.getByRole('dialog', { name: '點擊判定失敗' })).toBeInTheDocument()
-    expect(screen.getByLabelText('生命 0')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /看廣告/ })).toBeNull()
+    fireEvent.click(cell(1, 1))
+    await waitForPlaced(1)
+    expect(screen.queryByLabelText(/生命/)).toBeNull()
+    expect(screen.queryByText(/扣除.*生命/)).toBeNull()
+    expect(screen.getByText('失敗 0 次')).toBeInTheDocument()
+    expect(screen.getByText('已安排 1 / 3')).toBeInTheDocument()
   })
   it('pauses playback and discards an old run when restarting', async () => {
     mount()

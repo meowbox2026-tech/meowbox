@@ -52,7 +52,7 @@ export const zhTW: Strings = {
     note: '🐾 持續遊玩，解鎖更多可愛貓咪！'
   },
   game: {
-    rescue: '救出 {done} / {target}', statusLabel: '關卡狀態', livesLabel: '剩餘生命', deadDropNotice: '完整配置結算失敗，已扣一條生命並清空本次配置。', timeLeft: '時間提示',
+    rescue: '救出 {done} / {target}', statusLabel: '關卡狀態', timeLeft: '時間提示',
     preview: '待落下的兩隻貓咪', previewThree: '待落下的三隻貓咪', previewFour: '待落下的四隻貓咪', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
     nowAlt: '現在：{name}', nextAlt: '下一隻：{name}', soonAlt: '再下一隻：{name}', laterAlt: '之後：{name}', traitScratch: '愛抓抓', traitHungry: '貪吃', board: '貓咪紙箱',
     columnAction: '第 {col} 欄，放下{name}', ceilingDanger: '⚠ 小心！快到頂端了',
@@ -63,8 +63,6 @@ export const zhTW: Strings = {
     rule2Title: '三隻同款連線', rule2Desc: '橫向、直向、兩種斜向，連續 3 隻以上一起消除。',
     rule3Title: '掉落再連鎖', rule3Desc: '上方貓咪往下掉，再連線就觸發 Combo！',
     rule4Title: '留意箱子頂端', rule4Desc: '消除與掉落結束後，仍有貓咪佔到最上排就失敗。',
-    rulesFooter: '本關：先完成全部配置，再依序觀看消除與重力。每關 3 條生命。',
-    rulesExtra: '目前主線只有第 1–25 關。失敗後不能復活或接回半盤；完整配置結算失敗才扣生命，三條用完就重新開始。',
     rulesCta: '知道了，來玩喵！', completedAria: '過關囉！', completedTitle: '第 {id} 關完成！',
     starsAria: '{stars} 顆星', summary: '救出 {cleared} 隻 · {score} 分',
     summaryLine2: '最佳 Combo ×{best} · 落下 {moves} 次', reward: '🐾 {amount} 貓掌幣已存入',
@@ -72,8 +70,8 @@ export const zhTW: Strings = {
     partyDone: '箱長的派對完成了 ♡', nextHappiness: '下一箱幸福正在等你 ♡',
     failedCeilingAria: '紙箱裝滿了', failedGenericAria: '挑戰結束',
     failedCeilingTitle: '哎呀，紙箱裝滿了！',
-    failedTimeTitle: '時間到，休息一下喵！', failedLivesTitle: '三條生命用完了', failedProgress: '已救出 {cleared} / {target} 隻貓咪。',
-    ceilingTip: '試試分散堆疊，留出更多空間。', livesTip: '只有能證明會進入死路的操作才會扣生命；三條用完後請重新開始本關。', otherTip: '再找找三連線，貓咪等你帶牠們回家。',
+    failedTimeTitle: '時間到，休息一下喵！', failedProgress: '已救出 {cleared} / {target} 隻貓咪。',
+    ceilingTip: '試試分散堆疊，留出更多空間。', otherTip: '再找找三連線，貓咪等你帶牠們回家。',
     retry: '再試一次喵', backCottage: '回溫馨小屋', hintTitle: '讓貓咪幫你看一眼',
     hintDesc: '完成觀看後，標出一個較安全的欄位。本局限一次。',
     comboSuccess: '喵！配對成功', combo: 'COMBO ×{count}', matchCombo: '喵喵 ×{count}',

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import { usePageSuspended } from '../../app/usePageSuspended'
 import { arrangeCats } from '../core/planningEngine'
-import { canCompletePlanningAsync, findSafePlacementAsync, shouldValidatePlacementImmediately } from '../core/planningSolvability'
+import { findSafePlacementAsync } from '../core/planningSolvability'
 import { getPlanningLevel } from '../data/planningLevels'
 import { freshPlanning, planningReducer, type PlanningState, type PlanningAction } from './planningState'
 
@@ -13,28 +13,13 @@ export function usePlanningGame(paused: boolean, levelId = 1) {
     () => freshPlanning(level)
   )
   const send = useCallback((action: PlanningAction) => {
-    if (action.type === 'place' && !state.validationDeferred && shouldValidatePlacementImmediately(level)) {
-      dispatch({ type: 'place-pending', x: action.x, y: action.y })
-      return
-    }
     if (action.type === 'hint') {
       dispatch({ type: 'hint-pending' })
       return
     }
     dispatch(action)
-  }, [level, state.validationDeferred])
+  }, [level])
   const hidden = usePageSuspended()
-  useEffect(() => {
-    if (!state.validatingPlacement) return
-    const controller = new AbortController()
-    const placements = [...state.placements, state.validatingPlacement]
-    void canCompletePlanningAsync(level, placements, controller.signal).then(safe => {
-      if (!controller.signal.aborted) dispatch({ type: 'placement-result', safe: safe !== false, deferred: safe === undefined })
-    }).catch(() => {
-      if (!controller.signal.aborted) dispatch({ type: 'placement-result', safe: true, deferred: true })
-    })
-    return () => controller.abort()
-  }, [level, state.placements, state.validatingPlacement])
   useEffect(() => {
     if (!state.pendingHint) return
     const controller = new AbortController()

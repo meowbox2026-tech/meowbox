@@ -7,14 +7,23 @@ interface Pattern { cells: [Point, Point, Point]; placed: 0 | 1 | 2 }
 const pattern = (cells: Pattern['cells'], placed: Pattern['placed'] = 1): Pattern => ({ cells, placed })
 const horizontal = (start: number, y: number, placed: Pattern['placed'] = 1): Pattern => pattern([[start, y], [start + 1, y], [start + 2, y]] as Pattern['cells'], placed)
 const vertical = (x: number, start: number, placed: Pattern['placed'] = 1): Pattern => pattern([[x, start], [x, start + 1], [x, start + 2]] as Pattern['cells'], placed)
+const horizontalRows = (start: number, count = 8): Pattern[] => Array.from({ length: count }, (_, row) => horizontal(start, row))
 
-const ROW_GROUPS: Pattern[] = Array.from({ length: 8 }, (_, row) => [horizontal(0, row), horizontal(4, row)]).flat()
-const MOSAIC_ROWS: Pattern[] = Array.from({ length: 8 }, (_, row) => [horizontal(0, row), horizontal(5, row)]).flat()
+const SHELF_LEFT = horizontalRows(0)
+const SHELF_RIGHT = horizontalRows(4)
+const ROW_GROUPS: Pattern[] = SHELF_LEFT.flatMap((left, row) => [left, SHELF_RIGHT[row]])
 const CENTER_GROUPS: Pattern[] = [vertical(3, 0), vertical(4, 0), vertical(3, 5), vertical(4, 5)]
-const MOSAIC_GROUPS: Pattern[] = [
-  MOSAIC_ROWS[0], CENTER_GROUPS[0], MOSAIC_ROWS[1], MOSAIC_ROWS[2], CENTER_GROUPS[1],
-  MOSAIC_ROWS[3], MOSAIC_ROWS[4], CENTER_GROUPS[2], MOSAIC_ROWS[5], MOSAIC_ROWS[6],
-  CENTER_GROUPS[3], MOSAIC_ROWS[7], MOSAIC_ROWS[8], MOSAIC_ROWS[9], MOSAIC_ROWS[10], MOSAIC_ROWS[11]
+const LEVEL_SEVENTEEN_LEFT: Pattern[] = [
+  vertical(0, 0, 0), vertical(1, 1), vertical(2, 2), vertical(0, 4), vertical(1, 5, 0)
+]
+const LEVEL_EIGHTEEN_LEFT: Pattern[] = [
+  horizontal(0, 0), horizontal(0, 1), horizontal(0, 2), horizontal(0, 3, 2), horizontal(0, 4, 0), vertical(0, 5)
+]
+const LEVEL_NINETEEN_LEFT: Pattern[] = [
+  vertical(0, 0, 0), vertical(1, 1), vertical(2, 2, 2), vertical(3, 0), horizontal(0, 5), horizontal(1, 6, 2)
+]
+const LEVEL_TWENTY_LEFT: Pattern[] = [
+  vertical(0, 0), vertical(1, 0), vertical(2, 0, 2), horizontal(0, 3), vertical(0, 4), vertical(1, 4)
 ]
 const SAFE_VERTICALS: Pattern[] = [vertical(3, 0), vertical(7, 0), vertical(7, 3)]
 const LEFT_CHAIN: Pattern[] = [
@@ -31,16 +40,16 @@ function authoredLevel(id: number, patterns: Pattern[], catTypes: CatAsset[]): R
 
 const CHAPTER_TYPES: CatAsset[] = ['orange', 'blue', 'white', 'fishLover', 'orange', 'blue', 'white', 'fishLover', 'orange', 'blue', 'white', 'fishLover', 'orange', 'blue', 'white', 'fishLover', 'orange', 'blue']
 
-// 16–19 are a bridge chapter with a visible mechanic per step: shelves, a
-// small centre mosaic, a wider mosaic, then a fuller mosaic. Level 20 adds
-// the deliberate support chain.
+// 16–20 are a bridge chapter with a visible mechanic per step. Each level
+// keeps the same density targets but changes the left contour so the player
+// must read the current board instead of memorising one repeated shelf.
 export const PLANNING_LEVEL_SIXTEEN = authoredLevel(16, ROW_GROUPS.slice(0, 13), CHAPTER_TYPES.slice(0, 13))
-export const PLANNING_LEVEL_SEVENTEEN = authoredLevel(17, MOSAIC_GROUPS.slice(0, 14), CHAPTER_TYPES.slice(0, 14))
-export const PLANNING_LEVEL_EIGHTEEN = authoredLevel(18, MOSAIC_GROUPS.slice(0, 15), CHAPTER_TYPES.slice(0, 15))
-export const PLANNING_LEVEL_NINETEEN = authoredLevel(19, MOSAIC_GROUPS, CHAPTER_TYPES.slice(0, 16))
+export const PLANNING_LEVEL_SEVENTEEN = authoredLevel(17, [...LEVEL_SEVENTEEN_LEFT, ...CENTER_GROUPS, ...horizontalRows(5, 5)], CHAPTER_TYPES.slice(0, 14))
+export const PLANNING_LEVEL_EIGHTEEN = authoredLevel(18, [...LEVEL_EIGHTEEN_LEFT, ...CENTER_GROUPS, ...horizontalRows(5, 5)], CHAPTER_TYPES.slice(0, 15))
+export const PLANNING_LEVEL_NINETEEN = authoredLevel(19, [...LEVEL_NINETEEN_LEFT, vertical(4, 0), vertical(4, 5), ...horizontalRows(5)], CHAPTER_TYPES.slice(0, 16))
 
 export const PLANNING_LEVEL_TWENTY = authoredLevel(20,
-  [...ROW_GROUPS.slice(0, 12), ...SAFE_VERTICALS, ...LEFT_CHAIN],
+  [...LEVEL_TWENTY_LEFT, ...SHELF_RIGHT.slice(0, 6), ...SAFE_VERTICALS, ...LEFT_CHAIN],
   [...CHAPTER_TYPES.slice(0, 12), 'blue', 'orange', 'white', 'fishLover', 'orange', 'blue'])
 
 export const PLANNING_LEVELS_THREE = [

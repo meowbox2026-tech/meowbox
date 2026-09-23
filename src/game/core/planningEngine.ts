@@ -40,14 +40,31 @@ export function arrangeCats(level: PlanningLevel, placements: Placement[]): Drop
 export function resolvePlanning(board: DropBoard): PlanningResult {
   let current = copy(board)
   const frames: PlanningFrame[] = []
+  // A gravity-created group outranks any group that was already waiting.
+  const cascadeGroups = new Set<string>()
+  let movedCats = new Set<number>()
   let waves = 0
   while (true) {
     const groups = findPlanningMatchGroups(current)
     if (!groups.length) break
-    const matches = chooseMatchGroup(groups, current).cells
+    const prioritizedCascades = groups.filter(group => {
+      const key = matchGroupKey(group, current)
+      return cascadeGroups.has(key) || group.cells.some(({ x, y }) => movedCats.has(current[y][x]!.id))
+    })
+    const selected = chooseMatchGroup(prioritizedCascades.length ? prioritizedCascades : groups, current)
+    cascadeGroups.delete(matchGroupKey(selected, current))
+    const matches = selected.cells
     waves += 1
-    frames.push({ board: copy(current), clearing: matches.map(({ x, y }) => current[y][x]!.id), wave: waves })
-    current = clearPlanningSupport(current, matches)
+    const clearedIds = matches.map(({ x, y }) => current[y][x]!.id)
+    frames.push({ board: copy(current), clearing: clearedIds, wave: waves })
+    const next = clearPlanningSupport(current, matches)
+    movedCats = findMovedCats(current, next, new Set(clearedIds))
+    for (const group of findPlanningMatchGroups(next)) {
+      if (group.cells.some(({ x, y }) => movedCats.has(next[y][x]!.id))) {
+        cascadeGroups.add(matchGroupKey(group, next))
+      }
+    }
+    current = next
     frames.push({ board: copy(current), clearing: [], wave: waves })
   }
   return { frames, remaining: current.flat().filter(Boolean).length, waves }
@@ -86,6 +103,27 @@ function chooseMatchGroup(groups: PlanningMatchGroup[], board: DropBoard): Plann
     const rightKey = groupSortKey(right, board)
     return leftKey.priority - rightKey.priority || leftKey.y - rightKey.y || leftKey.x - rightKey.x
   })[0]
+}
+
+function matchGroupKey(group: PlanningMatchGroup, board: DropBoard): string {
+  return group.cells.map(({ x, y }) => board[y][x]!.id).sort((left, right) => left - right).join(',')
+}
+
+function findMovedCats(before: DropBoard, after: DropBoard, clearedIds: Set<number>): Set<number> {
+  const beforePositions = new Map<number, string>()
+  const afterPositions = new Map<number, string>()
+  for (let y = 0; y < before.length; y += 1) {
+    for (let x = 0; x < before[y].length; x += 1) {
+      const cat = before[y][x]
+      if (cat) beforePositions.set(cat.id, `${x}:${y}`)
+      const nextCat = after[y][x]
+      if (nextCat) afterPositions.set(nextCat.id, `${x}:${y}`)
+    }
+  }
+  return new Set([...beforePositions.entries()].filter(([id, position]) => {
+    if (clearedIds.has(id)) return false
+    return afterPositions.get(id) !== undefined && afterPositions.get(id) !== position
+  }).map(([id]) => id))
 }
 
 function groupSortKey(group: PlanningMatchGroup, board: DropBoard): { priority: number; y: number; x: number } {

@@ -105,6 +105,14 @@ describe('authored planning levels', () => {
     expect(chapterThree.every(level => new Set(level.cats.map(cat => cat.type)).size === 4)).toBe(true)
   })
 
+  it('gives levels sixteen through twenty distinct left-side silhouettes', () => {
+    const leftSideSilhouettes = PLANNING_LEVELS.slice(15, 20).map(level => level.board
+      .map(row => row.slice(0, 4).map(cell => cell ? '#' : '.').join(''))
+      .join('/'))
+
+    expect(new Set(leftSideSilhouettes)).toHaveLength(5)
+  })
+
   it('adds a fourth chapter up to the 8x8 capacity without adding a fifth cat type', () => {
     const chapterFour = PLANNING_LEVELS.slice(20)
     expect(chapterFour.map(level => level.id)).toEqual([21, 22, 23, 24, 25])
@@ -112,6 +120,20 @@ describe('authored planning levels', () => {
     expect(chapterFour.map(level => level.board.flat().filter(Boolean).length)).toEqual([31, 32, 36, 39, 39])
     expect(chapterFour.every(level => new Set(level.cats.map(cat => cat.type)).size === 4 && !level.cats.some(cat => cat.type === 'alone'))).toBe(true)
     expect(chapterFour.every(level => level.board.flat().filter(Boolean).length + level.cats.length <= 64)).toBe(true)
+  })
+
+  it('stages expert silhouettes and gives level twenty-five a distinct route', () => {
+    const chapterFour = PLANNING_LEVELS.slice(20)
+    const silhouette = (level: typeof chapterFour[number]) => {
+      const occupied = new Set(level.solution.map(({ x, y }) => `${x}:${y}`))
+      return level.board.map((row, y) => row.map((cell, x) => cell || occupied.has(`${x}:${y}`) ? '#' : '.').join('')).join('/')
+    }
+    const silhouettes = chapterFour.map(silhouette)
+    const mirroredRoute = chapterFour[3].solution.map(({ x, y }) => `${7 - x}:${y}`).join('/')
+    const finalRoute = chapterFour[4].solution.map(({ x, y }) => `${x}:${y}`).join('/')
+
+    expect(new Set(silhouettes)).toHaveLength(5)
+    expect(finalRoute).not.toBe(mirroredRoute)
   })
 
   it('keeps fourth-chapter layouts directional, dense, and chainable', () => {

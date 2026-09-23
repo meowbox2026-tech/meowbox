@@ -64,12 +64,14 @@ function chapterLevel(id: number, transform: Transform, baseCount: number, extra
 
 const IDENTITY: Transform = ([x, y]) => [x, y]
 const FLIP_X: Transform = ([x, y]) => [7 - x, y]
-// 21–25 share the expert rules but change the density and branch shape each
-// time: a right branch, a mirrored branch, a full lattice, a merge, then a
-// final mirrored merge.
+// 21–25 open the expert chapter for the longer 100-level roadmap. The chapter
+// teaches one pressure at a time: a right branch, an offset mirror, a denser
+// lattice reset, a centre merge, then a mirrored merge with a different route
+// order. Later chapters can add new branch topologies without reusing this
+// chapter as the game's ending.
 export const PLANNING_LEVEL_TWENTY_ONE = chapterLevel(21, IDENTITY, 15, [[RIGHT_BRANCH, RIGHT_BRANCH_TYPE]])
 export const PLANNING_LEVEL_TWENTY_TWO = chapterLevel(22, FLIP_X, 15, [[RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [HORIZONTAL_BRANCH, HORIZONTAL_BRANCH_TYPE]])
-export const PLANNING_LEVEL_TWENTY_THREE = chapterLevel(23, FLIP_X, 18, [])
+export const PLANNING_LEVEL_TWENTY_THREE = chapterLevel(23, IDENTITY, 18, [])
 export const PLANNING_LEVEL_TWENTY_FOUR = chapterLevel(24, IDENTITY, 18, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [pattern([[5, 4], [4, 5], [3, 6]], 0), DIAGONAL_BRANCH_TYPE]])
 export const PLANNING_LEVEL_TWENTY_FIVE = chapterLevel(25, FLIP_X, 18, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [DIAGONAL_BRANCH, DIAGONAL_BRANCH_TYPE]])
 

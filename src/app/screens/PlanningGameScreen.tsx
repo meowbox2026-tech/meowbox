@@ -35,12 +35,11 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || rules || tutorial.open, activeLevelId)
   const rewarded = useRef(false)
   const editing = state.phase === 'editing'
-  const locked = paused || rules || tutorial.open || hidden || !editing || Boolean(state.validatingPlacement || state.pendingHint)
+  const locked = paused || rules || tutorial.open || hidden || !editing || state.pendingHint
   const stars = Math.max(1, 3 - state.failures)
   const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
-  const placementFailure = state.failureReason === 'placement'
   const objective = getPlanningObjective(level)
   const objectiveLines: Array<[PlanningObjectiveDirection, string, string, number]> = [
     ['horizontal', '━', text.horizontalLine, objective.lineCounts.horizontal],
@@ -48,7 +47,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     ['diagonal', '╱', text.diagonalLine, objective.lineCounts.diagonal]
   ]
   useEffect(() => {
-    if (paused || rules || tutorial.open || hidden || state.phase === 'completed' || state.phase === 'failed') stopBackgroundMusic()
+    if (paused || rules || tutorial.open || hidden || state.phase === 'completed') stopBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
     return () => stopBackgroundMusic()
   }, [paused, rules, tutorial.open, hidden, state.phase, player.settings.music])
@@ -72,7 +71,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const catName = (type: string) => getDropCatName(type, locale)
   return <main className={`screen screen--game screen--drop screen--planning${hidden ? ' is-suspended' : ''}`}>
     <TopBar level={activeLevelId} coins={player.pawCoins} onPause={() => setPaused(true)} status={<div className="planning-top-status">
-      <strong>{localized.name}</strong><span aria-label={`${text.livesLabel} ${state.lives}`}>♡ {state.lives}</span><small>{text.failures} {state.failures} {text.times}</small>
+      <strong>{localized.name}</strong><small>{text.failures} {state.failures} {text.times}</small>
     </div>} />
     <section className="planning-intro"><strong>{text.goal(totalCats)}</strong><span>{text.calm}</span></section>
     <section className="planning-tray" aria-label={text.tray}>
@@ -120,7 +119,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       </div>
       <div className="planning-box__label">MEOWBOX <span>8 × 8</span></div>
     </div>
-    {state.validatingPlacement || state.pendingHint ? <p className="planning-life-status" role="status">{text.checkingPlacement}</p> : editing && state.failures > 0 && state.placements.length === 0 && <p className="planning-life-status" role="status">{placementFailure ? text.placementRetryNotice(state.lives) : text.retryNotice(state.lives)}</p>}
+    {editing && state.failureReason === 'resolution' && state.placements.length === 0 && <p className="planning-status" role="status">{text.retryNotice}</p>}
     <div className="planning-edit-actions">
       <button disabled={locked || !state.placements.length || state.undoUses <= 0} onClick={() => dispatch({ type: 'undo' })}>{text.undo} <span className="planning-undo-count">{state.undoUses}</span></button>
       <button disabled={locked || state.hintUses <= 0 || state.selected === undefined} onClick={() => dispatch({ type: 'hint' })}>{text.useHint} <span className="planning-undo-count">{state.hintUses}</span></button>
@@ -133,12 +132,6 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     <Modal open={rules} ariaLabel={text.rules} className="drop-rules">
       <h2>{text.rulesTitle}</h2><ol>{[text.rule1, text.rule2, text.rule3, text.rule4(totalCats), text.rule5].map(rule => <li key={rule}>{rule}</li>)}</ol>
       <AppButton onClick={() => setRules(false)}>{text.close}</AppButton>
-    </Modal>
-    <Modal open={state.phase === 'failed' && !paused} ariaLabel={placementFailure ? text.placementFailed : text.failed} className="drop-result">
-      <img src={getCatAssetPath('sleeping')} alt="" /><h2>{placementFailure ? text.placementFailed : text.failed}</h2>
-      <p>{state.result ? <>{text.wave} {wave} · {text.remaining} {state.result.remaining} {text.cats}<br /></> : null}{placementFailure ? text.placementFailedTip : text.failedTip}</p>
-      <AppButton variant="cream" onClick={restart}>{text.restart}</AppButton>
-      <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>
     </Modal>
     <Modal open={state.phase === 'completed' && !paused} ariaLabel={text.completed} className="drop-result">
       <img src={getCatAssetPath('orange')} alt="" /><h2>{text.completed}</h2>

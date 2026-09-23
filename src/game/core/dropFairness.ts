@@ -114,7 +114,7 @@ export function findCompletionRoute(state: DropState, options: DropSearchOptions
 
 /**
  * Evaluate one click after all waves have settled. A search limit or a random
- * future is deliberately uncertain: it is never converted into a life loss.
+ * future is deliberately uncertain: it is never converted into an immediate failure.
  */
 export function evaluateDropAction(
   state: DropState,

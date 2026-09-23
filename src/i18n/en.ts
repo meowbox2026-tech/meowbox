@@ -52,7 +52,7 @@ export const en: Strings = {
     note: '🐾 Keep playing to unlock more cute cats!'
   },
   game: {
-    rescue: 'Rescued {done} / {target}', statusLabel: 'Level status', livesLabel: 'Lives remaining', deadDropNotice: 'The complete arrangement failed resolution, so one life was spent and the arrangement was cleared.', timeLeft: 'Time note',
+    rescue: 'Rescued {done} / {target}', statusLabel: 'Level status', timeLeft: 'Time note',
     preview: 'Next two cats', previewThree: 'Next three cats', previewFour: 'Next four cats', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
     nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', soonAlt: 'Soon: {name}', laterAlt: 'Later: {name}', traitScratch: 'Scratch', traitHungry: 'Hungry', board: 'Cat box',
     columnAction: 'Column {col}, drop {name}', ceilingDanger: '⚠ Careful! Almost at the top',
@@ -63,8 +63,6 @@ export const en: Strings = {
     rule2Title: 'Match 3 of a kind', rule2Desc: 'Horizontal, vertical, or either diagonal—3 or more in a row clears.',
     rule3Title: 'Drops chain again', rule3Desc: 'Cats above fall down, and new lines trigger a Combo!',
     rule4Title: 'Watch the top', rule4Desc: 'If any cat still fills the top row after clears and drops, you fail.',
-    rulesFooter: 'This level: arrange every cat first, then watch the clears and gravity. Each level has 3 lives.',
-    rulesExtra: 'The active mainline ends at level 25. There is no revive or half-board continuation after failure; only a complete arrangement that fails resolution spends a life, and all three lives mean a restart.',
     rulesCta: 'Got it, let’s play!', completedAria: 'Level complete!', completedTitle: 'Level {id} complete!',
     starsAria: '{stars} stars', summary: 'Rescued {cleared} · {score} pts',
     summaryLine2: 'Best Combo ×{best} · {moves} drops', reward: '🐾 {amount} Paw Coins saved',
@@ -72,8 +70,8 @@ export const en: Strings = {
     partyDone: 'The captain’s party is complete ♡', nextHappiness: 'The next box of happiness awaits ♡',
     failedCeilingAria: 'Box is full', failedGenericAria: 'Challenge over',
     failedCeilingTitle: 'Oh no, the box is full!',
-    failedTimeTitle: 'Time’s up—take a breather, meow!', failedLivesTitle: 'All three lives are gone', failedProgress: 'Rescued {cleared} / {target} cats.',
-    ceilingTip: 'Try spreading stacks to leave more room.', livesTip: 'A life is spent only when the engine proves a drop is a dead end. When all three are gone, restart the level.', otherTip: 'Look for lines of three—your cats are waiting.',
+    failedTimeTitle: 'Time’s up—take a breather, meow!', failedProgress: 'Rescued {cleared} / {target} cats.',
+    ceilingTip: 'Try spreading stacks to leave more room.', otherTip: 'Look for lines of three—your cats are waiting.',
     retry: 'Try again, meow', backCottage: 'Back to Cottage', hintTitle: 'Let a cat take a peek',
     hintDesc: 'After watching, a safer column is marked. Once per round.',
     comboSuccess: 'Meow! Matched', combo: 'COMBO ×{count}', matchCombo: 'Meow ×{count}',

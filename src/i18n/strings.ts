@@ -94,8 +94,6 @@ export interface Strings {
   game: {
     rescue: string
     statusLabel: string
-    livesLabel: string
-    deadDropNotice: string
     timeLeft: string
     preview: string
     previewThree: string
@@ -130,8 +128,6 @@ export interface Strings {
     rule3Desc: string
     rule4Title: string
     rule4Desc: string
-    rulesFooter: string
-    rulesExtra: string
     rulesCta: string
     completedAria: string
     completedTitle: string
@@ -148,10 +144,8 @@ export interface Strings {
     failedGenericAria: string
     failedCeilingTitle: string
     failedTimeTitle: string
-    failedLivesTitle: string
     failedProgress: string
     ceilingTip: string
-    livesTip: string
     otherTip: string
     retry: string
     backCottage: string
