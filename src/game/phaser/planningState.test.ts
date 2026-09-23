@@ -22,6 +22,7 @@ describe('planning failure boundaries', () => {
     let state = freshPlanning(level)
     expect(state.selected).toBe(level.cats[0].id)
     expect(state.undoUses).toBe(1)
+    expect(state.lives).toBe(3)
 
     const skipped = reduce(state, { type: 'select', id: level.cats[2].id })
     expect(skipped).toBe(state)
@@ -38,7 +39,7 @@ describe('planning failure boundaries', () => {
     expect(reduce(recalled, { type: 'remove', id: level.cats[0].id })).toBe(recalled)
   })
 
-  it('allows one undo per level attempt and no failure-recovery ad action', () => {
+  it('allows one undo per configuration attempt without a failure-recovery ad action', () => {
     let state = freshPlanning(level)
     state = reduce(state, { type: 'place', x: 0, y: 0 })
     const undone = reduce(state, { type: 'undo' })
@@ -47,9 +48,6 @@ describe('planning failure boundaries', () => {
     expect(undone.undoUses).toBe(0)
     expect(reduce(undone, { type: 'undo' })).toBe(undone)
     expect(reduce(undone, { type: 'remove', id: level.cats[0].id })).toBe(undone)
-    const rewarded = reduce(undone, { type: 'ad-undo' })
-    expect(rewarded.undoUses).toBe(1)
-    expect(reduce(rewarded, { type: 'ad-undo' }).undoUses).toBe(2)
   })
 
   it('reveals the next authored solution cell once and resets on restart', () => {
@@ -65,14 +63,37 @@ describe('planning failure boundaries', () => {
     expect(reduce(placed, { type: 'restart' }).hintUses).toBe(1)
   })
 
-  it('does not resume from a half-cleared chain after failure', () => {
+  it('spends one life and resets the whole configuration after a failed attempt', () => {
     const failed = failedAttempt()
 
-    expect(failed.phase).toBe('failed')
-    expect(failed.result?.remaining).toBe(6)
-    expect(failed.placements).toHaveLength(level.cats.length)
+    expect(failed.phase).toBe('editing')
+    expect(failed.lives).toBe(2)
+    expect(failed.failures).toBe(1)
+    expect(failed.result).toBeUndefined()
+    expect(failed.placements).toEqual([])
+    expect(failed.selected).toBe(level.cats[0].id)
+    expect(failed.undoUses).toBe(1)
     expect(failed.puzzle.cats).toEqual(level.cats)
     expect(failed.completedWaves).toBe(0)
-    expect(reduce(failed, { type: 'restart' })).toEqual(freshPlanning(level))
+  })
+
+  it('only opens the terminal failure state after all three lives are spent', () => {
+    let state = failedAttempt()
+    expect(state.phase).toBe('editing')
+    state = failedAttemptFrom(state)
+    expect(state.phase).toBe('editing')
+    state = failedAttemptFrom(state)
+    expect(state.phase).toBe('failed')
+    expect(state.lives).toBe(0)
+    expect(state.failures).toBe(3)
+    expect(state.placements).toHaveLength(level.cats.length)
+    expect(state.result?.remaining).toBe(6)
+    expect(reduce(state, { type: 'restart' })).toEqual(freshPlanning(level))
   })
 })
+
+function failedAttemptFrom(start: PlanningState): PlanningState {
+  let state = start
+  for (const [x, y] of [[4, 3], [0, 0], [1, 0]]) state = reduce(state, { type: 'place', x, y })
+  return play(state)
+}

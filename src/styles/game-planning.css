@@ -4,6 +4,7 @@
 .app-stage .screen.screen--planning { background: transparent; }
 .planning-top-status { display: grid; gap: 3px; color: #754c36; text-align: center; }
 .planning-top-status strong { font-size: 16px; }
+.planning-top-status span { color: #a15b45; font-size: 12px; font-weight: 700; }
 .planning-top-status small { font-size: 11px; }
 .planning-intro { display: grid; gap: 3px; text-align: center; color: #714932; }
 .planning-intro strong { font-size: 19px; }
@@ -36,6 +37,7 @@ button.planning-cat { z-index: 3; pointer-events: auto; cursor: pointer; }
 .planning-edit-actions button { flex: 1; min-height: 33px; padding: 3px; border: 1px solid #d2b28f; border-radius: 10px; color: #79553b; background: #fffaee; font-size: 11px; cursor: pointer; }
 .planning-undo-count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 3px; padding-inline: 3px; border: 1px solid #cfaa7c; border-radius: 5px; background: #ffe7b9; color: #70452c; font-size: 10px; font-weight: bold; font-variant-numeric: tabular-nums; }
 .planning-hint-status { margin: 0; color: #9a6538; font-size: 10px; text-align: center; }
+.planning-life-status, .planning-mainline-done { margin: 0; color: #9a6538; font-size: 11px; text-align: center; }
 .planning-diagonal-tutorial { text-align: center; color: #79553b; }
 .planning-diagonal-tutorial h2 { font-size: 21px; }
 .planning-diagonal-tutorial p { line-height: 1.6; }

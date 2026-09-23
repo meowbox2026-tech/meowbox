@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getLevelById } from '../data/levels'
 import {
-  addChallengeMoves,
   autoPlaceCat,
   createPuzzleState,
   getCatRuleTargetCells,
@@ -121,17 +120,6 @@ describe('puzzle engine', () => {
     expect(unknown.reason).toBe('unknown-cat')
   })
 
-  it('snaps a valid cat to its grid origin and consumes a challenge move', () => {
-    const level = getLevelById(26)
-    const state = createPuzzleState(level)
-
-    const result = moveCat(state, 'challenge-sleeper', { x: 0, y: 0 })
-
-    expect(result.accepted).toBe(true)
-    expect(result.state.placements['challenge-sleeper']?.origin).toEqual({ x: 0, y: 0 })
-    expect(result.state.movesRemaining).toBe(level.moves - 1)
-  })
-
   it('keeps a sleeping cat immovable until a wake reward is applied', () => {
     const level = getLevelById(7)
     const placed = moveCat(createPuzzleState(level), 'sleepy-orange', { x: 0, y: 0 }).state
@@ -168,14 +156,6 @@ describe('puzzle engine', () => {
     expect(attemptedMove.reason).toBe('lid-closed')
   })
 
-  it('fails a challenge when the final allowed move does not solve the board', () => {
-    const level = getLevelById(26)
-    const state = { ...createPuzzleState(level), movesRemaining: 1 }
-    const result = moveCat(state, 'challenge-sleeper', { x: 0, y: 0 })
-
-    expect(result.state.phase).toBe('failed')
-  })
-
   it('restores a valid action with undo and clears all placements on restart', () => {
     const level = getLevelById(1)
     const placed = moveCat(createPuzzleState(level), 'basic-row-a', { x: 0, y: 0 }).state
@@ -198,13 +178,4 @@ describe('puzzle engine', () => {
     expect(result.state.placements['basic-row-a']).toMatchObject({ origin: { x: 0, y: 0 } })
   })
 
-  it('adds three moves after a rewarded challenge rescue', () => {
-    const level = getLevelById(26)
-    const state = { ...createPuzzleState(level), movesRemaining: 0, phase: 'failed' as const }
-
-    const rescued = addChallengeMoves(state, 3)
-
-    expect(rescued.movesRemaining).toBe(3)
-    expect(rescued.phase).toBe('playing')
-  })
 })

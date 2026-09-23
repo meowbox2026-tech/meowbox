@@ -5,6 +5,7 @@ export interface PlanningState {
   placements: Placement[]
   selected: number | undefined
   phase: 'editing' | 'running' | 'failed' | 'completed'
+  lives: number
   failures: number
   undoUses: number
   hintUses: number
@@ -14,16 +15,36 @@ export interface PlanningState {
   result?: PlanningResult
 }
 export type PlanningAction = { type: 'select' | 'remove'; id: number } | { type: 'place'; x: number; y: number }
-  | { type: 'undo' | 'clear' | 'hint' | 'start' | 'tick' | 'ad-undo' | 'restart' }
+  | { type: 'undo' | 'clear' | 'hint' | 'start' | 'tick' | 'restart' }
+
+export const PLANNING_STARTING_LIVES = 3
 
 export const freshPlanning = (level: PlanningLevel): PlanningState => ({
   puzzle: level, placements: [], selected: level.cats[0]?.id, phase: 'editing',
-  failures: 0, undoUses: 1, hintUses: 1, completedWaves: 0, frame: 0
+  lives: PLANNING_STARTING_LIVES, failures: 0, undoUses: 1, hintUses: 1, completedWaves: 0, frame: 0
 })
 
 function finish(state: PlanningState): PlanningState {
   const won = state.result?.remaining === 0
-  return { ...state, phase: won ? 'completed' : 'failed', failures: state.failures + (won ? 0 : 1) }
+  if (won) return { ...state, phase: 'completed' }
+
+  const lives = Math.max(0, state.lives - 1)
+  const failures = state.failures + 1
+  if (lives === 0) return { ...state, phase: 'failed', lives, failures }
+
+  return {
+    ...state,
+    phase: 'editing',
+    lives,
+    failures,
+    placements: [],
+    selected: state.puzzle.cats[0]?.id,
+    undoUses: 1,
+    hintCell: undefined,
+    completedWaves: 0,
+    frame: 0,
+    result: undefined
+  }
 }
 
 export function planningReducer(state: PlanningState, action: PlanningAction, original: PlanningLevel): PlanningState {
@@ -32,7 +53,6 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
     return state.frame + 1 < state.result!.frames.length ? { ...state, frame: state.frame + 1 } : finish(state)
   }
   if (state.phase !== 'editing') return state
-  if (action.type === 'ad-undo') return { ...state, undoUses: state.undoUses + 1 }
   const level = state.puzzle
   switch (action.type) {
     case 'select':

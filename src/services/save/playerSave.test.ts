@@ -11,24 +11,24 @@ describe('player save', () => {
     expect(save.settings.haptics).toBe(true)
   })
 
-  it('advances a legacy save after level 60 exactly once while preserving progress', () => {
+  it('drops obsolete post-twenty-five progress instead of unlocking removed levels', () => {
     const legacy = {
       ...createDefaultPlayerSave(),
-      currentLevel: 60,
-      completedLevels: [1, 30, 60],
-      stars: { 31: 3, 60: 2 },
+      currentLevel: 90,
+      completedLevels: [1, 25, 30, 60, 90],
+      stars: { 25: 3, 31: 3, 60: 2 },
       pawCoins: 912
     }
 
     const migrated = normalisePlayerSave(legacy)
     const migratedAgain = normalisePlayerSave(migrated)
 
-    expect(migrated.currentLevel).toBe(61)
-    expect(migratedAgain.currentLevel).toBe(61)
-    expect(migrated.completedLevels).toEqual([1, 30, 60])
-    expect(migrated.stars).toEqual({ 31: 3, 60: 2 })
+    expect(migrated.currentLevel).toBe(25)
+    expect(migratedAgain.currentLevel).toBe(25)
+    expect(migrated.completedLevels).toEqual([1, 25])
+    expect(migrated.stars).toEqual({ 25: 3 })
     expect(migrated.pawCoins).toBe(912)
-    expect(normalisePlayerSave({ ...legacy, completedLevels: [1, 30] }).currentLevel).toBe(60)
+    expect(normalisePlayerSave({ ...legacy, currentLevel: 26, completedLevels: [1, 25] }).currentLevel).toBe(25)
   })
 
   it('prefers newer cloud progress but unions durable unlocks and completions', () => {
@@ -54,11 +54,12 @@ describe('player save', () => {
     expect(merged.unlockedCatSkins).toEqual(['orange', 'black', 'white'])
   })
 
-  it('applies the level 60 migration after merging completion records', () => {
-    const local = { ...createDefaultPlayerSave(), currentLevel: 60, completedLevels: [60], pawCoins: 100 }
-    const cloud = { ...createDefaultPlayerSave(), currentLevel: 60, completedLevels: [], pawCoins: 200 }
+  it('clamps merged progress to the active mainline', () => {
+    const local = { ...createDefaultPlayerSave(), currentLevel: 90, completedLevels: [25, 60], pawCoins: 100 }
+    const cloud = { ...createDefaultPlayerSave(), currentLevel: 60, completedLevels: [24], pawCoins: 200 }
 
-    expect(mergePlayerSaves(local, cloud).currentLevel).toBe(61)
+    expect(mergePlayerSaves(local, cloud).currentLevel).toBe(25)
+    expect(mergePlayerSaves(local, cloud).completedLevels).toEqual([24, 25])
   })
 
   it('clamps malformed stars and preserves only supported language settings', () => {

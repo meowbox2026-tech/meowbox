@@ -57,6 +57,13 @@ describe('planning difficulty analysis', () => {
     expect(outOfBand).toEqual([])
     expect(getPlanningProgressionWarnings(reports)).toEqual(expect.arrayContaining([
       'level-15-jump-too-large',
+      'level-21-jump-too-large'
+    ]))
+    expect(getPlanningProgressionWarnings(reports)).not.toEqual(expect.arrayContaining([
+      'level-16-jump-too-large',
+      'level-17-jump-too-large',
+      'level-18-jump-too-large',
+      'level-19-jump-too-large',
       'level-20-jump-too-large'
     ]))
     expect(getPlanningReadabilityWarnings(reports)).toEqual(expect.arrayContaining([

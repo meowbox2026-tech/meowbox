@@ -64,6 +64,7 @@ describe('8x8 planning level through the game entry point', () => {
     expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
     expect([...container.querySelectorAll('.planning-cat b')].map(node => node.textContent).sort()).toEqual(['1', '2', '3'])
     expect(screen.getByRole('button', { name: '開始救援' })).toBeEnabled()
+    expect(screen.getByLabelText('生命 3')).toBeInTheDocument()
     act(() => vi.advanceTimersByTime(120000))
     expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
     fireEvent.click(screen.getByRole('button', { name: '拿回 3 奶霜' }))
@@ -113,19 +114,31 @@ describe('8x8 planning level through the game entry point', () => {
     fireEvent.click(screen.getByRole('button', { name: '前往第 2 關' }))
     expect(next).toHaveBeenCalledWith(2)
   })
-  it('does not expose half-cleared checkpoint recovery after a failed chain', () => {
+  it('spends lives only after a full failed configuration and resets before the next try', () => {
     mount()
-    fireEvent.click(cell(4, 5))
-    fireEvent.click(cell(1, 1))
-    fireEvent.click(cell(1, 2))
-    start()
-    finish()
-    expect(screen.getByRole('dialog', { name: '本次配置失敗' })).toBeInTheDocument()
+    const fail = () => {
+      fireEvent.click(cell(4, 5))
+      fireEvent.click(cell(1, 1))
+      fireEvent.click(cell(1, 2))
+      start()
+      finish()
+    }
+    fail()
+    expect(screen.queryByRole('dialog', { name: '本次配置失敗' })).toBeNull()
     expect(screen.queryByRole('button', { name: /從中斷處修改/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /看廣告/ })).toBeNull()
     expect(screen.getByText('失敗 1 次')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '整關重來' }))
+    expect(screen.getByLabelText('生命 2')).toBeInTheDocument()
     expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
+
+    fail()
+    expect(screen.getByLabelText('生命 1')).toBeInTheDocument()
+    expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
+
+    fail()
+    expect(screen.getByRole('dialog', { name: '本次配置失敗' })).toBeInTheDocument()
+    expect(screen.getByLabelText('生命 0')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /看廣告/ })).toBeNull()
   })
   it('pauses playback and discards an old run when restarting', () => {
     mount()
@@ -141,4 +154,5 @@ describe('8x8 planning level through the game entry point', () => {
     expect(completeLevel).not.toHaveBeenCalled()
     expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
   })
+
 })

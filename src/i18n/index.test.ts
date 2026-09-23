@@ -39,9 +39,9 @@ describe('i18n dictionaries', () => {
     expect(getCatSkinName('calico', 'en')).toBe('Calico')
     expect(getBoxName('night', 'ja')).toBe('星空ボックス')
     expect(getLevelName(1, 'en')).toBe('First Meeting')
-    expect(getLevelName(30, 'ja')).toBe('箱長のパーティー')
-    expect(getLevelName(31, 'zh-TW')).toBe('花園初見')
-    expect(getLevelGuidance(31, 'zh-TW')).toContain('三隻')
+    expect(getLevelName(25, 'ja')).toBe('虹チーム')
+    expect(getLevelName(26, 'zh-TW')).toBe('Lv. 26')
+    expect(getLevelGuidance(26, 'zh-TW')).toBe('')
     expect(getLevelGuidance(1, 'zh-TW')).toContain('第 3 欄')
   })
 

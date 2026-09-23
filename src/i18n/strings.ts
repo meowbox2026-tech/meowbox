@@ -28,10 +28,6 @@ export interface Strings {
   levels: {
     title: string
     subtitle: string
-    worldTabs: string
-    world: string
-    worldSubs: [string, string, string]
-    worldLocked: string
     board: string
     levelAria: string
     lockedSuffix: string

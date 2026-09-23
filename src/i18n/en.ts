@@ -18,9 +18,7 @@ export const en: Strings = {
     collected: 'Collected {count} stars', start: 'Start Game', levels: 'Levels', mainNav: 'Main menu'
   },
   levels: {
-    title: 'Levels', subtitle: 'More cats, more happiness!', worldTabs: 'Worlds',
-    world: 'World {n}', worldSubs: ['Cozy Cottage', 'Garden', 'Journey'],
-    worldLocked: 'Complete all 30 World 1 levels to unlock World 2',
+    title: 'Levels', subtitle: 'Levels 1–25: take your time and arrange every cat!',
     board: 'Level list', levelAria: 'Level {id}', lockedSuffix: ', locked', locked: 'Locked'
   },
   settings: {
@@ -54,7 +52,7 @@ export const en: Strings = {
     note: '🐾 Keep playing to unlock more cute cats!'
   },
   game: {
-    rescue: 'Rescued {done} / {target}', statusLabel: 'Mission and time', livesLabel: 'Lives remaining', deadDropNotice: 'That drop would close the current winning route. You are back before the move; board progress was not lost.', timeLeft: 'Time left',
+    rescue: 'Rescued {done} / {target}', statusLabel: 'Level status', livesLabel: 'Lives remaining', deadDropNotice: 'The complete arrangement failed resolution, so one life was spent and the arrangement was cleared.', timeLeft: 'Time note',
     preview: 'Next two cats', previewThree: 'Next three cats', previewFour: 'Next four cats', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
     nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', soonAlt: 'Soon: {name}', laterAlt: 'Later: {name}', traitScratch: 'Scratch', traitHungry: 'Hungry', board: 'Cat box',
     columnAction: 'Column {col}, drop {name}', ceilingDanger: '⚠ Careful! Almost at the top',
@@ -65,8 +63,8 @@ export const en: Strings = {
     rule2Title: 'Match 3 of a kind', rule2Desc: 'Horizontal, vertical, or either diagonal—3 or more in a row clears.',
     rule3Title: 'Drops chain again', rule3Desc: 'Cats above fall down, and new lines trigger a Combo!',
     rule4Title: 'Watch the top', rule4Desc: 'If any cat still fills the top row after clears and drops, you fail.',
-    rulesFooter: 'This level: rescue {target} cats in {time}s. The clock starts on your first drop; mechanic animations pause it from level 31 onward, as do pause and ads. {three} drops for 3 stars, {two} for 2 stars.',
-    rulesExtra: 'One ad hint per round. There is no revive or half-board continuation after failure; a proven dead drop rolls back before commit and costs one life, and all three lives mean a restart.',
+    rulesFooter: 'This level: arrange every cat first, then watch the clears and gravity. Each level has 3 lives.',
+    rulesExtra: 'The active mainline ends at level 25. There is no revive or half-board continuation after failure; only a complete arrangement that fails resolution spends a life, and all three lives mean a restart.',
     rulesCta: 'Got it, let’s play!', completedAria: 'Level complete!', completedTitle: 'Level {id} complete!',
     starsAria: '{stars} stars', summary: 'Rescued {cleared} · {score} pts',
     summaryLine2: 'Best Combo ×{best} · {moves} drops', reward: '🐾 {amount} Paw Coins saved',

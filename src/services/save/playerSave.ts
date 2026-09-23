@@ -30,7 +30,7 @@ export interface PlayerSave {
 }
 
 const STORAGE_KEY = 'meow-box-player-save'
-export const MAX_SAVED_LEVEL = 90
+export const MAX_SAVED_LEVEL = 25
 
 export function createDefaultPlayerSave(): PlayerSave {
   return {
@@ -62,9 +62,7 @@ export function normalisePlayerSave(value: unknown): PlayerSave {
     ...defaults,
     version: 1,
     updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : defaults.updatedAt,
-    // The old build stopped at 60. A save that really completed 60 may be
-    // advanced to 61; a player merely sitting on level 60 stays there.
-    currentLevel: storedCurrentLevel === 60 && completedLevels.includes(60) ? 61 : storedCurrentLevel,
+    currentLevel: storedCurrentLevel,
     completedLevels,
     stars: normaliseStars(value.stars),
     pawCoins: toNonNegativeInteger(value.pawCoins, defaults.pawCoins),

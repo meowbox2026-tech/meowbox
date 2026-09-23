@@ -85,6 +85,8 @@ export const PLANNING_LEVELS = [
   ...PLANNING_LEVELS_FOUR
 ] as const
 
+export const MAX_PLANNING_LEVEL = PLANNING_LEVELS.length
+
 export function getPlanningLevel(id: number): PlanningLevel {
   return PLANNING_LEVELS.find(level => level.id === id) ?? PLANNING_LEVEL_ONE
 }

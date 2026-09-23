@@ -9,55 +9,32 @@ const player = vi.hoisted(() => ({
 }))
 
 vi.mock('../../state/PlayerContext', () => ({
-  usePlayer: () => ({ player }),
+  usePlayer: () => ({ player })
 }))
 
 afterEach(() => { cleanup(); player.currentLevel = 1 })
 
-describe('LevelSelectScreen single-phone layout', () => {
-  it('keeps the level board without the removed progress and home controls', () => {
+describe('LevelSelectScreen active mainline', () => {
+  it('renders only the twenty-five planning levels without world tabs', () => {
     const { container } = render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={vi.fn()} />)
 
     expect(screen.getByRole('region', { name: '關卡清單' })).toBeInTheDocument()
-    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '返回主頁' })).not.toBeInTheDocument()
-    expect(screen.queryByText(/\/ 90/)).not.toBeInTheDocument()
-    expect(container.querySelectorAll('.level-tile').length).toBeGreaterThan(0)
-    expect(container.querySelectorAll('.level-tile__stars img[src="/assets/stars.webp"]')).toHaveLength(3)
-    expect(container.querySelectorAll('.world-tabs img[src="/assets/lock.webp"]')).toHaveLength(2)
-    expect(container.querySelectorAll('.level-tile__lock img[src="/assets/lock.webp"]')).toHaveLength(29)
+    expect(container.querySelectorAll('.level-tile')).toHaveLength(25)
+    expect(container.querySelectorAll('.level-tile__lock img[src="/assets/lock.webp"]')).toHaveLength(24)
+    expect(container.querySelector('.world-tabs')).toBeNull()
+    expect(screen.queryByRole('button', { name: /第 26 關/ })).not.toBeInTheDocument()
+    expect(screen.queryByText(/世界/)).not.toBeInTheDocument()
   })
 
-  it('switches to world 2 and shows levels 31 through 60 when unlocked', () => {
-    player.currentLevel = 31
-    const { container } = render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={vi.fn()} />)
+  it('unlocks through level twenty-five and keeps later levels absent', () => {
+    player.currentLevel = 25
+    const onSelectLevel = vi.fn()
+    const { container } = render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={onSelectLevel} />)
 
-    fireEvent.click(screen.getByRole('tab', { name: /世界 2/ }))
-
-    expect(screen.getByRole('tab', { name: /世界 2/ })).toHaveAttribute('aria-selected', 'true')
-    expect(container.querySelectorAll('.level-tile')).toHaveLength(30)
-    expect(screen.getByRole('button', { name: '第 31 關' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /第 60 關/ })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /第 30 關/ })).not.toBeInTheDocument()
-  })
-
-  it('unlocks world 3 at level 61 and never renders a level 91 tile', () => {
-    player.currentLevel = 61
-    const { container } = render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={vi.fn()} />)
-
-    expect(screen.getByRole('tab', { name: /世界 3/ })).not.toBeDisabled()
-    fireEvent.click(screen.getByRole('tab', { name: /世界 3/ }))
-
-    expect(container.querySelectorAll('.level-tile')).toHaveLength(30)
-    expect(screen.getByRole('button', { name: '第 61 關' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /第 90 關/ })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /第 91 關/ })).not.toBeInTheDocument()
-  })
-
-  it('explains that world 2 unlocks after world 1 is complete', () => {
-    render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={vi.fn()} />)
-
-    expect(screen.getByRole('tab', { name: /世界 2/ })).toBeDisabled()
-    expect(screen.getByRole('status')).toHaveTextContent('完成世界 1 的 30 關後解鎖世界 2')
+    expect(container.querySelectorAll('.level-tile--locked')).toHaveLength(0)
+    expect(screen.getByRole('button', { name: '第 25 關' })).toBeEnabled()
+    fireEvent.click(screen.getByRole('button', { name: '第 25 關' }))
+    expect(onSelectLevel).toHaveBeenCalledWith(25)
+    expect(screen.queryByRole('button', { name: /第 (26|90) 關/ })).not.toBeInTheDocument()
   })
 })

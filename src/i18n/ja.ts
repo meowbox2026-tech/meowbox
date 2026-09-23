@@ -18,9 +18,7 @@ export const ja: Strings = {
     collected: '{count}スター集めた', start: 'ゲームスタート', levels: 'レベル', mainNav: 'メインメニュー'
   },
   levels: {
-    title: 'レベル選択', subtitle: '猫が増えるほど、幸せも増える！', worldTabs: 'ワールド選択',
-    world: 'ワールド {n}', worldSubs: ['あたたかいお家', 'ガーデン', '旅行'],
-    worldLocked: 'ワールド1の30ステージをクリアするとワールド2が解放されます',
+    title: 'レベル選択', subtitle: '1〜25面、猫をゆっくり並べよう！',
     board: 'レベル一覧', levelAria: 'レベル {id}', lockedSuffix: '、まだロック中', locked: 'ロック中'
   },
   settings: {
@@ -54,7 +52,7 @@ export const ja: Strings = {
     note: '🐾 遊び続けて、もっとかわいい猫を解放しよう！'
   },
   game: {
-    rescue: '{done} / {target} 匹救出', statusLabel: 'ミッションと残り時間', livesLabel: '残りライフ', deadDropNotice: 'その落下は今のクリアルートを閉じるため、操作前に戻りました。盤面の進行は失われません。', timeLeft: '残り時間',
+    rescue: '{done} / {target} 匹救出', statusLabel: 'ステージ状態', livesLabel: '残りライフ', deadDropNotice: '配置全体の判定に失敗したため、ライフを1つ使って配置をリセットしました。', timeLeft: '時間メモ',
     preview: '次に落ちる2匹', previewThree: '次に落ちる3匹', previewFour: '次に落ちる4匹', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
     nowAlt: '今：{name}', nextAlt: '次：{name}', soonAlt: 'その次：{name}', laterAlt: 'その後：{name}', traitScratch: 'ひっかき', traitHungry: 'くいしんぼ', board: '猫の箱',
     columnAction: '{col}列目、{name}を落とす', ceilingDanger: '⚠ 注意！天井が近いよ',
@@ -65,8 +63,8 @@ export const ja: Strings = {
     rule2Title: '同じ猫3匹で消える', rule2Desc: 'タテ・ヨコ・2種のナナメで、3匹以上つながると消えます。',
     rule3Title: '落ちて連鎖', rule3Desc: '上の猫が落ちて、またつながるとコンボ発生！',
     rule4Title: '箱の天井に注意', rule4Desc: '消去と落下の後、最上段に猫が残ると失敗です。',
-    rulesFooter: 'このレベル：{time}秒以内に{target}匹救出。最初の落下で計測開始、31以降は機関アニメ中に一時停止します。停止と広告でも止まります。{three}手以内で星3、{two}手以内で星2。',
-    rulesExtra: '1回につき広告ヒント1回。失敗後の復活や途中盤面への再開はありません。行き止まりと判定された落下は確定前に戻り、ライフを1つ消費します。3つ使い切ったら最初からやり直します。',
+    rulesFooter: 'このステージ：猫をすべて配置してから、消去と重力を見ます。ライフは3つです。',
+    rulesExtra: '現在のメインラインは25面までです。失敗後の復活や途中盤面の続行はありません。配置全体の判定に失敗した時だけライフが減り、3つ使い切ったらやり直します。',
     rulesCta: 'わかった、遊ぼう！', completedAria: 'クリア！', completedTitle: 'レベル {id} クリア！',
     starsAria: '{stars}スター', summary: '{cleared}匹救出 · {score}点',
     summaryLine2: '最高コンボ ×{best} · {moves}回落下', reward: '🐾 {amount} 肉球コインを保存',

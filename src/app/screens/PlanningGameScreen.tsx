@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getCatAssetPath } from '../../game/data/catAssets'
+import { MAX_PLANNING_LEVEL } from '../../game/data/planningLevels'
 import { usePlanningGame } from '../../game/phaser/usePlanningGame'
 import { planningCopy } from '../../game/phaser/planningCopy'
 import { getDropCatName, useLocale, useLocalizedLevel } from '../../i18n'
@@ -22,14 +23,15 @@ interface Props {
 }
 
 export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel }: Props) {
+  const activeLevelId = Math.min(MAX_PLANNING_LEVEL, Math.max(1, levelId))
   const { player, completeLevel } = usePlayer()
   const locale = useLocale()
   const text = planningCopy[locale]
-  const localized = useLocalizedLevel(levelId)
+  const localized = useLocalizedLevel(activeLevelId)
   const [paused, setPaused] = useState(false)
   const [rules, setRules] = useState(false)
-  const tutorial = useDiagonalTutorial(levelId)
-  const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || rules || tutorial.open, levelId)
+  const tutorial = useDiagonalTutorial(activeLevelId)
+  const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || rules || tutorial.open, activeLevelId)
   const rewarded = useRef(false)
   const editing = state.phase === 'editing'
   const locked = paused || rules || tutorial.open || hidden || !editing
@@ -45,9 +47,9 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   useEffect(() => {
     if (state.phase === 'completed' && !rewarded.current) {
       rewarded.current = true
-      completeLevel(levelId, stars, 50)
+      completeLevel(activeLevelId, stars, 50)
     }
-  }, [state.phase, completeLevel, levelId, stars])
+  }, [state.phase, completeLevel, activeLevelId, stars])
   const restart = () => {
     rewarded.current = false
     dispatch({ type: 'restart' })
@@ -61,8 +63,8 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   }
   const catName = (type: string) => getDropCatName(type, locale)
   return <main className={`screen screen--game screen--drop screen--planning${hidden ? ' is-suspended' : ''}`}>
-    <TopBar level={levelId} coins={player.pawCoins} onPause={() => setPaused(true)} status={<div className="planning-top-status">
-      <strong>{localized.name}</strong><small>{text.failures} {state.failures} {text.times}</small>
+    <TopBar level={activeLevelId} coins={player.pawCoins} onPause={() => setPaused(true)} status={<div className="planning-top-status">
+      <strong>{localized.name}</strong><span aria-label={`${text.livesLabel} ${state.lives}`}>♡ {state.lives}</span><small>{text.failures} {state.failures} {text.times}</small>
     </div>} />
     <section className="planning-intro"><strong>{text.goal(totalCats)}</strong><span>{text.calm}</span></section>
     <section className="planning-tray" aria-label={text.tray}>
@@ -101,6 +103,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       </div>
       <div className="planning-box__label">MEOWBOX <span>8 × 8</span></div>
     </div>
+    {editing && state.failures > 0 && state.placements.length === 0 && <p className="planning-life-status" role="status">{text.retryNotice(state.lives)}</p>}
     <div className="planning-edit-actions">
       <button disabled={locked || !state.placements.length || state.undoUses <= 0} onClick={() => dispatch({ type: 'undo' })}>{text.undo} <span className="planning-undo-count">{state.undoUses}</span></button>
       <button disabled={locked || state.hintUses <= 0 || state.selected === undefined} onClick={() => dispatch({ type: 'hint' })}>{text.useHint} <span className="planning-undo-count">{state.hintUses}</span></button>
@@ -125,7 +128,8 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       <div className="drop-result__stars" aria-label={`${stars} ★`}>{[1, 2, 3].map(i => <span className={i <= stars ? 'is-earned' : ''} key={i}>★</span>)}</div>
       <p>{text.wave} {wave} · {text.failures} {state.failures} {text.times}</p>
       <strong className="drop-reward">{text.reward}</strong>
-      <AppButton onClick={() => onNextLevel(levelId + 1)}>{text.next(levelId + 1)}</AppButton>
+      {activeLevelId < MAX_PLANNING_LEVEL && <AppButton onClick={() => onNextLevel(activeLevelId + 1)}>{text.next(activeLevelId + 1)}</AppButton>}
+      {activeLevelId === MAX_PLANNING_LEVEL && <p className="planning-mainline-done">{text.mainlineDone}</p>}
       <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>
     </Modal>
   </main>

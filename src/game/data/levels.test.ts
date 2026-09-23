@@ -3,6 +3,12 @@ import { CAT_ASSET_PATHS } from './catAssets'
 import { LEVELS, getLevelById } from './levels'
 
 describe('level artwork progression', () => {
+  it('contains no authored level after the active twenty-five-level mainline', () => {
+    expect(LEVELS).toHaveLength(25)
+    expect(LEVELS.at(-1)?.id).toBe(25)
+    expect(getLevelById(26).id).toBe(1)
+  })
+
   it('assigns one of the supplied cat artworks to every playable cat', () => {
     const cats = LEVELS.flatMap((level) => level.cats)
 
@@ -66,8 +72,7 @@ describe('level artwork progression', () => {
     expect(getLevelById(4).difficulty).toBe(2)
     expect(getLevelById(11).difficulty).toBe(3)
     expect(getLevelById(21).difficulty).toBe(4)
-    expect(getLevelById(26).difficulty).toBe(5)
-    expect(LEVELS.every((level) => level.difficulty >= 1 && level.difficulty <= 5)).toBe(true)
+    expect(LEVELS.every((level) => level.difficulty >= 1 && level.difficulty <= 4)).toBe(true)
   })
 
   it('gives obstacle stages a visible 3D-style obstacle descriptor without changing collision cells', () => {

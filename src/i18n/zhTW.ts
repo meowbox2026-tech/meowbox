@@ -18,9 +18,7 @@ export const zhTW: Strings = {
     collected: '已蒐集 {count} 顆星星', start: '開始遊戲', levels: '關卡', mainNav: '主選單'
   },
   levels: {
-    title: '關卡選擇', subtitle: '更多貓咪，更多幸福！', worldTabs: '世界選擇',
-    world: '世界 {n}', worldSubs: ['溫馨小屋', '花園', '旅行'],
-    worldLocked: '完成世界 1 的 30 關後解鎖世界 2',
+    title: '關卡選擇', subtitle: '第 1–25 關，慢慢安排每一隻貓！',
     board: '關卡清單', levelAria: '第 {id} 關', lockedSuffix: '，尚未解鎖', locked: '未解鎖'
   },
   settings: {
@@ -54,7 +52,7 @@ export const zhTW: Strings = {
     note: '🐾 持續遊玩，解鎖更多可愛貓咪！'
   },
   game: {
-    rescue: '救出 {done} / {target}', statusLabel: '關卡任務與時間', livesLabel: '剩餘生命', deadDropNotice: '這一步會封死目前的完成路線，已退回操作前；不扣棋盤進度。', timeLeft: '剩餘時間',
+    rescue: '救出 {done} / {target}', statusLabel: '關卡狀態', livesLabel: '剩餘生命', deadDropNotice: '完整配置結算失敗，已扣一條生命並清空本次配置。', timeLeft: '時間提示',
     preview: '待落下的兩隻貓咪', previewThree: '待落下的三隻貓咪', previewFour: '待落下的四隻貓咪', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
     nowAlt: '現在：{name}', nextAlt: '下一隻：{name}', soonAlt: '再下一隻：{name}', laterAlt: '之後：{name}', traitScratch: '愛抓抓', traitHungry: '貪吃', board: '貓咪紙箱',
     columnAction: '第 {col} 欄，放下{name}', ceilingDanger: '⚠ 小心！快到頂端了',
@@ -65,8 +63,8 @@ export const zhTW: Strings = {
     rule2Title: '三隻同款連線', rule2Desc: '橫向、直向、兩種斜向，連續 3 隻以上一起消除。',
     rule3Title: '掉落再連鎖', rule3Desc: '上方貓咪往下掉，再連線就觸發 Combo！',
     rule4Title: '留意箱子頂端', rule4Desc: '消除與掉落結束後，仍有貓咪佔到最上排就失敗。',
-    rulesFooter: '本關：{time} 秒內救出 {target} 隻。首次落下開始計時；31 關起機關動畫會暫停倒數，暫停與廣告停表。{three} 次內三星，{two} 次內兩星。',
-    rulesExtra: '每局可看廣告提示一次。失敗後不能復活或接回半盤；被判定為死路的落下會在提交前退回並扣生命，三條用完就重新開始。',
+    rulesFooter: '本關：先完成全部配置，再依序觀看消除與重力。每關 3 條生命。',
+    rulesExtra: '目前主線只有第 1–25 關。失敗後不能復活或接回半盤；完整配置結算失敗才扣生命，三條用完就重新開始。',
     rulesCta: '知道了，來玩喵！', completedAria: '過關囉！', completedTitle: '第 {id} 關完成！',
     starsAria: '{stars} 顆星', summary: '救出 {cleared} 隻 · {score} 分',
     summaryLine2: '最佳 Combo ×{best} · 落下 {moves} 次', reward: '🐾 {amount} 貓掌幣已存入',

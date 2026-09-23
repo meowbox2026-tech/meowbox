@@ -186,44 +186,6 @@ function createLidLevel(id: number, prefix: string): LevelDefinition {
   return levelFromPairs(id, `箱蓋練習 ${id}`, 'normal', board, cats, LINE_SOLUTIONS, '上方區域填滿時箱蓋會關上，裡面的貓將無法再移動。', 0, 4)
 }
 
-function createChallengeLevel(id: number, prefix: string): LevelDefinition {
-  const artwork: CatAsset[] = id % 2 === 0
-    ? ['sleeping', 'box', 'mischievous', 'sticky', 'boss', 'sunny', 'arrogant']
-    : ['white', 'alone', 'fishLover', 'orange', 'blue', 'box', 'sticky']
-  const cats = [
-    cat(`${prefix}-sleeper`, 'orange', 'line4', 'sleeping', { visualAsset: artwork[0] }),
-    cat(`${prefix}-vertical`, 'black', 'line4', 'normal', { visualAsset: artwork[1] }),
-    cat(`${prefix}-stretch`, 'gray', 'line4', 'stretch', { stretchLengths: [2, 3, 4], visualAsset: artwork[2] }),
-    cat(`${prefix}-sticky-a`, 'white', 'line2', 'sticky', { stickyGroup: `${prefix}-friends`, visualAsset: artwork[3] }),
-    cat(`${prefix}-sticky-b`, 'calico', 'line2', 'sticky', { stickyGroup: `${prefix}-friends`, visualAsset: artwork[4] }),
-    cat(`${prefix}-row-d`, 'siamese', 'line4', 'normal', { visualAsset: artwork[5] }),
-    cat(`${prefix}-row-e`, 'ragdoll', 'line4', 'normal', { visualAsset: artwork[6] })
-  ]
-  const board = {
-    width: 5,
-    height: 5,
-    blockedCells: [{ x: 4, y: 4 }],
-    obstacles: [{ cell: { x: 4, y: 4 }, kind: 'divider' as const }],
-    lidZones: [{
-      id: `${prefix}-top-lid`,
-      cells: [
-        { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 },
-        { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }
-      ]
-    }]
-  }
-  const solutions = [
-    { origin: { x: 0, y: 0 }, rotation: 0 },
-    { origin: { x: 4, y: 0 }, rotation: 1 },
-    { origin: { x: 0, y: 1 }, rotation: 0, stretchLength: 4 },
-    { origin: { x: 0, y: 2 }, rotation: 0 },
-    { origin: { x: 2, y: 2 }, rotation: 0 },
-    { origin: { x: 0, y: 3 }, rotation: 0 },
-    { origin: { x: 0, y: 4 }, rotation: 0 }
-  ]
-  return levelFromPairs(id, `挑戰紙箱 ${id}`, 'challenge', board, cats, solutions, '限步關卡：仔細安排貓咪與箱蓋的順序。', 14, 5)
-}
-
 function levelFromPairs(
   id: number,
   name: string,
@@ -274,12 +236,7 @@ export const LEVELS: LevelDefinition[] = [
   createLidLevel(22, 'cover'),
   createLidLevel(23, 'close'),
   createLidLevel(24, 'fold'),
-  createLidLevel(25, 'seal'),
-  createChallengeLevel(26, 'challenge'),
-  createChallengeLevel(27, 'challenge-two'),
-  createChallengeLevel(28, 'challenge-three'),
-  createChallengeLevel(29, 'challenge-four'),
-  createChallengeLevel(30, 'challenge-five')
+  createLidLevel(25, 'seal')
 ]
 
 export function getLevelById(id: number): LevelDefinition {

@@ -339,8 +339,8 @@ export function getPlanningDifficultyTarget(levelId: number): PlanningDifficulty
   if (levelId <= 3) return { chapter: 1, minimum: 28, maximum: 38 }
   if (levelId <= 10) return { chapter: 2, minimum: 35, maximum: 55 }
   if (levelId <= 15) return { chapter: 3, minimum: 44, maximum: 62 }
-  if (levelId <= 20) return { chapter: 4, minimum: 52, maximum: 78 }
-  return { chapter: 5, minimum: 65, maximum: 82 }
+  if (levelId <= 20) return { chapter: 4, minimum: 50, maximum: 72 }
+  return { chapter: 5, minimum: 62, maximum: 80 }
 }
 
 export function scorePlanningReport(metrics: PlanningDifficultyMetrics): ScoredPlanningDifficulty {

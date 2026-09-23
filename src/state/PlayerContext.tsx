@@ -7,7 +7,7 @@ import {
   type PlayerSave,
   type PlayerSettings
 } from '../services/save/playerSave'
-import { MAX_DROP_LEVEL } from '../game/data/dropManifest'
+import { MAX_PLANNING_LEVEL } from '../game/data/planningLevels'
 import { setBackgroundMusicEnabled, startBackgroundMusic } from '../services/audio/audioService'
 import { installGlobalAudioFeedback } from '../services/audio/globalAudioFeedback'
 
@@ -67,7 +67,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const completeLevel = useCallback((levelId: number, stars: number, coinReward: number) => {
     update((current) => ({
       ...current,
-      currentLevel: Math.max(current.currentLevel, Math.min(MAX_DROP_LEVEL, levelId + 1)),
+      currentLevel: Math.max(current.currentLevel, Math.min(MAX_PLANNING_LEVEL, levelId + 1)),
       completedLevels: uniqueNumbers([...current.completedLevels, levelId]),
       stars: { ...current.stars, [levelId]: Math.max(current.stars[levelId] ?? 0, stars) },
       pawCoins: current.pawCoins + coinReward

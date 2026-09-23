@@ -120,14 +120,13 @@ describe('authored planning levels', () => {
     expect(directions).toEqual(new Set(['horizontal', 'vertical', 'diagonal']))
   })
 
-  it('uses all three directions and produces multi-step gravity in the third chapter', () => {
+  it('uses a staged horizontal bridge and introduces one controlled vertical chain at level twenty', () => {
     const chapterDirections = new Set<string>()
     for (const level of PLANNING_LEVELS.slice(15, 20)) {
       const solved = arrangeCats(level, level.solution)!
       const result = resolvePlanning(solved)
       const authoredDirections = boardDirections(solved)
       authoredDirections.forEach(direction => chapterDirections.add(direction))
-      expect(authoredDirections).toContain('diagonal')
       const directions = new Set<string>()
       let gravityFrames = 0
       for (let index = 0; index < result.frames.length; index += 2) {
@@ -137,17 +136,19 @@ describe('authored planning levels', () => {
         if (new Set(cells.map(cell => cell.x)).size === 1) directions.add('vertical')
         if (new Set(cells.map(cell => cell.x - cell.y)).size === 1 || new Set(cells.map(cell => cell.x + cell.y)).size === 1) directions.add('diagonal')
         const after = result.frames[index + 1]?.board
-        if (after && frame.board.some((row, y) => row.some((cat, x) => cat && after[y][x]?.id !== cat.id))) gravityFrames += 1
+        const cleared = new Set(frame.clearing)
+        if (after && frame.board.some((row, y) => row.some((cat, x) => cat && !cleared.has(cat.id) && after[y][x]?.id !== cat.id))) gravityFrames += 1
       }
       expect(directions.size, `level ${level.id} has no resolved match`).toBeGreaterThan(0)
-      expect(gravityFrames, `level ${level.id} gravity`).toBeGreaterThanOrEqual(3)
+      if (level.id < 20) expect(gravityFrames, `level ${level.id} should be a readable bridge`).toBe(0)
+      if (level.id === 20) expect(gravityFrames, `level ${level.id} gravity`).toBeGreaterThan(0)
     }
-    expect(chapterDirections).toEqual(new Set(['horizontal', 'vertical', 'diagonal']))
+    expect(chapterDirections).toEqual(new Set(['horizontal', 'vertical']))
   })
 
-  it('teaches horizontal, vertical and diagonal clears on irregular opening boards', () => {
+  it('keeps the non-bridge chapters directional on irregular opening boards', () => {
     const directions = new Set<string>()
-    for (const level of PLANNING_LEVELS) {
+    for (const level of PLANNING_LEVELS.filter(level => level.id < 16 || level.id > 20)) {
       const occupiedRows = level.board.map(row => row.filter(Boolean).length)
       const occupiedColumns = Array.from({ length: 8 }, (_, x) => level.board.filter(row => row[x]).length)
       expect(new Set(occupiedRows).size, `level ${level.id} row shape`).toBeGreaterThan(1)
