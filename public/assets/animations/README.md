@@ -1,4 +1,4 @@
-# MeowBox cat animation assets
+# Meow Line cat animation assets
 
 The idle, running, legacy paw, and top-edge hide-and-seek sheets were generated
 in the separate ChatGPT image conversation, then placed in the frame grids used

@@ -18,39 +18,39 @@ describe('InspectorOverlay', () => {
     sessionStorage.clear()
     render(<InspectorOverlay />)
 
-    expect(screen.queryByRole('dialog', { name: 'MeowBox 檢視工具' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '開啟 MeowBox 檢視工具' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Meow Line 檢視工具' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '開啟 Meow Line 檢視工具' })).not.toBeInTheDocument()
 
     fireEvent.keyDown(window, { key: 'i', ctrlKey: true, shiftKey: true })
 
-    expect(screen.queryByRole('dialog', { name: 'MeowBox 檢視工具' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Meow Line 檢視工具' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' })).toBeInTheDocument()
     expect(sessionStorage.getItem('meowbox-dev-inspector-mode.v1')).toBe('inspector')
 
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
-    expect(screen.getByRole('dialog', { name: 'MeowBox 檢視工具' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
+    expect(screen.getByRole('dialog', { name: 'Meow Line 檢視工具' })).toBeInTheDocument()
   })
 
   it('opens the local inspector panel from its launcher', () => {
     render(<InspectorOverlay />)
 
-    expect(screen.queryByRole('dialog', { name: 'MeowBox 檢視工具' })).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    expect(screen.queryByRole('dialog', { name: 'Meow Line 檢視工具' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
 
-    expect(screen.getByRole('dialog', { name: 'MeowBox 檢視工具' })).toBeInTheDocument()
-    expect(screen.getByText('MEOWBOX INSPECTOR')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Meow Line 檢視工具' })).toBeInTheDocument()
+    expect(screen.getByText('MEOW LINE INSPECTOR')).toBeInTheDocument()
   })
 
   it('persists overlay toggles across remounts', () => {
     const firstRender = render(<InspectorOverlay />)
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
     fireEvent.click(screen.getByLabelText('格線'))
 
     expect(JSON.parse(localStorage.getItem('meowbox-dev-inspector.v1') || '{}')).toMatchObject({ grid: true })
     firstRender.unmount()
 
     render(<InspectorOverlay />)
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
     expect(screen.getByLabelText('格線')).toBeChecked()
   })
 
@@ -59,7 +59,7 @@ describe('InspectorOverlay', () => {
 
     fireEvent.keyDown(window, { key: 'g', ctrlKey: true, shiftKey: true })
 
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
     expect(screen.getByLabelText('格線')).toBeChecked()
   })
 
@@ -75,10 +75,10 @@ describe('InspectorOverlay', () => {
     }
 
     const firstRender = render(<InspectorOverlay />)
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
     fireEvent.click(screen.getByLabelText('調整模式'))
     fireEvent.click(screen.getByRole('button', { name: '關閉檢視工具' }))
-    expect(screen.queryByRole('dialog', { name: 'MeowBox 檢視工具' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Meow Line 檢視工具' })).not.toBeInTheDocument()
     act(() => {
       dispatchPointer('pointerdown', { clientX: 10, clientY: 20, pointerId: 1 })
       dispatchPointer('pointermove', { clientX: 32, clientY: 12, pointerId: 1 })
@@ -87,12 +87,12 @@ describe('InspectorOverlay', () => {
 
     expect(localStorage.getItem('meowbox-dev-inspector-overrides.v1')).toContain('"x":22')
     expect(localStorage.getItem('meowbox-dev-inspector-overrides.v1')).toContain('"y":-8')
-    expect(screen.queryByRole('dialog', { name: 'MeowBox 檢視工具' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Meow Line 檢視工具' })).not.toBeInTheDocument()
 
     firstRender.unmount()
     render(<InspectorOverlay />)
     expect(document.getElementById('mbo-inspector-overrides')?.textContent).toContain('translate: 22px -8px')
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
     fireEvent.click(screen.getByRole('button', { name: '清除全部調整' }))
     expect(localStorage.getItem('meowbox-dev-inspector-overrides.v1')).toBe('{}')
     expect(document.getElementById('mbo-inspector-overrides')?.textContent).toBe('')
@@ -112,7 +112,7 @@ describe('InspectorOverlay', () => {
     Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: vi.fn().mockReturnValue(target) })
 
     render(<InspectorOverlay />)
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
     fireEvent.click(screen.getByLabelText('元件框線'))
     act(() => {
       window.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 40, clientY: 60 }))
@@ -152,7 +152,7 @@ describe('InspectorOverlay', () => {
     }
 
     render(<InspectorOverlay />)
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
     fireEvent.click(screen.getByLabelText('元件框線'))
     act(() => {
       window.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 40, clientY: 60 }))
@@ -222,7 +222,7 @@ describe('InspectorOverlay', () => {
 
   it('shows the SE 375x667 baseline frame and device checklist', () => {
     render(<InspectorOverlay />)
-    fireEvent.click(screen.getByRole('button', { name: '開啟 MeowBox 檢視工具' }))
+    fireEvent.click(screen.getByRole('button', { name: '開啟 Meow Line 檢視工具' }))
 
     expect(screen.getByText('Viewport / SE 基準')).toBeInTheDocument()
     expect(screen.getByText(/iPhone SE 375×667/)).toBeInTheDocument()

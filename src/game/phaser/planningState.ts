@@ -20,7 +20,7 @@ export interface PlanningState {
 }
 export type PlanningAction = { type: 'select' | 'remove'; id: number } | { type: 'place'; x: number; y: number }
   | { type: 'hint-pending' } | { type: 'hint-result'; hintCell?: Placement }
-  | { type: 'undo' | 'clear' | 'hint' | 'start' | 'tick' | 'restart' }
+  | { type: 'undo' | 'clear' | 'grant-undo' | 'grant-hint' | 'hint' | 'start' | 'tick' | 'restart' }
 
 export const freshPlanning = (level: PlanningLevel): PlanningState => ({
   puzzle: level, placements: [], selected: level.cats[0]?.id, phase: 'editing',
@@ -95,6 +95,10 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
       if (state.pendingHint) return state
       return state.undoUses > 0 && state.placements.length
         ? { ...state, selected: state.placements.at(-1)!.catId, placements: state.placements.slice(0, -1), undoUses: state.undoUses - 1, hintCell: undefined, failureReason: undefined } : state
+    case 'grant-undo':
+      return state.undoUses === 0 ? { ...state, undoUses: 5 } : state
+    case 'grant-hint':
+      return state.hintUses === 0 ? { ...state, hintUses: 3 } : state
     case 'clear':
       if (state.pendingHint) return state
       return { ...state, placements: [], selected: level.cats[0]?.id, hintCell: undefined, failureReason: undefined }

@@ -1,6 +1,8 @@
-/* WKWebView on iOS is stricter about the WebP files used by the web build. */
-.native-platform .screen--home { background-image: url('/assets-native/bg-main.png'); }
-.native-platform .screen--levels { background-image: url('/assets-native/bg-main.png'); }
-.native-platform .screen--settings { background-image: url('/assets-native/bg-main.png'); }
-.native-platform .screen--game { background-image: url('/assets-native/bg-main.png'); }
-.native-platform .screen--game--intro { background-image: url('/assets-native/bg-main.png'); }
+/* Keep native screens on the same optimized background as the web build. */
+.native-platform .screen--home,
+.native-platform .screen--levels,
+.native-platform .screen--settings,
+.native-platform .screen--game,
+.native-platform .screen--game--intro {
+  background-image: url('/assets/bg-main.webp');
+}

@@ -6,18 +6,33 @@
 .home-brand { width: min(72%, 310px); margin: clamp(58px, 11dvh, 96px) auto 8px; padding: 16px 10px 14px; border: 5px solid #6d3a26; border-radius: 28px; color: #fff3d7; text-align: center; background: #63301e; box-shadow: inset 0 0 0 4px rgba(255,214,141,.24), 0 7px 0 rgba(70,31,18,.45); transform: rotate(-1deg); }
 .home-brand__ears { position: absolute; margin-top: -31px; margin-left: -17px; color: #ffb0b7; font-size: 42px; text-shadow: 0 3px 0 #63301e; }
 .home-brand h1 { margin: 0; color: #fff4de; font-size: clamp(44px, 13vw, 68px); font-weight: 1000; letter-spacing: -.09em; line-height: .76; text-shadow: 0 5px 0 #9a4c2e; } .home-brand h1 b { color: #ffd162; } .home-brand p { margin: 12px -4px -3px; color: #ffe1a0; font-size: clamp(15px,4.1vw,20px); font-weight: 900; letter-spacing: .08em; }
-.home-progress { width: 132px; margin: 9px 5% 10px auto; padding: 8px 10px; border: 3px solid #bd8a67; border-radius: 16px; color: #7d4935; text-align: center; background: rgba(255,248,234,.92); box-shadow: 0 4px 0 rgba(103,52,25,.22); } .home-progress span { display: block; font-size: 11px; font-weight: 800; } .home-progress strong { display: block; margin: 2px 0; font-size: 22px; } .home-progress i { color: #b4a195; font-size: 20px; font-style: normal; } .home-progress i.is-earned { color: #ffce44; text-shadow: 0 2px 0 #c77c20; }
 .home-start { display: flex; width: min(86%, 375px); min-height: 72px; margin: 10px auto 0; border-radius: 26px; font-size: clamp(23px, 7vw, 32px); } .home-start .app-button__icon { display: none; } .home-start b { margin-left: 3px; font-size: .7em; }
 .home-nav { position: absolute; right: 8%; bottom: calc(env(safe-area-inset-bottom) + 26px); left: 8%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .home-nav .app-button { min-width: 0; min-height: 86px; flex-direction: column; padding: 6px 3px; border-radius: 19px; font-size: clamp(12px,3.5vw,16px); } .home-nav .app-button__icon { width: 42px; height: 42px; } .home-footer { position: absolute; right: 0; bottom: calc(env(safe-area-inset-bottom) + 132px); left: 0; margin: 0; color: #75452f; font-size: 12px; font-weight: 800; text-align: center; text-shadow: 0 1px 0 #ffe8c9; }
 
 
 .screen--settings { height: 100%; overflow-y: auto; scrollbar-width: none; }
 .screen--settings::-webkit-scrollbar { display: none; }
+.screen--settings .screen-title { display: grid; place-items: center; }
 
-.settings-card { max-width: 440px; margin: 2px auto 12px; padding: 7px 14px 14px; border: 3px solid #d1a47e; border-radius: 25px; background: rgba(255,249,239,.91); box-shadow: inset 0 2px 0 white, 0 5px 0 rgba(103,52,25,.18); }
-.settings-language { display: grid; grid-template-columns: 40px .8fr 2fr; min-height: 70px; align-items: center; gap: 6px; border-bottom: 1px solid #e2b993; } .settings-language > span { font-size: 29px; } .settings-language strong { font-size: 17px; } .settings-language div { display: flex; overflow: hidden; border: 1px solid #d3a77e; border-radius: 12px; } .settings-language button { min-height: 34px; flex: 1; border: 0; border-right: 1px solid #ddb99b; color: #8a5b43; font-size: 10px; font-weight: 800; background: transparent; } .settings-language button:last-child { border: 0; } .settings-language .is-active { color: #684128; background: #ffe181; }
-.settings-link { display: grid; grid-template-columns: 40px 1fr 22px; width: 100%; min-height: 54px; align-items: center; gap: 7px; border: 0; border-bottom: 1px solid #e2b993; color: #703e2e; text-align: left; background: transparent; cursor: pointer; } .settings-link span { font-size: 23px; } .settings-link strong { font-size: 17px; } .settings-link b { color: #c0825c; font-size: 35px; font-weight: 500; }
-.settings-home { display: flex; width: min(80%, 300px); min-height: 50px; margin: 0 auto; }
+.settings-card {
+  max-width: 440px;
+  margin: 0 auto 12px;
+  padding: 7px 14px 14px;
+  border: 3px solid transparent;
+  border-radius: 27px;
+  background:
+    linear-gradient(180deg, rgba(255, 254, 248, .95), rgba(255, 243, 226, .88)) padding-box,
+    linear-gradient(180deg, #71c8fb 0%, #b28bf2 52%, #f28eaf 100%) border-box;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .78), 0 6px 0 rgba(79, 76, 151, .22), 0 12px 22px rgba(93, 52, 40, .12);
+  backdrop-filter: blur(2px);
+}
+.settings-language { display: grid; grid-template-columns: 40px .8fr 2fr; min-height: 70px; align-items: center; gap: 6px; border-bottom: 1px solid rgba(207, 145, 104, .46); } .settings-language > span { color: #6a8ed1; font-size: 29px; text-shadow: 0 1px 0 #fff; } .settings-language strong { color: #6d3925; font-size: 17px; } .settings-language div { display: flex; overflow: hidden; border: 1px solid #d3a77e; border-radius: 12px; background: rgba(255, 251, 243, .58); } .settings-language button { min-height: 34px; flex: 1; border: 0; border-right: 1px solid #ddb99b; color: #8a5b43; font-size: 10px; font-weight: 800; background: transparent; } .settings-language button:last-child { border: 0; } .settings-language .is-active { color: #684128; background: linear-gradient(180deg, #ffe78e, #ffd46a); box-shadow: inset 0 -2px 0 rgba(213, 142, 46, .2); }
+.settings-link { display: grid; grid-template-columns: 40px 1fr 22px; width: 100%; min-height: 54px; align-items: center; gap: 7px; border: 0; border-bottom: 1px solid rgba(207, 145, 104, .46); color: #6d3925; text-align: left; background: transparent; cursor: pointer; } .settings-link span { color: #6d8ed0; font-size: 23px; text-shadow: 0 1px 0 #fff; } .settings-link strong { font-size: 17px; } .settings-link b { color: #ef9a55; font-size: 35px; font-weight: 500; text-shadow: 0 1px 0 #fff; }
+.screen--settings .settings-home { display: grid; width: min(73cqw, 300px); height: min(11cqh, 76px); min-height: min(11cqh, 76px); margin: 0 auto; overflow: visible; font-size: clamp(22px, 7.2cqw, 30px); }
+.screen--settings .settings-home .artwork-button__image { width: 100%; }
+.screen--settings .settings-home .artwork-button__label { position: absolute; top: 50%; left: 48%; color: #743920; white-space: nowrap; text-shadow: 0 2px 0 rgba(255, 239, 157, .78); transform: translate(-50%, -50%); }
+.screen--settings .settings-home:hover { filter: brightness(1.08); }
+.screen--settings .settings-home:active { transform: translateY(2px); }
 
 @media (max-height: 760px) {
   .home-brand { margin-top: 55px; transform: scale(.9); transform-origin: top center; margin-bottom: -6px; }
@@ -26,20 +41,16 @@
   .screen-title { margin-top: 4px; padding-block: 11px; }
 }
 
-/* The home screen now uses the supplied logo, progress card, and button art. */
+/* The home mark keeps the cat mascot while making the new line-based game idea visible. */
 .home-brand { position: relative; width: min(82%, 332px); height: clamp(202px, 28dvh, 245px); margin: clamp(38px, 7dvh, 66px) auto 2px; padding: 0; border: 0; border-radius: 0; color: #6e3925; text-align: center; background: transparent; box-shadow: none; transform: none; }
-.home-brand__logo { position: absolute; top: 50%; left: 50%; width: 100%; max-width: none; transform: translate(-50%, -50%); pointer-events: none; }
+.home-brand__mark { position: absolute; top: 47%; left: 50%; display: grid; width: 100%; height: 100%; place-items: center; transform: translate(-50%, -58%) scale(.86); }
+.home-brand__logo { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 2px rgba(91, 48, 29, .24)); }
 .home-brand p { position: absolute; right: 14%; bottom: -2%; left: 14%; z-index: 1; margin: 0; color: #6d3927; font-family: var(--font-cute); font-size: clamp(15px, 4.5vw, 21px); font-weight: 900; letter-spacing: .1em; line-height: 1.1; text-shadow: 0 1px 0 rgba(255, 241, 208, .72); white-space: nowrap; }
-.home-progress { position: relative; z-index: 2; width: 140px; height: 140px; min-height: 0; margin: -12px 0 0 auto; padding: 0; border: 0; border-radius: 0; color: #75432f; background: transparent; box-shadow: none; transform: rotate(10deg); }
-.home-progress__art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-.home-progress > span, .home-progress > strong { position: absolute; z-index: 1; right: 10%; left: 10%; font-family: var(--font-cute); text-align: center; }
-.home-progress > span { top: 31%; font-size: clamp(10px, 3vw, 13px); font-weight: 900; }
-.home-progress > strong { top: 43%; margin: 0; font-size: clamp(20px, 6vw, 27px); line-height: 1; }
 .home-start { width: min(89%, 390px); min-height: clamp(98px, 14dvh, 119px); margin: -8px auto 0; overflow: visible; font-size: clamp(25px, 7.2vw, 34px); }
 .home-start .artwork-button__image { width: 100%; }
-.home-start .artwork-button__label { position: absolute; top: 50%; left: 45%; color: #743920; white-space: nowrap; text-shadow: 0 2px 0 rgba(255, 239, 157, .78); transform: translate(-50%, -50%); }
+.home-start .artwork-button__label { position: absolute; top: 50%; left: 48%; color: #743920; white-space: nowrap; text-shadow: 0 2px 0 rgba(255, 239, 157, .78); transform: translate(-50%, -50%); }
 .home-nav { right: 7%; bottom: calc(env(safe-area-inset-bottom) + 24px); left: 7%; gap: 6px; }
-.home-nav__button { width: 100%; aspect-ratio: 1; min-height: 0; font-size: clamp(12px, 3.6vw, 16px); }
+.home-nav__button { width: 100%; aspect-ratio: 1; min-height: 0; color: #743920; font-size: clamp(12px, 3.6vw, 16px); text-shadow: 0 2px 0 rgba(255, 239, 157, .78); }
 .home-nav__button .artwork-button__label { position: absolute; right: 4%; bottom: 14%; left: 4%; white-space: nowrap; }
 .home-nav__button--dark { color: #713d2b; text-shadow: 0 1px 0 rgba(255, 250, 235, .9); }
 .home-nav__button .artwork-button__badge { top: 2%; right: 0; }
@@ -61,7 +72,6 @@
 @media (max-height: 760px) {
   .home-brand { height: 187px; margin-top: 34px; }
   .home-brand p { font-size: 14px; }
-  .home-progress { width: 140px; height: 140px; margin-top: -40px; transform: rotate(10deg); }
   .home-start { min-height: 90px; margin-top: -6px; }
   .home-nav { bottom: calc(env(safe-area-inset-bottom) + 15px); }
   .home-nav__button { font-size: 12px; }
@@ -82,23 +92,10 @@
 }
 /* Keep the brand sub readable at SE width without overflowing the logo art. */
 .screen--home .home-brand p { bottom: -2%; font-size: clamp(14px, 4.5cqw, 21px); }
-/* Progress card floats right below the brand plank so the sub text stays fully visible. */
-.screen--home .home-progress {
-  position: absolute;
-  top: 47cqh;
-  right: 4cqw;
-  z-index: 2;
-  width: min(37.3cqw, 148px);
-  height: min(37.3cqw, 148px);
-  margin: 0;
-  transform: rotate(10deg);
-}
-.screen--home .home-progress > span { font-size: clamp(10px, 3cqw, 13px); }
-.screen--home .home-progress > strong { font-size: clamp(20px, 6cqw, 27px); }
-/* Start control is absolutely stacked: brand / progress / start / nav never collide. */
+/* Start control is absolutely stacked below the brand and above the navigation. */
 .screen--home .home-start {
   position: absolute;
-  top: 68.5cqh;
+  top: 58cqh;
   left: 50%;
   width: min(73cqw, 300px);
   height: min(11cqh, 76px);

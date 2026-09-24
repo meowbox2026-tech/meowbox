@@ -65,5 +65,5 @@ export const CatPlacementArea = forwardRef<CatPlacementAreaHandle, CatPlacementA
     }
   }, [level, onFeedback, onStateChange])
 
-  return <div className="cat-placement-area" ref={hostRef} aria-label="貓咪裝箱拼圖棋盤" />
+  return <div className="cat-placement-area" ref={hostRef} aria-label="貓咪落下連線棋盤" />
 })

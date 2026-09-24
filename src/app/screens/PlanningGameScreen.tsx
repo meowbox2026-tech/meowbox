@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { getCatAssetPath } from '../../game/data/catAssets'
 import { MAX_PLANNING_LEVEL } from '../../game/data/planningLevels'
-import { getPlanningObjective, type PlanningObjectiveDirection } from '../../game/core/planningObjective'
 import { usePlanningGame } from '../../game/phaser/usePlanningGame'
 import { planningCopy } from '../../game/phaser/planningCopy'
-import { getDropCatName, useLocale, useLocalizedLevel } from '../../i18n'
+import { getDropCatName, useLocale } from '../../i18n'
 import type { CatAsset } from '../../game/types'
 import { usePlayer } from '../../state/PlayerContext'
 import { startBackgroundMusic, stopBackgroundMusic } from '../../services/audio/audioService'
 import { playPlacementHaptic } from '../../services/haptics/hapticsService'
 import { AppButton } from '../components/AppButton'
+import { ArtworkButton } from '../components/ArtworkButton'
 import { Modal } from '../components/Modal'
 import { PauseModal } from '../components/PauseModal'
 import { TopBar } from '../components/TopBar'
@@ -22,36 +22,35 @@ interface Props {
   onLevelSelect: () => void
   onNextLevel: (id: number) => void
   onPlayAction: () => void | Promise<void>
+  onWatchUndoAd: () => Promise<boolean>
+  onWatchHintAd?: () => Promise<boolean>
 }
 
-export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction }: Props) {
+type RewardAdKind = 'undo' | 'hint'
+
+export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction, onWatchUndoAd, onWatchHintAd = onWatchUndoAd }: Props) {
   const activeLevelId = Math.min(MAX_PLANNING_LEVEL, Math.max(1, levelId))
   const { player, completeLevel } = usePlayer()
   const locale = useLocale()
   const text = planningCopy[locale]
-  const localized = useLocalizedLevel(activeLevelId)
   const [paused, setPaused] = useState(false)
-  const [rules, setRules] = useState(false)
+  const [rewardAdConfirm, setRewardAdConfirm] = useState<RewardAdKind>()
+  const [rewardAdPending, setRewardAdPending] = useState(false)
+  const [rewardAdStatus, setRewardAdStatus] = useState<string>()
   const tutorial = useDiagonalTutorial(activeLevelId)
-  const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || rules || tutorial.open, activeLevelId)
+  const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || tutorial.open, activeLevelId)
   const completionRecorded = useRef(false)
   const editing = state.phase === 'editing'
-  const locked = paused || rules || tutorial.open || hidden || !editing || state.pendingHint
+  const locked = paused || tutorial.open || hidden || !editing || state.pendingHint || rewardAdPending
   const stars = Math.max(1, 3 - state.failures)
   const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
-  const objective = getPlanningObjective(level)
-  const objectiveLines: Array<[PlanningObjectiveDirection, string, string, number]> = [
-    ['horizontal', '━', text.horizontalLine, objective.lineCounts.horizontal],
-    ['vertical', '┃', text.verticalLine, objective.lineCounts.vertical],
-    ['diagonal', '╱', text.diagonalLine, objective.lineCounts.diagonal]
-  ]
   useEffect(() => {
-    if (paused || rules || tutorial.open || hidden || state.phase === 'completed') stopBackgroundMusic()
+    if (paused || tutorial.open || hidden || state.phase === 'completed') stopBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
     return () => stopBackgroundMusic()
-  }, [paused, rules, tutorial.open, hidden, state.phase, player.settings.music])
+  }, [paused, tutorial.open, hidden, state.phase, player.settings.music])
   useEffect(() => {
     if (state.phase === 'completed' && !completionRecorded.current) {
       completionRecorded.current = true
@@ -62,8 +61,50 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     completionRecorded.current = false
     dispatch({ type: 'restart' })
     void onPlayAction()
+    setRewardAdConfirm(undefined)
+    setRewardAdStatus(undefined)
     setPaused(false)
-    setRules(false)
+  }
+  const watchRewardAd = async (kind: RewardAdKind) => {
+    if (rewardAdPending || state.phase !== 'editing') return
+    if (kind === 'undo' ? state.undoUses > 0 : state.hintUses > 0) return
+    setRewardAdPending(true)
+    setRewardAdStatus(undefined)
+    try {
+      const completed = await (kind === 'hint' ? onWatchHintAd() : onWatchUndoAd())
+      if (completed) {
+        dispatch({ type: kind === 'hint' ? 'grant-hint' : 'grant-undo' })
+        setRewardAdStatus(kind === 'hint' ? text.hintAdGranted : text.undoAdGranted)
+      } else {
+        setRewardAdStatus(kind === 'hint' ? text.hintAdUnavailable : text.undoAdUnavailable)
+      }
+    } catch {
+      setRewardAdStatus(kind === 'hint' ? text.hintAdUnavailable : text.undoAdUnavailable)
+    } finally {
+      setRewardAdPending(false)
+    }
+  }
+  const requestUndo = () => {
+    if (locked || rewardAdPending) return
+    if (state.undoUses > 0) {
+      if (state.placements.length) dispatch({ type: 'undo' })
+      return
+    }
+    setRewardAdConfirm('undo')
+  }
+  const requestHint = () => {
+    if (locked || rewardAdPending || state.selected === undefined) return
+    if (state.hintUses > 0) {
+      dispatch({ type: 'hint' })
+      return
+    }
+    setRewardAdConfirm('hint')
+  }
+  const confirmRewardAd = () => {
+    if (!rewardAdConfirm) return
+    const kind = rewardAdConfirm
+    setRewardAdConfirm(undefined)
+    void watchRewardAd(kind)
   }
   const place = (x: number, y: number) => {
     if (locked) return
@@ -72,24 +113,12 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   }
   const catName = (type: string) => getDropCatName(type, locale)
   return <main className={`screen screen--game screen--drop screen--planning${hidden ? ' is-suspended' : ''}`}>
-    <TopBar level={activeLevelId} onPause={() => setPaused(true)} status={<div className="planning-top-status">
-      <strong>{localized.name}</strong><small>{text.failures} {state.failures} {text.times}</small>
-    </div>} />
-    <section className="planning-intro"><strong>{text.goal(totalCats)}</strong><span>{text.calm}</span></section>
+    <TopBar level={activeLevelId} onPause={() => setPaused(true)} status={<div className="planning-top-goal">{text.goal(totalCats)}</div>} />
     <section className="planning-tray" aria-label={text.tray}>
       <div className="planning-tray__heading"><span>{text.tray}</span>
         {remainingCats.length > 8 && <small className="planning-tray__hint">↔ {text.swipe}</small>}
         <b>{text.placed} {state.placements.length} / {cats.length}</b>
       </div>
-      <section className="planning-objective" data-testid="planning-objective" aria-label={text.conditions}>
-        <div className="planning-objective__heading"><strong>{text.conditions}</strong><small>{text.conditionHint}</small></div>
-        <div className="planning-objective__chips">
-          {objectiveLines.filter(([, , , count]) => count > 0).map(([direction, symbol, label, count]) => <span aria-label={`${label} ${count}`} data-testid={`planning-objective-line-${direction}`} key={direction}>{symbol}×{count}</span>)}
-          <span aria-label={`${text.clearCount} ${objective.totalClearingCells}`} data-testid="planning-objective-cleared">▦×{objective.totalClearingCells}</span>
-          {objective.gravityWaves > 0 && <span aria-label={`${text.gravityCount} ${objective.gravityWaves}`} data-testid="planning-objective-gravity">↓×{objective.gravityWaves}</span>}
-          {objective.largestGroup > 3 && <span aria-label={`${text.mergedGroup} ${objective.largestGroup}`} data-testid="planning-objective-merge">◎×{objective.largestGroup}</span>}
-        </div>
-      </section>
       <div className="planning-tray__cats" role="list">{remainingCats.map((cat, index) =>
         <div key={cat.id} role="listitem" className={`planning-tray__cat${index === 0 ? ' is-next' : ''}`}
           aria-label={text.cardLabel(index + 1, catName(cat.type))}>
@@ -97,8 +126,11 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         </div>
       )}</div>
     </section>
-    <div className={`planning-box${paused || rules || hidden ? ' is-paused' : ''}`}>
-      <div className="planning-grid" aria-label={text.board}>
+    <div
+      className={`planning-board planning-board--prism${paused || hidden ? ' is-paused' : ''}`}
+      data-board-size="8x8"
+    >
+      <div className="planning-grid" data-board-skin="candy-prism" aria-label={text.board}>
         {Array.from({ length: 64 }, (_, i) => <div className="planning-cell" key={i} />)}
         <div className="planning-placement-grid">{Array.from({ length: 8 }, (_, y) => Array.from({ length: 8 }, (_, x) => {
           const hinted = state.hintCell !== undefined && state.hintCell.catId === state.selected && state.hintCell.x === x && state.hintCell.y === y
@@ -119,21 +151,43 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
               aria-label={order >= 0 ? `${text.placed} ${order + 1} ${catName(cat.type)}` : `${text.fixed} ${catName(cat.type)}`}>{content}</div>
         }))}
       </div>
-      <div className="planning-box__label">MEOWBOX <span>8 × 8</span></div>
+      <div className="planning-board__label">MEOW LINE <span>8 × 8</span></div>
     </div>
     {editing && state.failureReason === 'resolution' && state.placements.length === 0 && <p className="planning-status" role="status">{text.retryNotice}</p>}
     <div className="planning-edit-actions">
-      <button disabled={locked || !state.placements.length || state.undoUses <= 0} onClick={() => dispatch({ type: 'undo' })}>{text.undo} <span className="planning-undo-count">{state.undoUses}</span></button>
-      <button disabled={locked || state.hintUses <= 0 || state.selected === undefined} onClick={() => dispatch({ type: 'hint' })}>{text.useHint} <span className="planning-undo-count">{state.hintUses}</span></button>
-      <button disabled={state.phase === 'running'} onClick={() => setRules(true)}>{text.rules}</button>
+      <ArtworkButton
+        asset="undo"
+        className={`planning-undo-button${state.undoUses === 0 ? ' is-attention' : ''}`}
+        badge={state.undoUses}
+        disabled={locked || rewardAdPending || (state.undoUses > 0 && !state.placements.length)}
+        aria-label={`${text.undo} ${state.undoUses}${state.undoUses === 0 ? `，${text.undoAdAttention}` : ''}`}
+        onClick={requestUndo}
+      />
+      <ArtworkButton
+        asset="hint"
+        className={`planning-hint-button${state.hintUses === 0 ? ' is-attention' : ''}`}
+        badge={state.hintUses}
+        disabled={locked || rewardAdPending || state.selected === undefined}
+        aria-label={`${text.useHint} ${state.hintUses}${state.hintUses === 0 ? `，${text.hintAdAttention}` : ''}`}
+        onClick={requestHint}
+      />
     </div>
-    {state.hintCell && <p className="planning-hint-status" role="status">{text.hintUsed}</p>}
-    <AppButton className="planning-start" disabled={locked || left > 0} onClick={() => dispatch({ type: 'start' })}>{text.start}</AppButton>
+    {rewardAdStatus && <p className="planning-ad-status" role="status">{rewardAdStatus}</p>}
+    <ArtworkButton asset="start" className="planning-start" disabled={locked || left > 0} onClick={() => dispatch({ type: 'start' })}>{text.start}</ArtworkButton>
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
     <PlanningDiagonalTutorial open={tutorial.open} onClose={tutorial.close} />
-    <Modal open={rules} ariaLabel={text.rules} className="drop-rules">
-      <h2>{text.rulesTitle}</h2><ol>{[text.rule1, text.rule2, text.rule3, text.rule4(totalCats), text.rule5].map(rule => <li key={rule}>{rule}</li>)}</ol>
-      <AppButton onClick={() => setRules(false)}>{text.close}</AppButton>
+    <Modal
+      open={rewardAdConfirm !== undefined}
+      onClose={() => setRewardAdConfirm(undefined)}
+      ariaLabel={rewardAdConfirm === 'hint' ? text.hintAdConfirmTitle : text.undoAdConfirmTitle}
+      className="planning-undo-confirm"
+    >
+      <h2>{rewardAdConfirm === 'hint' ? text.hintAdConfirmTitle : text.undoAdConfirmTitle}</h2>
+      <p>{rewardAdConfirm === 'hint' ? text.hintAdConfirmBody : text.undoAdConfirmBody}</p>
+      <div className="planning-undo-confirm__actions">
+        <AppButton onClick={confirmRewardAd} disabled={rewardAdPending}>{text.undoAdConfirmAction}</AppButton>
+        <AppButton variant="cream" onClick={() => setRewardAdConfirm(undefined)}>{text.cancel}</AppButton>
+      </div>
     </Modal>
     <Modal open={state.phase === 'completed' && !paused} ariaLabel={text.completed} className="drop-result">
       <img src={getCatAssetPath('orange')} alt="" /><h2>{text.completed}</h2>

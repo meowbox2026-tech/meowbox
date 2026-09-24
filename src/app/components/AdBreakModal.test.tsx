@@ -17,9 +17,11 @@ describe('AdBreakModal', () => {
     render(<AdBreakModal open />)
 
     expect(screen.getByRole('dialog', { name: '廣告播放中' })).toBeInTheDocument()
-    expect(screen.getByText('還剩 5 秒')).toBeInTheDocument()
+    expect(screen.getByText('還剩 30 秒')).toBeInTheDocument()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
 
-    act(() => vi.advanceTimersByTime(5000))
+    act(() => vi.advanceTimersByTime(30000))
     expect(screen.getByText('廣告即將結束')).toBeInTheDocument()
     vi.useRealTimers()
   })

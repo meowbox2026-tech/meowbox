@@ -611,10 +611,10 @@ export function InspectorOverlay() {
         </div>
       </div>
 
-      <section className="mbo-panel" role="dialog" aria-label="MeowBox 檢視工具" hidden={!state.panel}>
+      <section className="mbo-panel" role="dialog" aria-label="Meow Line 檢視工具" hidden={!state.panel}>
         <div className="mbo-panel__header">
           <div>
-            <strong className="mbo-panel__title">MEOWBOX INSPECTOR</strong>
+            <strong className="mbo-panel__title">MEOW LINE INSPECTOR</strong>
             <span className="mbo-panel__status">Inspector 模式 · 本分頁</span>
           </div>
           <button className="mbo-panel__close" type="button" onClick={() => patchState({ panel: false })} aria-label="關閉檢視工具">×</button>
@@ -670,7 +670,7 @@ export function InspectorOverlay() {
         <p className="mbo-panel__hint">拖曳元件不會重新開啟面板。移動、尺寸、旋轉都只套用在 Inspector 預覽；設定依本分頁／本機保存，正式模式不會套用。</p>
       </section>
 
-      <button className="mbo-launcher" type="button" onClick={() => patchState({ panel: true })} aria-label="開啟 MeowBox 檢視工具" title="MeowBox 檢視工具">▦</button>
+      <button className="mbo-launcher" type="button" onClick={() => patchState({ panel: true })} aria-label="開啟 Meow Line 檢視工具" title="Meow Line 檢視工具">▦</button>
     </div>,
     document.body,
   )

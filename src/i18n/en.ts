@@ -2,42 +2,41 @@ import type { Strings } from './strings'
 
 export const en: Strings = {
   app: {
-    openingBox: 'Opening the box…',
-    organizingBox: 'Tidying the box…',
-    title: 'MEOW BOX｜Cat Packing Puzzle'
+    openingGame: 'Getting the game ready…',
+    organizingGame: 'Tidying the board…',
+    title: 'MEOW LINE｜Cat Drop Match Puzzle'
   },
   topbar: {
-    back: 'Back', settings: 'Settings', pause: 'Pause', level: 'Level',
+    back: 'Back', settings: 'Settings', pause: 'Pause',
     levelAria: 'Level {level}', starsAria: '{stars} stars', moves: 'Moves'
   },
   home: {
-    brandSub: 'Cat Packing Puzzle', brandAria: 'Meow Box Cat Packing Puzzle',
-    progress: 'Progress', progressAria: 'Progress, level {level}',
-    collected: 'Collected {count} stars', start: 'Start Game', levels: 'Levels', mainNav: 'Main menu'
+    brandSub: 'Cat Drop Match Puzzle', brandAria: 'Meow Line Cat Drop Match Puzzle',
+    start: 'Start Game', levels: 'Levels', mainNav: 'Main menu'
   },
   levels: {
-    title: 'Levels', subtitle: 'Levels 1–25: take your time and arrange every cat!',
+    title: 'Levels',
     board: 'Level list', levelAria: 'Level {id}', lockedSuffix: ', locked', locked: 'Locked'
   },
   settings: {
-    title: 'Settings', subtitle: 'Make every play session just right!',
+    title: 'Settings',
     musicLabel: 'Music', soundLabel: 'Sound', hapticsLabel: 'Haptics',
     language: 'Language',
-    about: 'About', aboutToast: 'Meow Box Cat Packing Puzzle, version 1.0.0.',
-    backHome: '⌂　Back Home', privacy: 'Privacy Policy', terms: 'Terms of Service', support: 'Support'
+    about: 'About', aboutToast: 'Meow Line Cat Drop Match Puzzle, version 1.0.0.',
+    backHome: 'Back Home', privacy: 'Privacy Policy', terms: 'Terms of Service', support: 'Support'
   },
   legal: { backToSettings: '‹　Back to Settings', emailCta: 'Email Support' },
   ads: {
-    dialogAria: 'Advertisement playing', title: 'Advertisement playing', description: 'Please wait for the ad to finish before returning to the game.', remaining: '{seconds}s remaining', ready: 'The ad is ending'
+    dialogAria: 'Advertisement playing', title: 'Advertisement playing', description: 'The browser test simulates up to 30 seconds; live full-screen ad duration and dismissal are controlled by AdMob.', remaining: '{seconds}s remaining', ready: 'The ad is ending'
   },
   game: {
     rescue: 'Rescued {done} / {target}', statusLabel: 'Level status', timeLeft: 'Time note',
     preview: 'Next two cats', previewThree: 'Next three cats', previewFour: 'Next four cats', now: 'NOW', next: 'NEXT', soon: 'SOON', later: 'LATER',
-    nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', soonAlt: 'Soon: {name}', laterAlt: 'Later: {name}', traitScratch: 'Scratch', traitHungry: 'Hungry', board: 'Cat box',
+    nowAlt: 'Now: {name}', nextAlt: 'Next: {name}', soonAlt: 'Soon: {name}', laterAlt: 'Later: {name}', traitScratch: 'Scratch', traitHungry: 'Hungry', board: 'Cat drop board',
     columnAction: 'Column {col}, drop {name}', ceilingDanger: '⚠ Careful! Almost at the top',
-    ceilingSafe: 'Stay below this line', boxTagline: '♡ a box of happiness', actions: 'Game actions',
+    ceilingSafe: 'Stay below this line', lineTagline: '♡ Drop, match, meow', actions: 'Game actions',
     howTo: '? How to Play', hintUsed: 'Hint used this round', replay: '↻ Retry',
-    rulesAria: 'How to play Cat Drop', rulesTitle: 'Tap, drop, meow!',
+    rulesAria: 'How to play Meow Line', rulesTitle: 'Tap, drop, meow!',
     rule1Title: 'Pick a column', rule1Desc: 'The NOW cat falls to the lowest empty slot. NEXT is up after that.',
     rule2Title: 'Match 3 of a kind', rule2Desc: 'Horizontal, vertical, or either diagonal—3 or more in a row clears.',
     rule3Title: 'Drops chain again', rule3Desc: 'Cats above fall down, and new lines trigger a Combo!',
@@ -46,9 +45,9 @@ export const en: Strings = {
     starsAria: '{stars} stars', summary: 'Rescued {cleared} · {score} pts',
     summaryLine2: 'Best Combo ×{best} · {moves} drops',
     nextLevel: 'Next: {id}', playAgain: 'Play again for a high score', backToLevels: 'Back to Levels',
-    partyDone: 'The captain’s party is complete ♡', nextHappiness: 'The next box of happiness awaits ♡',
-    failedCeilingAria: 'Box is full', failedGenericAria: 'Challenge over',
-    failedCeilingTitle: 'Oh no, the box is full!',
+    partyDone: 'The meow party is complete ♡', nextHappiness: 'The next chain is waiting ♡',
+    failedCeilingAria: 'Board is full', failedGenericAria: 'Challenge over',
+    failedCeilingTitle: 'Oh no, the board is full!',
     failedTimeTitle: 'Time’s up—take a breather, meow!', failedProgress: 'Rescued {cleared} / {target} cats.',
     ceilingTip: 'Try spreading stacks to leave more room.', otherTip: 'Look for lines of three—your cats are waiting.',
     retry: 'Try again, meow', backCottage: 'Back to Cottage',
@@ -61,7 +60,7 @@ export const en: Strings = {
   },
   pause: {
     dialogAria: 'Pause menu', pausedAlt: 'Game paused', title: 'Paused', close: 'Close pause menu',
-    continue: 'Continue', restart: 'Restart Level', home: 'Back Home', settings: 'Settings'
+    continue: 'Continue', restart: 'Restart Level', home: 'Home', settings: 'Settings'
   },
   tray: { label: 'Cat picker', placed: 'Placed' },
   match3: { board: 'Match-3 board', empty: 'Empty', cell: 'Column {col}, row {row}, {name}' }

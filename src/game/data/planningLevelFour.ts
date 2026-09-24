@@ -24,10 +24,14 @@ const RIGHT_BRANCH = pattern([[7, 0], [7, 1], [7, 2]], 1)
 const RIGHT_BRANCH_TYPE: CatAsset = 'fishLover'
 const HORIZONTAL_BRANCH = pattern([[4, 3], [5, 3], [6, 3]], 1)
 const HORIZONTAL_BRANCH_TYPE: CatAsset = 'blue'
-const CENTER_BRANCH = pattern([[3, 3], [4, 3], [5, 3]], 2)
-const CENTER_BRANCH_TYPE: CatAsset = 'white'
-const DIAGONAL_BRANCH = pattern([[5, 4], [4, 5], [3, 6]], 1)
-const DIAGONAL_BRANCH_TYPE: CatAsset = 'fishLover'
+
+type AuthoredPattern = readonly [Pattern, CatAsset]
+
+const authoredPattern = (type: CatAsset, cells: Pattern['cells'], placed: Pattern['placed']): AuthoredPattern => [pattern(cells, placed), type]
+
+function authoredChapterLevel(id: number, groups: readonly AuthoredPattern[]): PlanningLevel {
+  return overlapLevel(id, groups.map(([item]) => item), groups.map(([, type]) => type))
+}
 
 type Transform = (point: Point) => Point
 
@@ -64,16 +68,58 @@ function chapterLevel(id: number, transform: Transform, baseCount: number, extra
 
 const IDENTITY: Transform = ([x, y]) => [x, y]
 const FLIP_X: Transform = ([x, y]) => [7 - x, y]
-// 21–25 open the expert chapter for the longer 100-level roadmap. The chapter
-// teaches one pressure at a time: a right branch, an offset mirror, a denser
-// lattice reset, a centre merge, then a mirrored merge with a different route
-// order. Later chapters can add new branch topologies without reusing this
-// chapter as the game's ending.
+// 21–22 introduce the expert chapter with the older branch lesson. Levels
+// 23–25 are authored separately so the final three boards have different
+// focal routes instead of being reflections of one another.
 export const PLANNING_LEVEL_TWENTY_ONE = chapterLevel(21, IDENTITY, 15, [[RIGHT_BRANCH, RIGHT_BRANCH_TYPE]])
 export const PLANNING_LEVEL_TWENTY_TWO = chapterLevel(22, FLIP_X, 15, [[RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [HORIZONTAL_BRANCH, HORIZONTAL_BRANCH_TYPE]])
-export const PLANNING_LEVEL_TWENTY_THREE = chapterLevel(23, IDENTITY, 18, [])
-export const PLANNING_LEVEL_TWENTY_FOUR = chapterLevel(24, IDENTITY, 18, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [pattern([[5, 4], [4, 5], [3, 6]], 0), DIAGONAL_BRANCH_TYPE]])
-export const PLANNING_LEVEL_TWENTY_FIVE = chapterLevel(25, FLIP_X, 18, [[CENTER_BRANCH, CENTER_BRANCH_TYPE], [RIGHT_BRANCH, RIGHT_BRANCH_TYPE], [DIAGONAL_BRANCH, DIAGONAL_BRANCH_TYPE]])
+
+// 23: a left rail feeds two descending diagonals into a staggered bottom
+// shelf. The first solution is not at the top-left, forcing the player to
+// read the route rather than sweep the board in row order.
+const LEVEL_TWENTY_THREE_LAYOUT: AuthoredPattern[] = [
+  authoredPattern('orange', [[3, 0], [4, 0], [5, 0]], 0), authoredPattern('blue', [[5, 4], [4, 5], [3, 6]], 1),
+  authoredPattern('white', [[5, 2], [4, 3], [3, 4]], 1), authoredPattern('fishLover', [[5, 5], [4, 6], [3, 7]], 2),
+  authoredPattern('orange', [[0, 5], [1, 5], [2, 5]], 1), authoredPattern('blue', [[5, 3], [4, 4], [3, 5]], 1),
+  authoredPattern('white', [[0, 1], [1, 1], [2, 1]], 1), authoredPattern('fishLover', [[7, 4], [7, 5], [7, 6]], 0),
+  authoredPattern('orange', [[5, 1], [6, 1], [7, 1]], 1), authoredPattern('blue', [[5, 7], [6, 7], [7, 7]], 0),
+  authoredPattern('white', [[2, 2], [2, 3], [2, 4]], 0), authoredPattern('fishLover', [[0, 6], [1, 6], [2, 6]], 0),
+  authoredPattern('orange', [[0, 0], [1, 0], [2, 0]], 2), authoredPattern('blue', [[0, 2], [0, 3], [0, 4]], 1),
+  authoredPattern('white', [[6, 3], [6, 4], [6, 5]], 0), authoredPattern('fishLover', [[3, 1], [3, 2], [3, 3]], 1),
+  authoredPattern('orange', [[0, 7], [1, 7], [2, 7]], 1), authoredPattern('blue', [[1, 2], [1, 3], [1, 4]], 0)
+]
+
+// 24: a central fan crosses a vertical spine and a short bottom shelf. It
+// deliberately moves the first choices into the middle of the board.
+const LEVEL_TWENTY_FOUR_LAYOUT: AuthoredPattern[] = [
+  authoredPattern('orange', [[5, 2], [6, 2], [7, 2]], 2), authoredPattern('blue', [[2, 1], [3, 2], [4, 3]], 2),
+  authoredPattern('white', [[4, 4], [5, 5], [6, 6]], 0), authoredPattern('fishLover', [[2, 3], [2, 4], [2, 5]], 0),
+  authoredPattern('orange', [[0, 0], [0, 1], [0, 2]], 2), authoredPattern('blue', [[2, 0], [3, 1], [4, 2]], 1),
+  authoredPattern('white', [[4, 5], [4, 6], [4, 7]], 0), authoredPattern('fishLover', [[0, 5], [0, 6], [0, 7]], 2),
+  authoredPattern('orange', [[5, 7], [6, 7], [7, 7]], 2), authoredPattern('blue', [[3, 4], [3, 5], [3, 6]], 1),
+  authoredPattern('white', [[1, 7], [2, 7], [3, 7]], 2), authoredPattern('fishLover', [[1, 2], [1, 3], [1, 4]], 0),
+  authoredPattern('orange', [[4, 1], [5, 1], [6, 1]], 2), authoredPattern('blue', [[7, 3], [7, 4], [7, 5]], 1),
+  authoredPattern('white', [[0, 4], [1, 5], [2, 6]], 0), authoredPattern('fishLover', [[4, 0], [5, 0], [6, 0]], 2),
+  authoredPattern('orange', [[1, 1], [2, 2], [3, 3]], 0), authoredPattern('blue', [[6, 3], [6, 4], [6, 5]], 0)
+]
+
+// 25: a left-to-right zigzag is interrupted by two outer vertical gates. The
+// route is intentionally asymmetric in both density and direction changes.
+const LEVEL_TWENTY_FIVE_LAYOUT: AuthoredPattern[] = [
+  authoredPattern('orange', [[3, 2], [4, 2], [5, 2]], 0), authoredPattern('blue', [[0, 0], [0, 1], [0, 2]], 2),
+  authoredPattern('white', [[3, 3], [2, 4], [1, 5]], 2), authoredPattern('fishLover', [[5, 4], [6, 5], [7, 6]], 1),
+  authoredPattern('orange', [[0, 6], [1, 6], [2, 6]], 1), authoredPattern('blue', [[1, 2], [2, 3], [3, 4]], 0),
+  authoredPattern('white', [[1, 1], [2, 1], [3, 1]], 1), authoredPattern('fishLover', [[6, 0], [6, 1], [6, 2]], 2),
+  authoredPattern('orange', [[4, 3], [5, 3], [6, 3]], 2), authoredPattern('blue', [[0, 7], [1, 7], [2, 7]], 1),
+  authoredPattern('white', [[3, 5], [3, 6], [3, 7]], 0), authoredPattern('fishLover', [[0, 3], [1, 4], [2, 5]], 0),
+  authoredPattern('orange', [[5, 5], [5, 6], [5, 7]], 1), authoredPattern('blue', [[7, 0], [7, 1], [7, 2]], 1),
+  authoredPattern('white', [[1, 0], [2, 0], [3, 0]], 1), authoredPattern('fishLover', [[4, 4], [4, 5], [4, 6]], 2),
+  authoredPattern('orange', [[2, 2], [1, 3], [0, 4]], 2), authoredPattern('blue', [[7, 3], [7, 4], [7, 5]], 1)
+]
+
+export const PLANNING_LEVEL_TWENTY_THREE = authoredChapterLevel(23, LEVEL_TWENTY_THREE_LAYOUT)
+export const PLANNING_LEVEL_TWENTY_FOUR = authoredChapterLevel(24, LEVEL_TWENTY_FOUR_LAYOUT)
+export const PLANNING_LEVEL_TWENTY_FIVE = authoredChapterLevel(25, LEVEL_TWENTY_FIVE_LAYOUT)
 
 export const PLANNING_LEVELS_FOUR = [
   PLANNING_LEVEL_TWENTY_ONE,

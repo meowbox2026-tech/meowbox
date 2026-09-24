@@ -1,4 +1,9 @@
-export const DEMO_INTERSTITIAL_DURATION_MS = 5000
+import { Capacitor } from '@capacitor/core'
+import { getNativeAdMobGateways } from './nativeAdMob'
+
+// Browser-only placeholder. Native AdMob interstitials use the provider's
+// full-screen UI and dismissal callbacks; this timer is not a revenue signal.
+export const DEMO_INTERSTITIAL_DURATION_MS = 30000
 
 export interface InterstitialAdResult {
   shown: boolean
@@ -16,8 +21,16 @@ class DemoInterstitialAdGateway implements InterstitialAdGateway {
   }
 }
 
+class UnavailableInterstitialAdGateway implements InterstitialAdGateway {
+  async show(): Promise<InterstitialAdResult> {
+    return { shown: false }
+  }
+}
+
 const demoGateway = new DemoInterstitialAdGateway()
-let gateway: InterstitialAdGateway = demoGateway
+const unavailableGateway = new UnavailableInterstitialAdGateway()
+const nativeGateways = getNativeAdMobGateways()
+let gateway: InterstitialAdGateway = nativeGateways?.interstitial ?? (Capacitor.isNativePlatform() ? unavailableGateway : demoGateway)
 
 export function setInterstitialAdGateway(nextGateway?: InterstitialAdGateway): void {
   gateway = nextGateway ?? demoGateway

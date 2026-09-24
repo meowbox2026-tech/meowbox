@@ -13,7 +13,7 @@ const INTRO_CAT_SHOWCASE: Array<{ suffix: string; name: string; skin: CatSkin; a
   { suffix: 'f', name: '普通藍貓', skin: 'gray', asset: 'blue' },
   { suffix: 'g', name: '獨處貓', skin: 'black', asset: 'alone' },
   { suffix: 'h', name: '睡覺貓', skin: 'gray', asset: 'sleeping' },
-  { suffix: 'i', name: '紙箱貓', skin: 'orange', asset: 'box' }
+  { suffix: 'i', name: '躲貓', skin: 'orange', asset: 'box' }
 ]
 
 function cat(
@@ -52,7 +52,7 @@ function createRowLevel(id: number, prefix: string, tutorial?: string): LevelDef
     cat(`${prefix}-row-d`, 'calico', 'line4', 'normal', { visualAsset: artwork[3] })
   ]
 
-  return levelFromPairs(id, `溫馨紙箱 ${id}`, 'normal', DEFAULT_BOARD, cats, LINE_SOLUTIONS, tutorial, 0, 1)
+  return levelFromPairs(id, `溫馨連線 ${id}`, 'normal', DEFAULT_BOARD, cats, LINE_SOLUTIONS, tutorial, 0, 1)
 }
 
 function createIntroLevel(id: number, prefix: string, tutorial?: string): LevelDefinition {
@@ -74,7 +74,7 @@ function createIntroLevel(id: number, prefix: string, tutorial?: string): LevelD
   }))
 
   return {
-    ...levelFromPairs(id, `溫馨紙箱 ${id}`, 'normal', board, cats, solutions, tutorial ?? '交換相鄰貓咪，三隻相同花色即可消除。', 0, 1),
+    ...levelFromPairs(id, `溫馨連線 ${id}`, 'normal', board, cats, solutions, tutorial ?? '交換相鄰貓咪，三隻相同花色即可消除。', 0, 1),
     match3: {
       tileAssets: ['alone', 'blue', 'fishLover', 'orange', 'white']
     }
@@ -107,7 +107,7 @@ function createObstacleLevel(id: number, prefix: string): LevelDefinition {
     blockedCells: [{ x: 1, y: 1 }],
     obstacles: [{ cell: { x: 1, y: 1 }, kind: obstacleKind }]
   }
-  return levelFromPairs(id, `避開障礙 ${id}`, 'normal', board, cats, solutions, '避開紙箱裡不能放貓咪的格子。', 0, 2)
+  return levelFromPairs(id, `避開障礙 ${id}`, 'normal', board, cats, solutions, '避開不能放貓咪的障礙格。', 0, 2)
 }
 
 function createSleepingLevel(id: number, prefix: string): LevelDefinition {
@@ -183,7 +183,7 @@ function createLidLevel(id: number, prefix: string): LevelDefinition {
       cells: Array.from({ length: 8 }, (_, index) => ({ x: index % 4, y: Math.floor(index / 4) }))
     }]
   }
-  return levelFromPairs(id, `箱蓋練習 ${id}`, 'normal', board, cats, LINE_SOLUTIONS, '上方區域填滿時箱蓋會關上，裡面的貓將無法再移動。', 0, 4)
+  return levelFromPairs(id, `頂端封鎖練習 ${id}`, 'normal', board, cats, LINE_SOLUTIONS, '上方區域填滿時會暫時封鎖，裡面的貓將無法再移動。', 0, 4)
 }
 
 function levelFromPairs(

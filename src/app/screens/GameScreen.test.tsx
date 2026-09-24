@@ -12,17 +12,17 @@ afterEach(cleanup)
 
 describe('GameScreen mainline routing', () => {
   it('uses planning mode for the last active level', () => {
-    render(<GameScreen levelId={25} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={vi.fn()} />)
+    render(<GameScreen levelId={30} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={vi.fn()} onWatchUndoAd={vi.fn()} />)
 
     expect(document.querySelectorAll('.planning-cell')).toHaveLength(64)
     expect(screen.queryByRole('timer')).toBeNull()
-    expect(screen.getByText('彩虹小隊')).toBeInTheDocument()
+    expect(screen.getByText('救出全部 54 隻貓咪')).toHaveClass('planning-top-goal')
   })
 
   it('clamps an obsolete level request to the last active planning level', () => {
-    render(<GameScreen levelId={26} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={vi.fn()} />)
+    render(<GameScreen levelId={31} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={vi.fn()} onWatchUndoAd={vi.fn()} />)
 
-    expect(screen.getByText('彩虹小隊')).toBeInTheDocument()
+    expect(screen.getByText('救出全部 54 隻貓咪')).toHaveClass('planning-top-goal')
     expect(screen.queryByRole('timer')).toBeNull()
   })
 })

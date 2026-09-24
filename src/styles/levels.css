@@ -26,7 +26,7 @@
   height: auto;
 }
 
-.screen--levels .screen-title h1 { margin: 0; font-size: clamp(24px, 7cqw, 34px); }
+.screen--levels .screen-title h1 { margin: 0; font-size: clamp(24px, 7cqw, 34px); transform: translateY(3px); }
 .screen--levels .screen-title p { margin: 5px 0 0; font-size: clamp(11px, 3cqw, 14px); }
 
 .world-tabs {

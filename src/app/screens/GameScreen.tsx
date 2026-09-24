@@ -9,10 +9,12 @@ interface GameScreenProps {
   onNextLevel: (levelId: number) => void
   onToast: (message: string) => void
   onPlayAction: () => void | Promise<void>
+  onWatchUndoAd: () => Promise<boolean>
+  onWatchHintAd?: () => Promise<boolean>
 }
 
-/** The active game is deliberately bounded to the authored 1–25 mainline. */
-export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction }: GameScreenProps) {
+/** The active game is deliberately bounded to the authored 1–30 mainline. */
+export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction, onWatchUndoAd, onWatchHintAd }: GameScreenProps) {
   const activeLevelId = Math.min(MAX_PLANNING_LEVEL, Math.max(1, levelId))
   return <PlanningGameScreen
     levelId={activeLevelId}
@@ -21,5 +23,7 @@ export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextL
     onLevelSelect={onLevelSelect}
     onNextLevel={onNextLevel}
     onPlayAction={onPlayAction}
+    onWatchUndoAd={onWatchUndoAd}
+    onWatchHintAd={onWatchHintAd ?? onWatchUndoAd}
   />
 }

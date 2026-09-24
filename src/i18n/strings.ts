@@ -1,14 +1,13 @@
 export interface Strings {
   app: {
-    openingBox: string
-    organizingBox: string
+    openingGame: string
+    organizingGame: string
     title: string
   }
   topbar: {
     back: string
     settings: string
     pause: string
-    level: string
     levelAria: string
     starsAria: string
     moves: string
@@ -16,16 +15,12 @@ export interface Strings {
   home: {
     brandSub: string
     brandAria: string
-    progress: string
-    progressAria: string
-    collected: string
     start: string
     levels: string
     mainNav: string
   }
   levels: {
     title: string
-    subtitle: string
     board: string
     levelAria: string
     lockedSuffix: string
@@ -33,7 +28,6 @@ export interface Strings {
   }
   settings: {
     title: string
-    subtitle: string
     musicLabel: string
     soundLabel: string
     hapticsLabel: string
@@ -74,7 +68,7 @@ export interface Strings {
     columnAction: string
     ceilingDanger: string
     ceilingSafe: string
-    boxTagline: string
+    lineTagline: string
     actions: string
     howTo: string
     hintUsed: string

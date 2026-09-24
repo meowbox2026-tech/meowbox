@@ -42,7 +42,7 @@ describe('planning failure boundaries', () => {
     expect(reduce(recalled, { type: 'remove', id: level.cats[0].id })).toBe(recalled)
   })
 
-  it('allows one undo per configuration attempt without a failure-recovery ad action', () => {
+  it('allows one undo per configuration attempt before offering the ad bonus', () => {
     let state = freshPlanning(level)
     state = reduce(state, { type: 'place', x: level.solution[0].x, y: level.solution[0].y })
     const undone = reduce(state, { type: 'undo' })
@@ -51,6 +51,17 @@ describe('planning failure boundaries', () => {
     expect(undone.undoUses).toBe(0)
     expect(reduce(undone, { type: 'undo' })).toBe(undone)
     expect(reduce(undone, { type: 'remove', id: level.cats[0].id })).toBe(undone)
+  })
+
+  it('adds five undo uses only after the current level reaches zero', () => {
+    let state = freshPlanning(level)
+    state = reduce(state, { type: 'place', x: level.solution[0].x, y: level.solution[0].y })
+    state = reduce(state, { type: 'undo' })
+
+    const rewarded = reduce(state, { type: 'grant-undo' })
+    expect(rewarded.undoUses).toBe(5)
+    expect(reduce(rewarded, { type: 'grant-undo' })).toBe(rewarded)
+    expect(reduce(rewarded, { type: 'restart' }).undoUses).toBe(1)
   })
 
   it('auto-places the next cat at the authored solution cell once and resets on restart', () => {
@@ -66,6 +77,16 @@ describe('planning failure boundaries', () => {
     const placed = reduce(hinted, { type: 'place', x: level.solution[0].x, y: level.solution[0].y })
     expect(placed).toBe(hinted)
     expect(reduce(placed, { type: 'restart' }).hintUses).toBe(1)
+  })
+
+  it('adds three hint uses only after the current level reaches zero', () => {
+    let state = freshPlanning(level)
+    state = reduce(state, { type: 'hint' })
+
+    const rewarded = reduce(state, { type: 'grant-hint' })
+    expect(rewarded.hintUses).toBe(3)
+    expect(reduce(rewarded, { type: 'grant-hint' })).toBe(rewarded)
+    expect(reduce(rewarded, { type: 'restart' }).hintUses).toBe(1)
   })
 
   it('keeps hint search pending without consuming the hint twice', () => {

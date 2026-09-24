@@ -5,6 +5,7 @@ import { PLANNING_LEVEL_ONE, PLANNING_LEVEL_ONE_SOLUTION } from './planningLevel
 import { PLANNING_LEVELS_TWO } from './planningLevelTwo'
 import { PLANNING_LEVELS_THREE } from './planningLevelThree'
 import { PLANNING_LEVELS_FOUR } from './planningLevelFour'
+import { PLANNING_LEVELS_FIVE } from './planningLevelFive'
 
 type Cell = [x: number, y: number, type: CatAsset]
 type Point = [x: number, y: number]
@@ -104,7 +105,8 @@ export const PLANNING_LEVELS = [
   PLANNING_LEVEL_TEN,
   ...PLANNING_LEVELS_TWO,
   ...PLANNING_LEVELS_THREE,
-  ...PLANNING_LEVELS_FOUR
+  ...PLANNING_LEVELS_FOUR,
+  ...PLANNING_LEVELS_FIVE
 ] as const
 
 export const MAX_PLANNING_LEVEL = PLANNING_LEVELS.length

@@ -1,6 +1,6 @@
-# MeowBox audio sources
+# Meow Line audio sources
 
-These files were downloaded for the MeowBox prototype from Pixabay pages marked
+These files were downloaded for the Meow Line prototype from Pixabay pages marked
 “Free for use under the Pixabay Content License”. Keep this note with the
 assets if they are moved to another repository.
 

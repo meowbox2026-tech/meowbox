@@ -55,7 +55,7 @@ describe('level artwork progression', () => {
     expect(level.cats.every((cat) => cat.shape === 'dot')).toBe(true)
     expect(level.cats.map((cat) => cat.name)).toEqual([
       '傲嬌貓', '太陽貓', '愛魚貓', '普通橘色貓', '普通白貓', '普通藍貓',
-      '獨處貓', '睡覺貓', '紙箱貓'
+      '獨處貓', '睡覺貓', '躲貓'
     ])
     expect(level.cats.every((cat) => cat.type === 'normal')).toBe(true)
     expect(level.cats.every((cat) => !cat.rule)).toBe(true)

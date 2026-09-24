@@ -19,7 +19,7 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
   return (
     <main className="screen screen--levels">
       <TopBar onBack={onBack} />
-      <ScreenTitle title={strings.levels.title} subtitle={strings.levels.subtitle} />
+      <ScreenTitle title={strings.levels.title} />
       <section className="level-board" aria-label={strings.levels.board} tabIndex={0}>
         {PLANNING_LEVELS.map((level) => {
           const unlocked = level.id <= currentLevel

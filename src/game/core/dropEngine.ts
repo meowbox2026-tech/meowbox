@@ -84,7 +84,7 @@ export interface DropResult {
 export const DROP_CATS = ['orange', 'blue', 'white'] as const
 export const DROP_NAMES: Record<string, string> = {
   arrogant: '傲嬌', sunny: '陽陽', fishLover: '魚丸', orange: '橘子', white: '奶霜', blue: '小灰',
-  alone: '小墨', sleeping: '睡覺', box: '紙箱', mischievous: '淘氣', boss: '老大', sticky: '黏黏'
+  alone: '小墨', sleeping: '睡覺', box: '躲貓', mischievous: '淘氣', boss: '老大', sticky: '黏黏'
 }
 
 const cloneBoard = (board: DropBoard): DropBoard => board.map((row) => row.map((tile) => tile && { ...tile }))

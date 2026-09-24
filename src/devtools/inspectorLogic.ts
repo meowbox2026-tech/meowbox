@@ -208,7 +208,7 @@ export function isEditableInspectorTarget(target: EventTarget | null): boolean {
 
 export function getInspectableTarget(element: Element | null): Element | null {
   if (!element) return null
-  return element.closest('button, a, [role="button"], [aria-label], .home-progress, .home-brand, .game-actions') || element
+  return element.closest('button, a, [role="button"], [aria-label], .home-brand, .game-actions') || element
 }
 
 function escapeCssIdentifier(value: string): string {

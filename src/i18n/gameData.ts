@@ -5,15 +5,15 @@ import { toLocale } from './locale'
 export const DROP_CAT_NAMES: Record<Locale, Record<string, string>> = {
   'zh-TW': {
     arrogant: '傲嬌', sunny: '陽陽', fishLover: '魚丸', orange: '橘子', white: '奶霜', blue: '小灰',
-    alone: '小墨', sleeping: '睡覺', box: '紙箱', mischievous: '淘氣', boss: '老大', sticky: '黏黏'
+    alone: '小墨', sleeping: '睡覺', box: '躲貓', mischievous: '淘氣', boss: '老大', sticky: '黏黏'
   },
   en: {
     arrogant: 'Smug', sunny: 'Sunny', fishLover: 'Fishball', orange: 'Tangerine', white: 'Cream', blue: 'Gray',
-    alone: 'Inky', sleeping: 'Sleepy', box: 'Boxy', mischievous: 'Naughty', boss: 'Boss', sticky: 'Sticky'
+    alone: 'Inky', sleeping: 'Sleepy', box: 'Hidey', mischievous: 'Naughty', boss: 'Boss', sticky: 'Sticky'
   },
   ja: {
     arrogant: 'ツン', sunny: 'ひなた', fishLover: 'さかなまる', orange: 'みかん', white: 'しろもち', blue: 'グレー',
-    alone: 'くろすけ', sleeping: 'ねむねむ', box: 'はこ', mischievous: 'いたずら', boss: 'ボス', sticky: 'ねばねば'
+    alone: 'くろすけ', sleeping: 'ねむねむ', box: 'かくれんぼ', mischievous: 'いたずら', boss: 'ボス', sticky: 'ねばねば'
   }
 }
 
@@ -42,9 +42,9 @@ export function getCatSkinName(skin: string, locale: unknown): string {
 }
 
 export const BOX_NAMES: Record<Locale, Record<string, string>> = {
-  'zh-TW': { classic: '經典紙箱', strawberry: '草莓紙箱', night: '星空紙箱', garden: '花園紙箱' },
-  en: { classic: 'Classic Box', strawberry: 'Strawberry Box', night: 'Starry Box', garden: 'Garden Box' },
-  ja: { classic: 'クラシックボックス', strawberry: 'いちごボックス', night: '星空ボックス', garden: 'ガーデンボックス' }
+  'zh-TW': { classic: '經典棋盤', strawberry: '草莓棋盤', night: '星空棋盤', garden: '花園棋盤' },
+  en: { classic: 'Classic Board', strawberry: 'Strawberry Board', night: 'Starry Board', garden: 'Garden Board' },
+  ja: { classic: 'クラシック盤面', strawberry: 'いちご盤面', night: '星空盤面', garden: 'ガーデン盤面' }
 }
 
 export function getBoxName(boxId: string, locale: unknown): string {
@@ -56,22 +56,22 @@ export const LEVEL_NAMES: Record<Locale, readonly string[]> = {
     '初次相遇', '疊疊午茶', '斜斜的祕密', '一起回家', '小小整理師', '窗邊陽光',
     '小墨報到', '四色軟糖', '愛心接力', '小屋派對', '魚丸來訪', '魚乾時間',
     '軟墊小山', '雙重驚喜', '下午茶會', '陽陽花園', '左右都可愛', '草地接力',
-    '大家集合', '花園野餐', '黏黏的朋友', '愛心滿滿', '雨天紙箱', '小小建築師',
-    '彩虹小隊'
+    '大家集合', '花園野餐', '黏黏的朋友', '愛心滿滿', '雨天連線', '小小建築師',
+    '彩虹小隊', '長柱回聲', '落差雙井', '等待的交叉', '折線回路', '中央匯流'
   ],
   en: [
     'First Meeting', 'Stacked Tea Time', 'Slanted Secret', 'Going Home Together', 'Tiny Organizer', 'Window Sunshine',
     'Inky Arrives', 'Four-Color Gummies', 'Heart Relay', 'Cottage Party', 'Fishball Visits', 'Dried Fish Time',
     'Cushion Hill', 'Double Surprise', 'Afternoon Tea', 'Sunny Garden', 'Cute Both Ways', 'Meadow Relay',
-    'Everyone Gather', 'Garden Picnic', 'Sticky Friend', 'Full of Love', 'Rainy Box', 'Tiny Architect',
-    'Rainbow Team'
+    'Everyone Gather', 'Garden Picnic', 'Sticky Friend', 'Full of Love', 'Rainy Line', 'Tiny Architect',
+    'Rainbow Team', 'Pillar Echo', 'Twin Wells', 'The Waiting Cross', 'Zigzag Loop', 'Central Convergence'
   ],
   ja: [
     '初めての出会い', '重なるティータイム', 'ななめの秘密', '一緒に帰ろう', 'ちいさな整理係', '窓辺の日差し',
     'くろすけ登場', '4色グミ', 'ハートリレー', 'おうちパーティー', 'さかなまる来訪', '煮干しタイム',
     'クッションの山', 'ダブルサプライズ', 'アフタヌーンティー', 'ひだまりガーデン', '左右どっちもかわいい', '草原リレー',
-    'みんな集合', 'ガーデンピクニック', 'ねばねばフレンズ', '愛がいっぱい', '雨の日の箱', 'ちいさな建築家',
-    '虹チーム'
+    'みんな集合', 'ガーデンピクニック', 'ねばねばフレンズ', '愛がいっぱい', '雨の日のライン', 'ちいさな建築家',
+    '虹チーム', '長柱のこだま', '段差の双井', '待つ交差点', '折れ線ルート', '中央合流'
   ]
 }
 
@@ -93,7 +93,10 @@ export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
     '鏡像會誤導，花色和方向都要確認。', '18 隻托盤貓大集合，安排多段連鎖。',
     '第 21 關加入右側直線分支，先確認斜線與直線的交接。', '第 22 關左右兩側交錯，不能只看最上面的連線。',
     '第 23 關斜線分支會延後出現，先記住支撐位置。', '第 24 關三條路線合流，安排順序比追求單次消除重要。',
-    '第 25 關是 21 隻托盤貓的收尾，保留空格給最後一段連鎖。'
+    '第 25 關是 21 隻托盤貓的收尾，保留空格給最後一段連鎖。',
+    '長柱落下後會形成新線，先看支撐再放置。', '左右兩井的高度不同，注意落下距離。',
+    '落下連鎖完成前，先不要追下一組線。', '橫、斜、直線折返，保留下一個轉折點。',
+    '左右兩條路線最後會在中央匯流，安排好順序。'
   ],
   en: [
     'Tap column 3 first and gather three Tangerines!', 'Stack matching cats and try a straight clear.',
@@ -108,7 +111,10 @@ export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
     'The mirror can mislead; check both color and direction.', 'An 18-cat tray asks for several planned chains.',
     'Level 21 adds a right-side branch; check where the diagonal meets the straight line.', 'Level 22 crosses both sides, so do not watch only the top match.',
     'Level 23 delays a diagonal branch; remember the support before placing.', 'Level 24 merges three routes, so order matters more than one big clear.',
-    'Level 25 closes the chapter with 21 tray cats; save room for the final chain.'
+    'Level 25 closes the chapter with 21 tray cats; save room for the final chain.',
+    'Watch the support before placing—the pillar makes a new line after it falls.', 'The two wells have different heights; watch how far each side drops.',
+    'Let the falling cascade finish before chasing the next line.', 'Follow the horizontal, diagonal, and vertical turns; save the next corner.',
+    'Two routes meet in the centre, so plan their order.'
   ],
   ja: [
     'まずは3列目をタップ、みかん3匹を集めよう！', '同じ猫を重ねて、まっすぐ消しを狙おう。',
@@ -123,7 +129,10 @@ export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
     '鏡写しに惑わされないで、色と方向を確認しよう。', '18匹のトレイ集合、何段もの連鎖を組み立てよう。',
     '21面は右側に直線の分岐が登場、ナナメとの合流を確認しよう。', '22面は左右が交差するよ、上のラインだけを見ないでね。',
     '23面はナナメの分岐が遅れて現れる、支えの位置を覚えておこう。', '24面は3本の道が合流するよ、一度の大消しより順番が大切。',
-    '25面はトレイ21匹の締めくくり、最後の連鎖のために空きを残そう。'
+    '25面はトレイ21匹の締めくくり、最後の連鎖のために空きを残そう。',
+    '長い柱が落ちて新しいラインになるよ、支えを見てから置こう。', '左右の井戸で高さが違うよ、落下距離に注目。',
+    '落下連鎖が終わるまで、次のラインを追わずに待とう。', 'ヨコ・ナナメ・タテの折り返し、次の角を残しておこう。',
+    '左右のルートが中央で合流するよ、順番を考えてね。'
   ]
 }
 

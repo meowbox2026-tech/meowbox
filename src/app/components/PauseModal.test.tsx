@@ -19,7 +19,7 @@ describe('PauseModal', () => {
     expect(screen.getByRole('dialog', { name: '暫停選單' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '繼續遊戲' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '重新開始本關' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '回到主頁' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '首頁' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '設定' })).toBeInTheDocument()
     expect(screen.getByText('暫停')).toBeInTheDocument()
     expect(container.querySelector('img[src="/assets/paused.webp"]')).toBeInTheDocument()
@@ -34,7 +34,7 @@ describe('PauseModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '繼續遊戲' }))
     fireEvent.click(screen.getByRole('button', { name: '重新開始本關' }))
-    fireEvent.click(screen.getByRole('button', { name: '回到主頁' }))
+    fireEvent.click(screen.getByRole('button', { name: '首頁' }))
     fireEvent.click(screen.getByRole('button', { name: '設定' }))
 
     expect(onContinue).toHaveBeenCalledOnce()

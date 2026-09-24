@@ -11,6 +11,7 @@ import type { LegalDocumentId } from './legal/legalContent'
 import { usePlayer } from '../state/PlayerContext'
 import { recordPlay } from '../services/ads/playCadence'
 import { showInterstitialAd } from '../services/ads/interstitialAds'
+import { showUndoRewardAd } from '../services/ads/undoRewardAd'
 
 type Screen = 'home' | 'levels' | 'game' | 'settings' | 'legal'
 
@@ -32,13 +33,28 @@ export function App() {
   }, [toast])
 
   const maybeShowPlayAd = useCallback(async () => {
-    if (!recordPlay().shouldShowAd || adInFlight.current) return
+    if (adInFlight.current || !recordPlay().shouldShowAd) return
     adInFlight.current = true
     setIsAdOpen(true)
     try {
       await showInterstitialAd()
     } catch {
       // A missing ad must never block the player from continuing.
+    } finally {
+      adInFlight.current = false
+      setIsAdOpen(false)
+    }
+  }, [])
+
+  const maybeGrantRewardAd = useCallback(async (): Promise<boolean> => {
+    if (adInFlight.current) return false
+    adInFlight.current = true
+    setIsAdOpen(true)
+    try {
+      const result = await showUndoRewardAd()
+      return result.completed
+    } catch {
+      return false
     } finally {
       adInFlight.current = false
       setIsAdOpen(false)
@@ -66,7 +82,7 @@ export function App() {
       <div className="app-stage">
       {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={setScreen} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
-      {screen === 'game' && <GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} onPlayAction={maybeShowPlayAd} />}
+      {screen === 'game' && <GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} onPlayAction={maybeShowPlayAd} onWatchUndoAd={maybeGrantRewardAd} onWatchHintAd={maybeGrantRewardAd} />}
       {screen === 'settings' && <SettingsScreen onBack={() => setScreen('home')} onToast={setToast} onLegal={openLegal} />}
       {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}
       </div>

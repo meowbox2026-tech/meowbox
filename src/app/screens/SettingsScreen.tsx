@@ -1,6 +1,6 @@
 import { LOCALES, LOCALE_LABELS, useStrings } from '../../i18n'
 import { usePlayer } from '../../state/PlayerContext'
-import { AppButton } from '../components/AppButton'
+import { ArtworkButton } from '../components/ArtworkButton'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { Toggle } from '../components/Toggle'
 import { TopBar } from '../components/TopBar'
@@ -24,7 +24,7 @@ export function SettingsScreen({ onBack, onToast, onLegal }: SettingsScreenProps
   return (
     <main className="screen screen--settings">
       <TopBar onBack={onBack} />
-        <ScreenTitle title={strings.settings.title} subtitle={strings.settings.subtitle} />
+      <ScreenTitle title={strings.settings.title} />
       <section className="settings-card">
         <div className="settings-toggle-row">
           <Toggle icon="music" label={strings.settings.musicLabel} checked={player.settings.music} onChange={(music) => updateSettings({ music })} />
@@ -35,7 +35,7 @@ export function SettingsScreen({ onBack, onToast, onLegal }: SettingsScreenProps
         {legalLinks.map(({ label, documentId }) => <button className="settings-link" key={label} onClick={() => onLegal(documentId)} type="button"><span>{label === strings.settings.support ? '◖◗' : '▤'}</span><strong>{label}</strong><b>›</b></button>)}
         <button className="settings-link" onClick={() => onToast(strings.settings.aboutToast)} type="button"><span>ⓘ</span><strong>{strings.settings.about}</strong><b>›</b></button>
       </section>
-      <AppButton className="settings-home" variant="pink" onClick={onBack}>{strings.settings.backHome}</AppButton>
+      <ArtworkButton asset="start" className="settings-home" onClick={onBack}>{strings.settings.backHome}</ArtworkButton>
     </main>
   )
 }

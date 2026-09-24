@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.meowbox.puzzle',
-  appName: 'Meow Box',
+  appName: 'Meow Line',
   webDir: 'dist',
   backgroundColor: '#fff8e8',
   plugins: {

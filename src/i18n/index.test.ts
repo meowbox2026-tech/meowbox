@@ -28,6 +28,13 @@ describe('i18n dictionaries', () => {
     expect(getStrings('xx').home.start).toBe('開始遊戲')
   })
 
+  it('describes the Meow Line brand and its drop-and-match gameplay', () => {
+    expect(getStrings('zh-TW').app.title).toBe('MEOW LINE｜貓咪落下連線')
+    expect(getStrings('zh-TW').home.brandSub).toBe('貓咪落下連線解謎')
+    expect(getStrings('en').app.title).toBe('MEOW LINE｜Cat Drop Match Puzzle')
+    expect(getStrings('ja').app.title).toBe('MEOW LINE｜猫を落としてつなぐパズル')
+  })
+
   it('formats placeholders', () => {
     expect(format('救出 {done} / {target}', { done: 3, target: 18 })).toBe('救出 3 / 18')
     expect(format(getStrings('en').game.rescue, { done: 3, target: 18 })).toBe('Rescued 3 / 18')
@@ -37,11 +44,11 @@ describe('i18n dictionaries', () => {
     expect(getDropCatName('orange', 'en')).toBe('Tangerine')
     expect(getDropCatName('orange', 'ja')).toBe('みかん')
     expect(getCatSkinName('calico', 'en')).toBe('Calico')
-    expect(getBoxName('night', 'ja')).toBe('星空ボックス')
+    expect(getBoxName('night', 'ja')).toBe('星空盤面')
     expect(getLevelName(1, 'en')).toBe('First Meeting')
     expect(getLevelName(25, 'ja')).toBe('虹チーム')
-    expect(getLevelName(26, 'zh-TW')).toBe('Lv. 26')
-    expect(getLevelGuidance(26, 'zh-TW')).toBe('')
+    expect(getLevelName(26, 'zh-TW')).toBe('長柱回聲')
+    expect(getLevelGuidance(26, 'zh-TW')).toContain('支撐')
     expect(getLevelGuidance(1, 'zh-TW')).toContain('第 3 欄')
   })
 

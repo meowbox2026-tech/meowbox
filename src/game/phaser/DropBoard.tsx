@@ -20,7 +20,7 @@ export const DropBoard = memo(function DropBoard({ board, previous, current, pau
   const blockedColumn = patrolColumn({ patrol })
   const danger = board[1].some(Boolean)
   const oldPositions = new Map(previous.flatMap((line, y) => line.flatMap(tile => tile ? [[tile.id, y] as const] : [])))
-  return <div className={`drop-box${danger ? ' is-danger' : ''}${paused ? ' is-paused' : ''}`}>
+  return <div className={`drop-board${danger ? ' is-danger' : ''}${paused ? ' is-paused' : ''}`}>
     <div className="drop-ceiling"><span>{danger ? strings.game.ceilingDanger : strings.game.ceilingSafe}</span></div>
     <div className="drop-grid" style={{ '--cols': width, '--rows': height, aspectRatio: `${width} / ${height}` } as CSSProperties} aria-label={strings.game.board}>
       {board.flatMap((line, y) => line.map((_, x) => <div className="drop-cell" key={`${x}:${y}`} />))}
@@ -51,6 +51,6 @@ export const DropBoard = memo(function DropBoard({ board, previous, current, pau
       </div>
       {wave && <div key={wave.combo} className="drop-combo" role="status">{wave.combo === 1 ? strings.game.comboSuccess : format(strings.game.combo, { count: wave.combo })}<small>+{wave.points} ♡</small></div>}
     </div>
-    <div className="drop-box-label">MEOWBOX <span>{strings.game.boxTagline}</span></div>
+    <div className="drop-board-label">MEOW LINE <span>{strings.game.lineTagline}</span></div>
   </div>
 })

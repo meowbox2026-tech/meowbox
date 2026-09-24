@@ -19,9 +19,8 @@ export function TopBar({ onBack, onSettings, level, stars, moves, onPause, statu
     <header className="top-bar">
       <div className="top-bar__left">
         {onBack && <ArtworkButton asset="bask" className="top-bar__round" onClick={onBack} aria-label={strings.topbar.back} />}
-        {level && <div className="level-pill" aria-label={format(strings.topbar.levelAria, { level })}>
+        {level !== undefined && <div className="level-pill" aria-label={format(strings.topbar.levelAria, { level })}>
           <GameImage asset="levelcard" className="level-pill__art" alt="" aria-hidden="true" />
-          <span>{strings.topbar.level}</span>
           <strong>{level}</strong>
         </div>}
       </div>

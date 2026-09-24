@@ -11,7 +11,7 @@ describe('player save', () => {
     expect(save.settings.haptics).toBe(true)
   })
 
-  it('drops obsolete post-twenty-five progress instead of unlocking removed levels', () => {
+  it('drops obsolete post-thirty progress instead of unlocking removed levels', () => {
     const legacy = {
       ...createDefaultPlayerSave(),
       currentLevel: 90,
@@ -24,13 +24,13 @@ describe('player save', () => {
     const migrated = normalisePlayerSave(legacy)
     const migratedAgain = normalisePlayerSave(migrated)
 
-    expect(migrated.currentLevel).toBe(25)
-    expect(migratedAgain.currentLevel).toBe(25)
-    expect(migrated.completedLevels).toEqual([1, 25])
+    expect(migrated.currentLevel).toBe(30)
+    expect(migratedAgain.currentLevel).toBe(30)
+    expect(migrated.completedLevels).toEqual([1, 25, 30])
     expect(migrated.stars).toEqual({ 25: 3 })
     expect(migrated).not.toHaveProperty('pawCoins')
     expect(migrated).not.toHaveProperty('unlockedCatSkins')
-    expect(normalisePlayerSave({ ...legacy, currentLevel: 26, completedLevels: [1, 25] }).currentLevel).toBe(25)
+    expect(normalisePlayerSave({ ...legacy, currentLevel: 26, completedLevels: [1, 25] }).currentLevel).toBe(26)
   })
 
   it('prefers newer cloud settings while preserving the union of completions', () => {
@@ -60,7 +60,7 @@ describe('player save', () => {
     const local = { ...createDefaultPlayerSave(), currentLevel: 90, completedLevels: [25, 60] }
     const cloud = { ...createDefaultPlayerSave(), currentLevel: 60, completedLevels: [24] }
 
-    expect(mergePlayerSaves(local, cloud).currentLevel).toBe(25)
+    expect(mergePlayerSaves(local, cloud).currentLevel).toBe(30)
     expect(mergePlayerSaves(local, cloud).completedLevels).toEqual([24, 25])
   })
 

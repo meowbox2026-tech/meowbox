@@ -1,7 +1,6 @@
 # bg-main background source
 
-- Source file: `ChatGPT Image Sep 21, 2026, 06_14_00 PM.png` (user-supplied AI artwork, removed after conversion)
-- Used by: every game screen (home, levels, collection, shop, settings, legal, game, drop, match3-intro) — single shared background
-- Web: `bg-main.webp` — 841x1870 (ratio 0.450), converted with `cwebp -q 80 -m 6` (2.26MB PNG -> 183KB)
-- Native (iOS WKWebView): `../assets-native/bg-main.png` — original PNG copied as-is
+- Source file: `788af39b-c431-4da4-8124-79b39d3f9145.png` (user-supplied artwork, removed after conversion)
+- Used by: every game screen (home, levels, settings, legal, game, drop, planning) — single shared background
+- Web and native: `bg-main.webp` — 1080x2400 (ratio 0.450), resized and converted with `cwebp -resize 1080 2400 -q 80 -m 6` (1.80MB PNG -> 153KB)
 - Tall-art spec: ratio <= 0.46, key subjects inside the center 0.562 band (the SE 375x667 crop)

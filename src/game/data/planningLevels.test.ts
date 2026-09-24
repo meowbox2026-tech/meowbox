@@ -16,12 +16,27 @@ function boardDirections(board: DropBoard): Set<string> {
   return directions
 }
 
+function fullLayoutKey(level: (typeof PLANNING_LEVELS)[number], transform: (x: number, y: number) => [number, number] = (x, y) => [x, y]): string {
+  const occupied = new Set<string>()
+  level.board.forEach((row, y) => row.forEach((cell, x) => {
+    if (cell) {
+      const [nextX, nextY] = transform(x, y)
+      occupied.add(`${nextX}:${nextY}`)
+    }
+  }))
+  level.solution.forEach(({ x, y }) => {
+    const [nextX, nextY] = transform(x, y)
+    occupied.add(`${nextX}:${nextY}`)
+  })
+  return [...occupied].sort().join('|')
+}
+
 describe('authored planning levels', () => {
   it('keeps every board at 8x8 and increases the authored puzzle density', () => {
-    expect(PLANNING_LEVELS).toHaveLength(25)
+    expect(PLANNING_LEVELS).toHaveLength(30)
     expect(PLANNING_LEVELS.every(level => level.width === 8 && level.height === 8)).toBe(true)
-    expect(PLANNING_LEVELS.map(level => level.board.flat().filter(Boolean).length)).toEqual([6, 8, 10, 12, 14, 16, 18, 20, 20, 20, 20, 20, 22, 22, 24, 26, 28, 30, 32, 36, 31, 32, 36, 39, 39])
-    expect(PLANNING_LEVELS.map(level => level.cats.length)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 11, 11, 12, 13, 14, 15, 16, 18, 16, 17, 18, 21, 21])
+    expect(PLANNING_LEVELS.map(level => level.board.flat().filter(Boolean).length)).toEqual([6, 8, 10, 12, 14, 16, 18, 20, 20, 20, 20, 20, 22, 22, 24, 26, 28, 30, 32, 36, 31, 32, 36, 36, 36, 34, 35, 36, 36, 36])
+    expect(PLANNING_LEVELS.map(level => level.cats.length)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 11, 11, 12, 13, 14, 15, 16, 18, 16, 17, 18, 18, 18, 17, 18, 18, 18, 18])
   })
 
   it('starts without a free match and has a complete authored solution for each level', () => {
@@ -33,7 +48,7 @@ describe('authored planning levels', () => {
       expect(result.waves, `level ${level.id} has no elimination`).toBeGreaterThan(0)
       return result.remaining
     })
-    expect(outcomes).toEqual(Array(25).fill(0))
+    expect(outcomes).toEqual(Array(30).fill(0))
   })
 
   it('introduces a fourth cat type by level four and keeps it readable through level ten', () => {
@@ -70,9 +85,9 @@ describe('authored planning levels', () => {
 
   it('gives every level a distinct authored board signature', () => {
     const signatures = PLANNING_LEVELS.map(level => JSON.stringify(level.board))
-    expect(new Set(signatures)).toHaveLength(25)
+    expect(new Set(signatures)).toHaveLength(30)
     const silhouettes = PLANNING_LEVELS.map(level => level.board.map(row => row.map(cat => cat ? '#' : '.').join('')).join('/'))
-    expect(new Set(silhouettes)).toHaveLength(25)
+    expect(new Set(silhouettes)).toHaveLength(30)
   })
 
   it('adds a second chapter with four matching cats and fixed authored density', () => {
@@ -114,16 +129,16 @@ describe('authored planning levels', () => {
   })
 
   it('adds a fourth chapter up to the 8x8 capacity without adding a fifth cat type', () => {
-    const chapterFour = PLANNING_LEVELS.slice(20)
+    const chapterFour = PLANNING_LEVELS.slice(20, 25)
     expect(chapterFour.map(level => level.id)).toEqual([21, 22, 23, 24, 25])
-    expect(chapterFour.map(level => level.cats.length)).toEqual([16, 17, 18, 21, 21])
-    expect(chapterFour.map(level => level.board.flat().filter(Boolean).length)).toEqual([31, 32, 36, 39, 39])
+    expect(chapterFour.map(level => level.cats.length)).toEqual([16, 17, 18, 18, 18])
+    expect(chapterFour.map(level => level.board.flat().filter(Boolean).length)).toEqual([31, 32, 36, 36, 36])
     expect(chapterFour.every(level => new Set(level.cats.map(cat => cat.type)).size === 4 && !level.cats.some(cat => cat.type === 'alone'))).toBe(true)
     expect(chapterFour.every(level => level.board.flat().filter(Boolean).length + level.cats.length <= 64)).toBe(true)
   })
 
   it('stages expert silhouettes and gives level twenty-five a distinct route', () => {
-    const chapterFour = PLANNING_LEVELS.slice(20)
+    const chapterFour = PLANNING_LEVELS.slice(20, 25)
     const silhouette = (level: typeof chapterFour[number]) => {
       const occupied = new Set(level.solution.map(({ x, y }) => `${x}:${y}`))
       return level.board.map((row, y) => row.map((cell, x) => cell || occupied.has(`${x}:${y}`) ? '#' : '.').join('')).join('/')
@@ -136,15 +151,64 @@ describe('authored planning levels', () => {
     expect(finalRoute).not.toBe(mirroredRoute)
   })
 
+  it('gives levels twenty-three to twenty-five three authored topologies instead of mirrored copies', () => {
+    const expertLayouts = PLANNING_LEVELS.slice(22, 25)
+    const layouts = expertLayouts.map(level => fullLayoutKey(level))
+    expect(new Set(layouts)).toHaveLength(3)
+
+    const transforms = [
+      (x: number, y: number): [number, number] => [7 - x, y],
+      (x: number, y: number): [number, number] => [x, 7 - y],
+      (x: number, y: number): [number, number] => [7 - x, 7 - y]
+    ]
+    for (let left = 0; left < expertLayouts.length; left += 1) {
+      for (let right = left + 1; right < expertLayouts.length; right += 1) {
+        transforms.forEach(transform => {
+          expect(layouts[left], `level ${expertLayouts[left].id} mirrors level ${expertLayouts[right].id}`).not.toBe(fullLayoutKey(expertLayouts[right], transform))
+        })
+      }
+    }
+
+    const rowProfiles = expertLayouts.map(level => level.board.map(row => row.filter(Boolean).length).join(','))
+    expect(new Set(rowProfiles)).toHaveLength(3)
+  })
+
   it('keeps fourth-chapter layouts directional, dense, and chainable', () => {
     const directions = new Set<string>()
-    for (const level of PLANNING_LEVELS.slice(20)) {
+    for (const level of PLANNING_LEVELS.slice(20, 25)) {
       const solved = arrangeCats(level, level.solution)!
       const result = resolvePlanning(solved)
       boardDirections(solved).forEach(direction => directions.add(direction))
       expect(result.waves, `level ${level.id} waves`).toBeGreaterThanOrEqual(5)
       expect(result.frames.filter((frame, index) => index % 2 === 0 && frame.clearing.length > 0).length, `level ${level.id} clears`).toBeGreaterThanOrEqual(5)
     }
+    expect(directions).toEqual(new Set(['horizontal', 'vertical', 'diagonal']))
+  })
+
+  it('adds the 26–30 support-and-merge chapter without a fifth cat type', () => {
+    const chapterFive = PLANNING_LEVELS.slice(25)
+    expect(chapterFive.map(level => level.id)).toEqual([26, 27, 28, 29, 30])
+    expect(chapterFive.map(level => level.board.flat().filter(Boolean).length)).toEqual([34, 35, 36, 36, 36])
+    expect(chapterFive.map(level => level.cats.length)).toEqual([17, 18, 18, 18, 18])
+    expect(chapterFive.every(level => {
+      const types = new Set(level.cats.map(cat => cat.type))
+      return types.size === 4 && types.has('fishLover') && !types.has('alone')
+    })).toBe(true)
+    expect(chapterFive.every(level => level.board.flat().filter(Boolean).length + level.cats.length <= 64)).toBe(true)
+  })
+
+  it('gives 26–30 distinct topologies with all existing line directions', () => {
+    const chapterFive = PLANNING_LEVELS.slice(25)
+    const silhouettes = chapterFive.map(level => level.board.map(row => row.map(cell => cell ? '#' : '.').join('')).join('/'))
+    expect(new Set(silhouettes)).toHaveLength(5)
+
+    const directions = new Set<string>()
+    chapterFive.forEach(level => {
+      const solved = arrangeCats(level, level.solution)!
+      const result = resolvePlanning(solved)
+      expect(result.waves, `level ${level.id} waves`).toBeGreaterThanOrEqual(6)
+      boardDirections(solved).forEach(direction => directions.add(direction))
+    })
     expect(directions).toEqual(new Set(['horizontal', 'vertical', 'diagonal']))
   })
 

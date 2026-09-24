@@ -22,7 +22,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
     sections: [
       {
         heading: '我們重視你的隱私',
-        paragraphs: ['Meow Box（以下稱「本遊戲」）由 Meow Box 開發團隊提供。我們希望用簡單、透明的方式說明目前版本如何處理資料。']
+        paragraphs: ['Meow Line（以下稱「本遊戲」）由 Meow Line 開發團隊提供。我們希望用簡單、透明的方式說明目前版本如何處理資料。']
       },
       {
         heading: '目前版本會處理哪些資料？',
@@ -39,7 +39,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
       },
       {
         heading: '第三方服務',
-        paragraphs: ['目前版本會在累計五次遊玩操作後顯示測試廣告畫面；這個畫面由本機測試 gateway 模擬，尚未向第三方廣告 SDK 發出廣告請求。正式接入 AdMob 或其他廣告供應商後，供應商可能依其政策處理廣告請求、裝置識別、同意訊息與曝光資料；我們不會把遊戲進度上傳到 Meow Box 的伺服器。App 使用 Apple 與 Capacitor 提供的系統能力（例如本機儲存與震動），這些能力不會把遊戲進度交給我們。Apple App Store、作業系統與電子郵件服務商也可能依其各自政策處理必要的技術資料。'],
+        paragraphs: ['瀏覽器版本會在累計五次遊玩操作後以本機 gateway 模擬全螢幕插頁廣告，也會在目前關卡的上一步次數為 0 時提供測試獎勵廣告；這些測試畫面不會向第三方廣告 SDK 發出請求。已設定 AdMob 的 iOS 原生版本會由 Google Mobile Ads SDK／User Messaging Platform 處理廣告請求、裝置識別、同意訊息與曝光／完成資料；我們不會把遊戲進度或上一步獎勵上傳到 Meow Line 的伺服器。App 使用 Apple 與 Capacitor 提供的系統能力（例如本機儲存與震動），這些能力不會把遊戲進度交給我們。Apple App Store、作業系統、Google AdMob 與電子郵件服務商也可能依其各自政策處理必要的技術資料。'],
       },
       {
         heading: '兒童隱私',
@@ -61,11 +61,11 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
     sections: [
       {
         heading: '接受條款',
-        paragraphs: ['下載、開啟或使用 Meow Box，即表示你同意本服務條款。如果你不同意，請停止使用本遊戲並刪除 App。']
+        paragraphs: ['下載、開啟或使用 Meow Line，即表示你同意本服務條款。如果你不同意，請停止使用本遊戲並刪除 App。']
       },
       {
         heading: '遊戲使用',
-        paragraphs: ['本遊戲提供貓咪裝箱拼圖與相關的遊戲內容，供個人、非商業用途使用。你應以合法且不影響其他人或服務運作的方式使用本遊戲。'],
+        paragraphs: ['本遊戲提供貓咪落下連線解謎與相關的遊戲內容，供個人、非商業用途使用。你應以合法且不影響其他人或服務運作的方式使用本遊戲。'],
         bullets: [
           '不得反向工程、修改、破解、轉售或重新散布本遊戲或其素材。',
           '不得利用錯誤、機器人或其他未授權方式取得遊戲進度或內容。',
@@ -78,11 +78,11 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
       },
       {
         heading: '付費內容與廣告',
-        paragraphs: ['目前版本不提供遊戲內貨幣、商店、每日獎勵或購買獎勵。主線每累計五次開始新局、從選關進入關卡、前往下一關或點擊重新開始後，會顯示測試廣告畫面；測試畫面至少維持五秒且不能提前關閉。正式接入廣告 SDK 後，廣告的載入、曝光、完成與關閉時機會由廣告供應商回呼控制，並會在上線前更新相關說明。若未來提供 App 內購買，交易會透過 Apple App Store 處理。']
+        paragraphs: ['目前版本不提供遊戲內貨幣、商店、每日獎勵或購買獎勵。主線每累計五次開始新局、從選關進入關卡、前往下一關或點擊重新開始後，會顯示全螢幕測試插頁廣告畫面；目前關卡的上一步次數為 0 時，也可觀看測試獎勵廣告補充 5 次，但只在該關有效。瀏覽器測試畫面模擬 30 秒且不能提前關閉；正式接入廣告 SDK 後，廣告的載入、曝光、完成與關閉時機會由廣告供應商回呼控制，遊戲不要求玩家點擊廣告或開啟商店，並會在上線前更新相關說明。若未來提供 App 內購買，交易會透過 Apple App Store 處理。']
       },
       {
         heading: '智慧財產權',
-        paragraphs: ['本遊戲的程式、畫面、文字、角色、圖像、音效與品牌識別均由 Meow Box 開發團隊或合法授權方擁有。除本條款明確允許的個人使用外，不授予你任何智慧財產權。']
+        paragraphs: ['本遊戲的程式、畫面、文字、角色、圖像、音效與品牌識別均由 Meow Line 開發團隊或合法授權方擁有。除本條款明確允許的個人使用外，不授予你任何智慧財產權。']
       },
       {
         heading: '服務變更與免責',
@@ -96,12 +96,12 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
   },
   support: {
     title: '客服支援',
-    subtitle: '遇到問題？我們會陪你一起整理紙箱。',
+    subtitle: '遇到問題？我們一起找出連線。',
     sections: [
       {
         heading: '聯絡我們',
         paragraphs: ['請將問題寄至下方信箱，我們會依序回覆。'],
-        bullets: [`客服信箱：${SUPPORT_EMAIL}`, '建議主旨：Meow Box｜問題說明']
+        bullets: [`客服信箱：${SUPPORT_EMAIL}`, '建議主旨：Meow Line｜問題說明']
       },
       {
         heading: '寄信時請附上',

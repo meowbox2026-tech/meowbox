@@ -3,7 +3,7 @@
   height: 100%; min-height: 100%; overflow: hidden;
   padding: max(7px, env(safe-area-inset-top)) max(7px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
   translate: none;
-  background: linear-gradient(#fff8eabb, #fff6e5d9), url('/assets/bg-main.webp') center / cover;
+  background: url('/assets/bg-main.webp') center / cover;
 }
 .drop-level-loading { align-items: center !important; justify-content: center; }
 .drop-level-loading__content { display: grid; justify-items: center; gap: 14px; color: #80573e; font-size: 15px; }
@@ -27,7 +27,7 @@
 .drop-preview img { width: clamp(31px, 10vw, 39px); height: clamp(31px, 10vw, 39px); object-fit: contain; }
 .drop-preview__cat:first-of-type img { animation: drop-arrive .35s ease-out; }
 .drop-preview__arrow { flex: 0 0 auto; color: #a77650; font-size: 13px; }
-.drop-box {
+.drop-board {
   position: relative; display: flex; width: 100%; min-height: 0; flex: 1 1 0; flex-direction: column; padding: 7px 7px 0;
   border: 3px solid #b77b4e; border-radius: 19px 19px 14px 14px;
   background: repeating-linear-gradient(90deg, #ffffff08 0 3px, transparent 3px 7px), linear-gradient(135deg, #eec99a, #c99865);
@@ -49,22 +49,16 @@
 .drop-columns button:hover:not(:disabled) { background: #fff6be0c; }
 .drop-columns button:focus-visible { outline: 2px dashed #ffe99f; outline-offset: -3px; }
 .drop-columns button:disabled { cursor: default; }
-.drop-box-label { padding: 7px 0; text-align: center; font-size: 12px; font-weight: bold; letter-spacing: .1em; color: #8d603e; }
-.drop-box-label span { font-size: 9px; font-weight: normal; letter-spacing: .03em; }
+.drop-board-label { padding: 7px 0; text-align: center; font-size: 12px; font-weight: bold; letter-spacing: .1em; color: #8d603e; }
+.drop-board-label span { font-size: 9px; font-weight: normal; letter-spacing: .03em; }
 .drop-combo { position: absolute; z-index: 7; top: 34%; left: 50%; padding: 9px 14px; border: 2px solid #fff0b9; border-radius: 20px; background: #ee8b8d; color: #fffef5; white-space: nowrap; font-size: 20px; text-align: center; text-shadow: 0 2px #ac595d; pointer-events: none; animation: drop-combo .58s ease-out both; }
 .drop-combo small { display: block; font-size: 14px; margin-top: 3px; }
 .drop-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin-top: auto; padding-top: 2px; flex-shrink: 0; }
 .drop-actions button { min-height: 42px; border: 1px solid #cda582; border-radius: 14px; padding: 7px 10px; color: #80573e; background: #fffbf0df; cursor: pointer; font-size: 12px; box-shadow: 0 2px 0 #cda58233; }
 .drop-actions > span { font-size: 10px; color: #9b775b; }
-.drop-box.is-danger { border-color: #d87572; }
-.drop-box.is-danger .drop-ceiling { border-color: #ffb6a3; animation: drop-warning .8s ease-in-out infinite alternate; }
-.drop-box.is-paused * { animation-play-state: paused !important; }
-.drop-rules { text-align: left; }
-.drop-rules h2 { font-size: 24px; text-align: center; }
-.drop-rules ol { padding-left: 25px; }
-.drop-rules li { margin: 10px 0; color: #a66a46; }
-.drop-rules li p { font-size: 13px; color: #755743; margin: 4px 0; }
-.drop-rules > p { font-size: 12px; }
+.drop-board.is-danger { border-color: #d87572; }
+.drop-board.is-danger .drop-ceiling { border-color: #ffb6a3; animation: drop-warning .8s ease-in-out infinite alternate; }
+.drop-board.is-paused * { animation-play-state: paused !important; }
 .drop-result { position: relative; text-align: center; overflow: hidden; }
 .drop-result > img { width: 90px; height: 90px; object-fit: contain; margin: 0 auto; animation: drop-arrive .6s ease-out; }
 .drop-result h2 { font-size: 25px; margin: 10px 0; }
@@ -80,7 +74,7 @@
 @keyframes drop-arrive { from { transform: scale(.55) rotate(-12deg); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes drop-guide { to { transform: translateY(-5px); } }
 @keyframes drop-warning { to { opacity: .4; } }
-@media (max-height: 730px) { .screen.screen--drop { gap: 4px; padding-top: 5px; } .drop-preview img { width: 35px; height: 35px; } .drop-box { padding-top: 5px; } .drop-box-label { padding: 4px 0; } }
+@media (max-height: 730px) { .screen.screen--drop { gap: 4px; padding-top: 5px; } .drop-preview img { width: 35px; height: 35px; } .drop-board { padding-top: 5px; } .drop-board-label { padding: 4px 0; } }
 @media (prefers-reduced-motion: reduce) { .screen--drop *, .drop-result * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; } }
 
 @media (max-height: 620px) {
@@ -99,5 +93,5 @@
 
 @media (min-width: 480px) {
   .screen.screen--drop { padding-inline: 10px; }
-  .drop-box { border-radius: 24px 24px 16px 16px; }
+  .drop-board { border-radius: 24px 24px 16px 16px; }
 }

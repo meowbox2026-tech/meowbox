@@ -19,6 +19,21 @@ afterEach(() => {
 })
 
 describe('SettingsScreen controls', () => {
+  it('uses the home artwork for the settings return action and removes the subtitle', () => {
+    const { container } = render(
+      <SettingsScreen onBack={vi.fn()} onToast={vi.fn()} onLegal={vi.fn()} />
+    )
+
+    expect(screen.getByRole('heading', { name: '設定' })).toBeInTheDocument()
+    expect(screen.queryByText('讓每一次遊玩都更剛好！')).not.toBeInTheDocument()
+
+    const homeButton = screen.getByRole('button', { name: '回到主頁' })
+    expect(homeButton).toHaveClass('settings-home')
+    expect(homeButton).toHaveClass('artwork-button')
+    expect(container.querySelector('.settings-home img')).toHaveAttribute('src', '/assets/start.webp')
+    expect(homeButton).not.toHaveTextContent('⌂')
+  })
+
   it('keeps the three icon-only toggles together without descriptions', () => {
     const { container } = render(
       <SettingsScreen onBack={vi.fn()} onToast={vi.fn()} onLegal={vi.fn()} />
