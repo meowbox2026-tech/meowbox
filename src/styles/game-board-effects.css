@@ -1,0 +1,210 @@
+/* Board surface and transient interaction feedback stay separate from the page background. */
+.planning-board--prism {
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, .88);
+  background:
+    radial-gradient(ellipse at 24% 12%, rgba(255, 255, 255, .8), transparent 35%),
+    linear-gradient(145deg, rgba(241, 255, 253, .92), rgba(205, 239, 247, .86) 48%, rgba(205, 215, 251, .9));
+  box-shadow:
+    0 14px 30px rgba(67, 112, 145, .2),
+    0 3px 0 rgba(139, 187, 211, .3),
+    inset 0 1px 0 rgba(255, 255, 255, .98),
+    inset 0 -12px 24px rgba(82, 130, 177, .12);
+}
+
+.planning-grid {
+  z-index: 1;
+  border-color: rgba(255, 255, 255, .94);
+  background:
+    radial-gradient(ellipse at 17% 78%, rgba(255, 255, 255, .28), transparent 30%),
+    linear-gradient(155deg, rgba(207, 247, 244, .86), rgba(202, 230, 250, .84) 54%, rgba(229, 217, 250, .84));
+  box-shadow:
+    inset 0 2px 8px rgba(75, 137, 165, .16),
+    inset 0 -10px 16px rgba(102, 118, 181, .1),
+    0 2px 7px rgba(76, 119, 149, .13);
+}
+
+.planning-cell {
+  border-color: rgba(255, 255, 255, .76);
+  background: linear-gradient(145deg, rgba(255, 255, 255, .64), rgba(170, 220, 235, .2));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, .7),
+    inset 0 -4px 8px rgba(62, 132, 164, .09),
+    0 1px 3px rgba(62, 111, 144, .12);
+}
+
+.planning-placement-cell:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .2);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .82), 0 0 13px rgba(105, 205, 214, .26);
+}
+
+.planning-placement-cell:active:not(:disabled) {
+  border-radius: 14px;
+  background: radial-gradient(circle, rgba(255, 255, 255, .52), rgba(152, 225, 231, .12) 68%);
+  transform: scale(.94);
+}
+
+.planning-placement-cell.is-hint {
+  border-radius: 13px;
+  background: radial-gradient(circle, rgba(255, 228, 142, .42), rgba(255, 255, 255, .08) 68%);
+  box-shadow: inset 0 0 0 2px rgba(255, 212, 103, .9), 0 0 14px rgba(255, 221, 122, .46);
+  animation: planning-hint-shimmer 1.7s ease-in-out infinite;
+}
+
+.planning-placement-cell.is-hint::after {
+  content: '✦';
+  color: #bd7e38;
+  font-size: clamp(15px, 4.5vw, 25px);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .86);
+}
+
+.planning-cat {
+  z-index: 3;
+  transition: top .28s cubic-bezier(.4, 0, .65, 1), transform .2s ease, filter .2s ease;
+}
+
+.planning-cat.is-added img {
+  animation: planning-cat-place .42s cubic-bezier(.18, .89, .32, 1.22) both;
+}
+
+.planning-cat.is-clearing { z-index: 5; }
+.planning-cat.is-clearing img { animation: planning-cat-clear .46s cubic-bezier(.2, .75, .25, 1) both; }
+
+.planning-effects-layer {
+  position: absolute;
+  z-index: 4;
+  inset: 10px 10px 27px;
+  overflow: hidden;
+  border-radius: 22px;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+.planning-effect {
+  position: absolute;
+  left: var(--effect-x);
+  top: var(--effect-y);
+  display: block;
+  width: 30%;
+  aspect-ratio: 1;
+  border: 2px solid rgba(255, 255, 255, .82);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, .22), transparent 58%);
+  box-shadow: 0 0 16px rgba(123, 226, 231, .32), inset 0 0 8px rgba(255, 255, 255, .4);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.2);
+}
+
+.planning-effect--place { animation: planning-place-ripple .62s ease-out both; }
+.planning-effect--remove { animation: planning-remove-ripple .5s ease-out both; }
+.planning-effect--clear {
+  width: 22%;
+  border-color: rgba(255, 245, 183, .92);
+  background: radial-gradient(circle, rgba(255, 251, 215, .38), transparent 60%);
+  box-shadow: 0 0 18px rgba(255, 222, 134, .52), inset 0 0 9px rgba(255, 255, 255, .55);
+  animation: planning-clear-ripple .64s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.planning-effect--start {
+  inset: 0;
+  width: auto;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 26%, rgba(255, 255, 255, .58) 48%, transparent 68%);
+  box-shadow: none;
+  transform: translateX(-115%);
+  animation: planning-start-sheen .78s ease-out both;
+}
+
+.planning-combo {
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  z-index: 6;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  animation: planning-combo-pop .72s cubic-bezier(.18, .89, .32, 1.22) both;
+}
+
+.planning-combo__label {
+  display: block;
+  padding: 8px 16px 7px;
+  border: 1px solid rgba(255, 255, 255, .88);
+  border-radius: 999px;
+  color: #315a7c;
+  font-size: clamp(14px, 4.8vw, 24px);
+  font-weight: 1000;
+  letter-spacing: .06em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .9);
+  background: linear-gradient(145deg, rgba(255, 255, 255, .74), rgba(178, 229, 239, .5));
+  box-shadow: 0 5px 14px rgba(57, 111, 147, .2), inset 0 2px 0 rgba(255, 255, 255, .72);
+  backdrop-filter: blur(3px) saturate(125%);
+}
+
+.planning-combo--2 .planning-combo__label { color: #3b5d92; }
+.planning-combo--3 .planning-combo__label { color: #694e9a; box-shadow: 0 6px 17px rgba(102, 83, 173, .25), inset 0 2px 0 rgba(255, 255, 255, .8); }
+.planning-combo--4 .planning-combo__label { color: #a55e38; box-shadow: 0 7px 20px rgba(224, 158, 74, .3), inset 0 2px 0 rgba(255, 255, 255, .88); }
+
+.planning-board__label { position: relative; z-index: 7; }
+
+.planning-board.is-paused .planning-effect,
+.planning-board.is-paused .planning-combo { animation-play-state: paused; }
+
+@keyframes planning-hint-shimmer {
+  0%, 100% { opacity: .58; }
+  50% { opacity: 1; }
+}
+
+@keyframes planning-cat-place {
+  0% { opacity: 0; transform: translateY(-9px) scale(1.1, .82); }
+  60% { opacity: 1; transform: translateY(2px) scale(.94, 1.08); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes planning-cat-clear {
+  0% { opacity: 1; transform: scale(1); filter: drop-shadow(0 3px 2px rgba(53, 76, 119, .28)); }
+  34% { transform: scale(1.12); filter: drop-shadow(0 0 8px rgba(255, 231, 150, .86)); }
+  100% { opacity: 0; transform: scale(.45); filter: drop-shadow(0 0 2px rgba(255, 255, 255, .8)); }
+}
+
+@keyframes planning-place-ripple {
+  0% { opacity: .72; transform: translate(-50%, -50%) scale(.18); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes planning-remove-ripple {
+  0% { opacity: .62; transform: translate(-50%, -50%) scale(.78); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.18); }
+}
+
+@keyframes planning-clear-ripple {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.15); }
+  24% { opacity: .88; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+}
+
+@keyframes planning-start-sheen {
+  0% { opacity: 0; transform: translateX(-115%); }
+  24% { opacity: .72; }
+  100% { opacity: 0; transform: translateX(115%); }
+}
+
+@keyframes planning-combo-pop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.72); }
+  42% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  68% { transform: translate(-50%, -50%) scale(.98); }
+  100% { opacity: 0; transform: translate(-50%, -64%) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planning-placement-cell.is-hint,
+  .planning-cat.is-added img,
+  .planning-cat.is-clearing img,
+  .planning-effect,
+  .planning-combo { animation: none !important; }
+  .planning-effect--place,
+  .planning-effect--clear { opacity: .42; transform: translate(-50%, -50%) scale(.76); }
+  .planning-effect--remove { opacity: .35; transform: translate(-50%, -50%) scale(.35); }
+  .planning-effect--start { opacity: .35; transform: none; }
+}

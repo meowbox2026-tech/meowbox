@@ -46,10 +46,15 @@ export function setBackgroundMusicEnabled(enabled: boolean): void {
   if (!enabled) stopBackgroundMusic()
 }
 
-export function stopBackgroundMusic(): void {
+/** Temporarily pause the current track while preserving its playback position. */
+export function pauseBackgroundMusic(): void {
   backgroundMusic?.pause()
-  backgroundMusic = undefined
   backgroundMusicPlaying = false
+}
+
+export function stopBackgroundMusic(): void {
+  pauseBackgroundMusic()
+  backgroundMusic = undefined
   uiSound = undefined
   lastUiSoundAt = 0
 }

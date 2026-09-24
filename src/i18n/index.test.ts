@@ -30,7 +30,6 @@ describe('i18n dictionaries', () => {
 
   it('describes the Meow Line brand and its drop-and-match gameplay', () => {
     expect(getStrings('zh-TW').app.title).toBe('MEOW LINE｜貓咪落下連線')
-    expect(getStrings('zh-TW').home.brandSub).toBe('貓咪落下連線解謎')
     expect(getStrings('en').app.title).toBe('MEOW LINE｜Cat Drop Match Puzzle')
     expect(getStrings('ja').app.title).toBe('MEOW LINE｜猫を落としてつなぐパズル')
   })

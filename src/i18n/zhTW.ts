@@ -11,7 +11,7 @@ export const zhTW: Strings = {
     levelAria: '關卡 {level}', starsAria: '{stars} 顆星', moves: '步數'
   },
   home: {
-    brandSub: '貓咪落下連線解謎', brandAria: 'Meow Line 喵序｜貓咪落下連線解謎',
+    brandAria: 'Meow Line 喵序｜貓咪落下連線解謎',
     start: '開始遊戲', levels: '關卡', mainNav: '主選單'
   },
   levels: {

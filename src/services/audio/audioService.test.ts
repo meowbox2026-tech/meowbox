@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   BACKGROUND_MUSIC_PATH,
   UI_SOUND_PATH,
+  pauseBackgroundMusic,
   playUiSound,
   setBackgroundMusicEnabled,
   startBackgroundMusic,
@@ -41,6 +42,22 @@ describe('audio service', () => {
     expect(AudioMock).toHaveBeenCalledTimes(1)
     expect(AudioMock).toHaveBeenCalledWith(BACKGROUND_MUSIC_PATH)
     expect(play).toHaveBeenCalledTimes(1)
+    expect(pause).toHaveBeenCalledTimes(1)
+  })
+
+  it('pauses and resumes the same background track without restarting its source', () => {
+    const play = vi.fn(() => Promise.resolve())
+    const pause = vi.fn()
+    const AudioMock = vi.fn(() => ({ play, pause, loop: false, volume: 1 }))
+    vi.stubGlobal('Audio', AudioMock)
+    Object.defineProperty(window, 'Audio', { configurable: true, value: AudioMock })
+
+    startBackgroundMusic(true)
+    pauseBackgroundMusic()
+    startBackgroundMusic(true)
+
+    expect(AudioMock).toHaveBeenCalledTimes(1)
+    expect(play).toHaveBeenCalledTimes(2)
     expect(pause).toHaveBeenCalledTimes(1)
   })
 

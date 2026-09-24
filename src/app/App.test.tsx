@@ -58,6 +58,18 @@ describe('App game loading', () => {
     expect(screen.getByTestId('game-screen')).toBeInTheDocument()
   })
 
+  it('skips the interstitial on the first game entry of a session', async () => {
+    recordPlay.mockReturnValue({ playsSinceAd: 0, shouldShowAd: true })
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: '開始遊戲' }))
+    await act(async () => { await Promise.resolve() })
+
+    expect(recordPlay).not.toHaveBeenCalled()
+    expect(showInterstitialAd).not.toHaveBeenCalled()
+    expect(screen.getByTestId('game-screen')).toBeInTheDocument()
+  })
+
   it('does not render the orange full-screen fallback while the save is loading', () => {
     player.isReady = false
 
@@ -76,9 +88,9 @@ describe('App game loading', () => {
     showInterstitialAd.mockResolvedValue({ shown: true })
     render(<App />)
 
-    for (let play = 0; play < 5; play += 1) {
+    for (let play = 0; play < 6; play += 1) {
       fireEvent.click(screen.getByRole('button', { name: '開始遊戲' }))
-      if (play < 4) fireEvent.click(screen.getByRole('button', { name: '回主頁' }))
+      if (play < 5) fireEvent.click(screen.getByRole('button', { name: '回主頁' }))
     }
     await act(async () => { await Promise.resolve() })
 

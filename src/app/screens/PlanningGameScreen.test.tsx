@@ -7,11 +7,12 @@ const playAction = vi.hoisted(() => vi.fn())
 const watchUndoAd = vi.hoisted(() => vi.fn())
 const watchHintAd = vi.hoisted(() => vi.fn())
 const startBackgroundMusic = vi.hoisted(() => vi.fn())
+const pauseBackgroundMusic = vi.hoisted(() => vi.fn())
 const stopBackgroundMusic = vi.hoisted(() => vi.fn())
 vi.mock('../../state/PlayerContext', () => ({ usePlayer: () => ({
-  player: { settings: { music: false, sound: false, haptics: false } }, completeLevel
+  player: { settings: { music: true, sound: false, haptics: false } }, completeLevel
 }) }))
-vi.mock('../../services/audio/audioService', () => ({ startBackgroundMusic, stopBackgroundMusic }))
+vi.mock('../../services/audio/audioService', () => ({ pauseBackgroundMusic, startBackgroundMusic, stopBackgroundMusic }))
 vi.mock('../../services/haptics/hapticsService', () => ({ playPlacementHaptic: vi.fn() }))
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks() })
 
@@ -54,7 +55,8 @@ describe('8x8 planning level through the game entry point', () => {
 
     expect(board).toHaveClass('planning-board--prism')
     expect(board).toHaveAttribute('data-board-size', '8x8')
-    expect(grid).toHaveAttribute('data-board-skin', 'candy-prism')
+    expect(grid).toHaveAttribute('data-board-skin', 'liquid-crystal')
+    expect(container.querySelector('.planning-effects-layer')).toBeInTheDocument()
     expect(container.querySelectorAll('.planning-cell')).toHaveLength(64)
   })
 
@@ -91,18 +93,28 @@ describe('8x8 planning level through the game entry point', () => {
     expect(container.querySelectorAll('.planning-cell')).toHaveLength(64)
     expect(container.querySelectorAll('.planning-tray img')).toHaveLength(3)
     expect(container.querySelectorAll('.planning-tray button')).toHaveLength(0)
+    expect(container.querySelectorAll('.planning-tray input[type="checkbox"]')).toHaveLength(0)
+    expect(screen.queryByText('已放置')).not.toBeInTheDocument()
     expect(container.querySelectorAll('button.planning-cat')).toHaveLength(0)
     expect(screen.queryByRole('timer')).toBeNull()
     expect(screen.getByRole('button', { name: '開始救援' })).toBeDisabled()
     expect(screen.getByRole('button', { name: '開始救援' })).toHaveClass('artwork-button')
     expect(container.querySelector('.planning-start img')).toHaveAttribute('src', '/assets/start.webp')
     await place(4, 5, 1)
+    expect(container.querySelector('.planning-effect--place')).toBeInTheDocument()
     expect(container.querySelectorAll('.planning-tray img')).toHaveLength(2)
+    expect(screen.queryByLabelText('第 1 隻待放貓咪：橘子')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('第 1 隻待放貓咪：小灰')).toBeInTheDocument()
     expect(container.querySelectorAll('button.planning-cat')).toHaveLength(1)
+    const firstPlacedCat = screen.getByRole('button', { name: '拿回 1 橘子' })
+    expect(firstPlacedCat).toHaveClass('is-added')
     await place(3, 5, 2)
+    expect(screen.getByLabelText('已安排 1 橘子')).not.toHaveClass('is-added')
+    expect(screen.getByRole('button', { name: '拿回 2 小灰' })).toHaveClass('is-added')
     expect(container.querySelectorAll('.planning-tray img')).toHaveLength(1)
     await place(2, 5, 3)
     expect(container.querySelectorAll('.planning-tray img')).toHaveLength(0)
+    expect(container.querySelector('.planning-tray__empty-slot')).toBeInTheDocument()
     expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
     expect([...container.querySelectorAll('.planning-cat b')].map(node => node.textContent).sort()).toEqual(['1', '2', '3'])
     expect(screen.getByRole('button', { name: '開始救援' })).toBeEnabled()
@@ -116,6 +128,18 @@ describe('8x8 planning level through the game entry point', () => {
     expect(container.querySelectorAll('.planning-tray img')).toHaveLength(1)
     expect(screen.queryByRole('button', { name: '拿回 2 小灰' })).toBeNull()
     expect(screen.queryByText('失敗 0 次')).not.toBeInTheDocument()
+  })
+
+  it('keeps background music continuous when the arranged run starts', async () => {
+    mount()
+    await place(4, 5, 1)
+    await place(3, 5, 2)
+    await place(2, 5, 3)
+
+    start()
+
+    expect(startBackgroundMusic).toHaveBeenCalledOnce()
+    expect(stopBackgroundMusic).not.toHaveBeenCalled()
   })
 
   it('replaces take-all with one free hint per planning level', async () => {
@@ -160,7 +184,7 @@ describe('8x8 planning level through the game entry point', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /提示 3/ }))
     await waitForPlaced(2)
-    expect(container.querySelectorAll('.planning-cat.is-added')).toHaveLength(2)
+    expect(container.querySelectorAll('.planning-cat.is-added')).toHaveLength(1)
   })
   it('keeps the hint count at zero when the rewarded ad is not completed', async () => {
     watchHintAd.mockResolvedValue(false)
@@ -209,7 +233,7 @@ describe('8x8 planning level through the game entry point', () => {
     fireEvent.blur(window)
     expect(firstCell).toBeDisabled()
     expect(document.querySelector('.screen--planning')).toHaveClass('is-suspended')
-    expect(stopBackgroundMusic).toHaveBeenCalled()
+    expect(pauseBackgroundMusic).toHaveBeenCalled()
 
     fireEvent.focus(window)
     expect(firstCell).toBeEnabled()
@@ -221,6 +245,8 @@ describe('8x8 planning level through the game entry point', () => {
     await place(3, 5, 2)
     await place(2, 5, 3)
     start()
+    await flushAsyncState()
+    expect(screen.getByRole('status', { name: '消除！' })).toBeInTheDocument()
     expect(cell(4, 5)).toBeDisabled()
     expect(completeLevel).not.toHaveBeenCalled()
     finish()

@@ -6,12 +6,13 @@ import { planningCopy } from '../../game/phaser/planningCopy'
 import { getDropCatName, useLocale } from '../../i18n'
 import type { CatAsset } from '../../game/types'
 import { usePlayer } from '../../state/PlayerContext'
-import { startBackgroundMusic, stopBackgroundMusic } from '../../services/audio/audioService'
+import { pauseBackgroundMusic, startBackgroundMusic, stopBackgroundMusic } from '../../services/audio/audioService'
 import { playPlacementHaptic } from '../../services/haptics/hapticsService'
 import { AppButton } from '../components/AppButton'
 import { ArtworkButton } from '../components/ArtworkButton'
 import { Modal } from '../components/Modal'
 import { PauseModal } from '../components/PauseModal'
+import { PlanningBoardEffects, type PlanningBoardEffect } from '../components/PlanningBoardEffects'
 import { TopBar } from '../components/TopBar'
 import { PlanningDiagonalTutorial, useDiagonalTutorial } from '../components/PlanningDiagonalTutorial'
 
@@ -40,25 +41,47 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const tutorial = useDiagonalTutorial(activeLevelId)
   const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || tutorial.open, activeLevelId)
   const completionRecorded = useRef(false)
+  const boardEffectId = useRef(0)
+  const lastHintEffect = useRef<string | undefined>(undefined)
+  const [boardEffect, setBoardEffect] = useState<PlanningBoardEffect>()
   const editing = state.phase === 'editing'
   const locked = paused || tutorial.open || hidden || !editing || state.pendingHint || rewardAdPending
   const stars = Math.max(1, 3 - state.failures)
   const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
+  const triggerBoardEffect = (effect: Omit<PlanningBoardEffect, 'id'>) => {
+    boardEffectId.current += 1
+    setBoardEffect({ ...effect, id: boardEffectId.current })
+  }
   useEffect(() => {
-    if (paused || tutorial.open || hidden || state.phase === 'completed') stopBackgroundMusic()
+    if (paused || tutorial.open || hidden) pauseBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
-    return () => stopBackgroundMusic()
-  }, [paused, tutorial.open, hidden, state.phase, player.settings.music])
+  }, [paused, tutorial.open, hidden, player.settings.music])
+  useEffect(() => {
+    if (state.phase === 'completed') pauseBackgroundMusic()
+  }, [state.phase])
+  useEffect(() => () => stopBackgroundMusic(), [])
   useEffect(() => {
     if (state.phase === 'completed' && !completionRecorded.current) {
       completionRecorded.current = true
       completeLevel(activeLevelId, stars)
     }
   }, [state.phase, completeLevel, activeLevelId, stars])
+  useEffect(() => {
+    const hint = state.hintCell
+    if (!hint) {
+      lastHintEffect.current = undefined
+      return
+    }
+    const hintKey = `${hint.catId}:${hint.x}:${hint.y}`
+    if (lastHintEffect.current === hintKey) return
+    lastHintEffect.current = hintKey
+    triggerBoardEffect({ kind: 'place', x: hint.x, y: hint.y })
+  }, [state.hintCell])
   const restart = () => {
     completionRecorded.current = false
+    setBoardEffect(undefined)
     dispatch({ type: 'restart' })
     void onPlayAction()
     setRewardAdConfirm(undefined)
@@ -108,8 +131,14 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   }
   const place = (x: number, y: number) => {
     if (locked) return
+    triggerBoardEffect({ kind: 'place', x, y })
     dispatch({ type: 'place', x, y })
     void playPlacementHaptic(player.settings.haptics)
+  }
+  const removePlacedCat = (id: number, x: number, y: number) => {
+    if (locked) return
+    triggerBoardEffect({ kind: 'remove', x, y })
+    dispatch({ type: 'remove', id })
   }
   const catName = (type: string) => getDropCatName(type, locale)
   return <main className={`screen screen--game screen--drop screen--planning${hidden ? ' is-suspended' : ''}`}>
@@ -124,13 +153,13 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
           aria-label={text.cardLabel(index + 1, catName(cat.type))}>
           <img src={getCatAssetPath(cat.type)} alt="" />
         </div>
-      )}</div>
+      )}{remainingCats.length === 0 && <span className="planning-tray__empty-slot" aria-hidden="true" />}</div>
     </section>
     <div
       className={`planning-board planning-board--prism${paused || hidden ? ' is-paused' : ''}`}
       data-board-size="8x8"
     >
-      <div className="planning-grid" data-board-skin="candy-prism" aria-label={text.board}>
+      <div className="planning-grid" data-board-skin="liquid-crystal" aria-label={text.board}>
         {Array.from({ length: 64 }, (_, i) => <div className="planning-cell" key={i} />)}
         <div className="planning-placement-grid">{Array.from({ length: 8 }, (_, y) => Array.from({ length: 8 }, (_, x) => {
           const hinted = state.hintCell !== undefined && state.hintCell.catId === state.selected && state.hintCell.x === x && state.hintCell.y === y
@@ -141,16 +170,26 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
           if (!cat) return []
           const order = state.placements.findIndex(p => p.catId === cat.id)
           const canTakeBack = editing && state.undoUses > 0 && order >= 0 && order === state.placements.length - 1
+          const isNewlyPlaced = boardEffect?.kind === 'place' && boardEffect.x === x && boardEffect.y === y
           const content = <><img src={getCatAssetPath(cat.type as CatAsset)} alt="" />{order >= 0 && <b>{order + 1}</b>}</>
           const style = { left: `${x * 12.5}%`, top: `${y * 12.5}%` }
-          const className = `planning-cat${clearing.includes(cat.id) ? ' is-clearing' : ''}${order >= 0 ? ' is-added' : ''}`
+          const className = `planning-cat${clearing.includes(cat.id) ? ' is-clearing' : ''}${isNewlyPlaced ? ' is-added' : ''}`
           return canTakeBack
             ? <button key={cat.id} className={className} style={style} disabled={locked}
-              aria-label={`${text.take} ${order + 1} ${catName(cat.type)}`} onClick={() => dispatch({ type: 'remove', id: cat.id })}>{content}</button>
+              aria-label={`${text.take} ${order + 1} ${catName(cat.type)}`} onClick={() => removePlacedCat(cat.id, x, y)}>{content}</button>
             : <div key={cat.id} className={className} style={style}
               aria-label={order >= 0 ? `${text.placed} ${order + 1} ${catName(cat.type)}` : `${text.fixed} ${catName(cat.type)}`}>{content}</div>
         }))}
       </div>
+      <PlanningBoardEffects
+        board={board}
+        clearingIds={clearing}
+        effect={boardEffect}
+        frame={state.frame}
+        wave={wave}
+        clearLabel={text.clear}
+        comboLabel={text.combo}
+      />
       <div className="planning-board__label">MEOW LINE <span>8 × 8</span></div>
     </div>
     {editing && state.failureReason === 'resolution' && state.placements.length === 0 && <p className="planning-status" role="status">{text.retryNotice}</p>}
@@ -173,7 +212,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       />
     </div>
     {rewardAdStatus && <p className="planning-ad-status" role="status">{rewardAdStatus}</p>}
-    <ArtworkButton asset="start" className="planning-start" disabled={locked || left > 0} onClick={() => dispatch({ type: 'start' })}>{text.start}</ArtworkButton>
+    <ArtworkButton asset="start" className="planning-start" disabled={locked || left > 0} onClick={() => { triggerBoardEffect({ kind: 'start' }); dispatch({ type: 'start' }) }}>{text.start}</ArtworkButton>
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
     <PlanningDiagonalTutorial open={tutorial.open} onClose={tutorial.close} />
     <Modal

@@ -18,7 +18,6 @@ export function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
         <div className="home-brand__mark" aria-hidden="true">
           <GameImage asset="meowlogo" className="home-brand__logo" alt="" />
         </div>
-        <p>{strings.home.brandSub}</p>
       </section>
       <ArtworkButton asset="start" className="home-start" onClick={onStart}>{strings.home.start}</ArtworkButton>
       <nav className="home-nav" aria-label={strings.home.mainNav}>

@@ -11,7 +11,7 @@ export const ja: Strings = {
     levelAria: 'レベル {level}', starsAria: '{stars}スター', moves: '手数'
   },
   home: {
-    brandSub: '猫を落としてつなぐパズル', brandAria: 'Meow Line｜猫を落としてつなぐパズル',
+    brandAria: 'Meow Line｜猫を落としてつなぐパズル',
     start: 'ゲームスタート', levels: 'レベル', mainNav: 'メインメニュー'
   },
   levels: {

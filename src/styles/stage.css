@@ -19,9 +19,20 @@
   position: fixed;
   inset: 0;
   z-index: 0;
+  isolation: isolate;
   background-position: center;
   background-size: calc(375px * var(--stage-scale, 1)) auto;
   background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* Keep the ambient tint continuous across every page. Applying it to a screen
+   alone creates a visible SE-sized seam on taller phones. */
+.app-bleed::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(180deg, rgba(255, 244, 223, .06), rgba(91, 42, 19, .08));
   pointer-events: none;
 }
 
@@ -30,6 +41,7 @@
 .app-bleed[data-screen='settings'] { background-image: url('/assets/bg-main.webp'); }
 .app-bleed[data-screen='legal'] { background-image: url('/assets/bg-main.webp'); }
 .app-bleed[data-screen='game'] { background-image: url('/assets/bg-main.webp'); }
+.app-bleed[data-screen='game']::after { display: none; }
 
 .app-stage {
   position: relative;
@@ -39,7 +51,7 @@
   flex: 0 0 auto;
   overflow: hidden;
   container-type: size;
-  background: #5f3c2b;
+  background: transparent;
   transform: scale(var(--stage-scale, 1));
   transform-origin: center center;
 }
@@ -50,13 +62,14 @@
 .app-stage .screen {
   padding-top: 14px;
   padding-bottom: 16px;
-  /* Width-locked art: same rendered width as the bleed layer, so tall art aligns
-     seam-free. Identical to cover for the current 0.56-ratio art (sub-pixel). */
-  background-size: 375px auto;
 }
 
-.app-stage .screen.screen--drop {
-  background-size: 375px auto;
+/* The fixed stage owns layout only. The full-viewport bleed owns the shared
+   background so the content never looks like it sits on a separate card. */
+.app-frame .app-stage > .screen { background: transparent; }
+
+.app-stage .screen::before {
+  display: none;
 }
 
 .app-stage .screen.screen--drop {

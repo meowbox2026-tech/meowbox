@@ -24,6 +24,7 @@ export function App() {
   const [toast, setToast] = useState<string>()
   const [legalDocument, setLegalDocument] = useState<LegalDocumentId>('privacy')
   const adInFlight = useRef(false)
+  const hasEnteredGame = useRef(false)
   useStageScale()
 
   useEffect(() => {
@@ -64,6 +65,10 @@ export function App() {
   const openGame = (levelId: number) => {
     setSelectedLevel(levelId)
     setScreen('game')
+    if (!hasEnteredGame.current) {
+      hasEnteredGame.current = true
+      return
+    }
     void maybeShowPlayAd()
   }
 

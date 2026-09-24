@@ -11,7 +11,7 @@ export const en: Strings = {
     levelAria: 'Level {level}', starsAria: '{stars} stars', moves: 'Moves'
   },
   home: {
-    brandSub: 'Cat Drop Match Puzzle', brandAria: 'Meow Line Cat Drop Match Puzzle',
+    brandAria: 'Meow Line Cat Drop Match Puzzle',
     start: 'Start Game', levels: 'Levels', mainNav: 'Main menu'
   },
   levels: {

@@ -13,7 +13,6 @@ export interface Strings {
     moves: string
   }
   home: {
-    brandSub: string
     brandAria: string
     start: string
     levels: string

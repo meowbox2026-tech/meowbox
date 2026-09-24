@@ -10,7 +10,7 @@ describe('HomeScreen responsive controls', () => {
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
     expect(container.querySelector('.home-progress')).not.toBeInTheDocument()
     expect(container.querySelector('.home-brand__logo')).toHaveAttribute('src', '/assets/meowlogo.webp')
-    expect(container.querySelector('.home-brand p')).toHaveTextContent('貓咪落下連線解謎')
+    expect(container.querySelector('.home-brand p')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Meow Line 喵序｜貓咪落下連線解謎' })).toBeInTheDocument()
 
     const navigation = screen.getByRole('navigation', { name: '主選單' })
