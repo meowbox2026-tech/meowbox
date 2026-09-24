@@ -59,13 +59,22 @@
 .drop-board.is-danger { border-color: #d87572; }
 .drop-board.is-danger .drop-ceiling { border-color: #ffb6a3; animation: drop-warning .8s ease-in-out infinite alternate; }
 .drop-board.is-paused * { animation-play-state: paused !important; }
-.drop-result { position: relative; text-align: center; overflow: hidden; }
-.drop-result > img { width: 90px; height: 90px; object-fit: contain; margin: 0 auto; animation: drop-arrive .6s ease-out; }
-.drop-result h2 { font-size: 25px; margin: 10px 0; }
-.drop-result p { font-size: 14px; line-height: 1.7; }
-.drop-result > small { display: block; font-size: 11px; margin-top: 12px; color: #9f7c65; }
-.drop-result__stars { font-size: 38px; color: #d1c6b7; letter-spacing: 5px; }
-.drop-result__stars .is-earned { color: #f2b943; text-shadow: 0 2px #cc944b; display: inline-block; animation: drop-arrive .6s .2s both; }
+.drop-result { position: relative; width: min(92vw, 360px); padding: 16px 14px 14px; text-align: center; overflow: hidden; }
+.drop-result__header { display: grid; justify-items: center; }
+.drop-result__header > img { width: 82px; height: 82px; object-fit: contain; margin: -5px auto 0; animation: drop-arrive .6s ease-out; }
+.drop-result__eyebrow { color: #b37751; font-size: 11px; font-weight: 900; letter-spacing: .12em; }
+.drop-result h2 { margin: 4px 0; color: #8a4827; font-size: clamp(28px, 8vw, 38px); line-height: 1; }
+.drop-result__encouragement { max-width: 280px; margin: 4px auto 9px !important; color: #80573e; font-size: 13px; line-height: 1.5 !important; }
+.drop-result__summary { margin: 4px 0 8px !important; color: #80573e; font-size: 14px; line-height: 1.5 !important; }
+.drop-result__stars { display: flex; justify-content: center; gap: 4px; margin: 2px 0 3px; }
+.drop-result__stars img { width: 42px; height: 42px; object-fit: contain; filter: grayscale(.8) saturate(.25) brightness(.93); }
+.drop-result__stars img.is-earned { filter: none; animation: drop-arrive .6s .2s both; }
+.drop-result__actions { display: grid; gap: 2px; }
+.drop-result__actions .app-button { margin-top: 8px; }
+.drop-result--failure h2 { color: #ae4c58; }
+.drop-result--failure .drop-result__eyebrow { color: #c66c72; }
+.drop-result--failure .drop-result__header > img { width: 76px; height: 76px; }
+.drop-result--failure .drop-result__actions .app-button--blue { color: #fffdf7; }
 .drop-confetti { position: absolute; inset: 16px 0 auto; color: #efa377; font-size: 35px; letter-spacing: 10px; pointer-events: none; animation: drop-guide 1.2s infinite alternate; }
 @keyframes drop-fall { 0% { transform: translateY(var(--fall)); } 78% { transform: translateY(0); } 88% { transform: scale(1.06, .91); } 100% { transform: none; } }
 @keyframes drop-pop { 0% { transform: scale(1); } 30% { transform: scale(1.17) rotate(-8deg); filter: drop-shadow(0 0 6px #ffe88c); } 58% { transform: scale(1.05) rotate(7deg); opacity: 1; } 100% { transform: scale(.2) translateY(-45%); opacity: 0; } }

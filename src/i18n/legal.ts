@@ -4,9 +4,9 @@ import type { Locale } from './locale'
 import { toLocale } from './locale'
 
 export const LEGAL_UPDATED_AT: Record<Locale, string> = {
-  'zh-TW': '2026 年 9 月 23 日',
-  en: 'September 23, 2026',
-  ja: '2026年9月23日'
+  'zh-TW': '2026 年 9 月 25 日',
+  en: 'September 25, 2026',
+  ja: '2026年9月25日'
 }
 
 const zh: Record<LegalDocumentId, LegalDocument> = {
@@ -17,14 +17,14 @@ const zh: Record<LegalDocumentId, LegalDocument> = {
       { heading: '我們重視你的隱私', paragraphs: ['Meow Line（以下稱「本遊戲」）由 Meow Line 開發團隊提供。我們希望用簡單、透明的方式說明目前版本如何處理資料。'] },
       {
         heading: '目前版本會處理哪些資料？',
-        paragraphs: ['本遊戲不要求建立帳號，也不會主動要求你的姓名、電話、地址、位置、聯絡人、照片、相機或麥克風資料。'],
-        bullets: ['遊戲進度、星等與設定會儲存在你的裝置上。', 'iPhone App 使用系統偏好儲存；手機網頁版使用瀏覽器本機儲存。', `如果你寄信給客服，我們會收到你主動提供的電子郵件地址、信件內容與附件。`]
+        paragraphs: ['本遊戲不要求建立帳號，也不會主動要求你的姓名、電話、地址、位置、聯絡人、照片、相機或麥克風資料。為了改善關卡與遊戲體驗，遊戲會使用 Supabase 建立不含姓名或電子郵件的匿名使用者識別碼，記錄必要的匿名遊戲事件。'],
+        bullets: ['遊戲進度、星等與設定會儲存在你的裝置上。', 'iPhone App 使用系統偏好儲存；手機網頁版使用瀏覽器本機儲存。', '匿名分析會記錄工作階段、關卡開始／完成／失敗、提示使用、過關時間、星等、關卡編號與事件時間；不記錄姓名、電子郵件、電話或可直接識別你的資料。', `如果你寄信給客服，我們會收到你主動提供的電子郵件地址、信件內容與附件。`]
       },
-      { heading: '資料如何使用與保存？', paragraphs: ['裝置上的遊戲資料只用來恢復遊戲進度、套用設定與提供遊戲功能。這些資料會保留到你刪除 App、清除瀏覽器網站資料，或自行重置遊戲資料為止。客服信件只會在處理問題、回覆請求與維護服務所需的期間保存。'] },
-      { heading: '第三方服務', paragraphs: ['瀏覽器版本會在累計五次遊玩操作後以本機 gateway 模擬全螢幕插頁廣告；若當前關卡的上一步次數歸零，也可以觀看測試獎勵廣告，完成後增加五次上一步且只限當前關卡使用。這些測試畫面不會向第三方廣告 SDK 發出請求。已設定 AdMob 的 iOS 原生版本會由 Google Mobile Ads SDK／User Messaging Platform 處理廣告請求、裝置識別、同意訊息與曝光及獎勵完成資料；我們不會把遊戲進度或上一步獎勵上傳到 Meow Line 的伺服器。App 使用 Apple 與 Capacitor 提供的系統能力（例如本機儲存與震動），這些能力不會把遊戲進度交給我們。Apple App Store、Google AdMob、作業系統與電子郵件服務商也可能依其各自政策處理必要的技術資料。'] },
+      { heading: '資料如何使用與保存？', paragraphs: ['裝置上的遊戲資料只用來恢復遊戲進度、套用設定與提供遊戲功能。匿名分析資料只用來了解關卡難度、完成率、實際過關時間、提示與失敗訊號，以改善關卡與體驗；目前沒有設定固定自動刪除期限。刪除 App 或清除瀏覽器網站資料會移除裝置上的匿名工作階段憑證，之後的事件不會再與該憑證連結，但先前的匿名事件可能無法對應到特定個人。客服信件只會在處理問題、回覆請求與維護服務所需的期間保存。'] },
+      { heading: '第三方服務', paragraphs: ['匿名分析事件會傳送到 Supabase 託管的資料庫；前端只可送出符合規則的事件，無法讀取原始事件，玩家狀態頁只讀取彙總結果。Supabase 可能依其服務政策處理必要的連線技術資料。iOS App 啟用 Google Mobile Ads SDK／User Messaging Platform，插頁式與獎勵式廣告的請求、顯示與完成回呼由 SDK 處理。為提供廣告與量測，Google 可能處理 IP 位址／概略位置、裝置 ID（包含廣告識別碼）、廣告資料、產品互動、效能資料、崩潰與其他診斷資料；這些資料可能用於第三方廣告、開發者廣告或分析，裝置 ID 可能用於廣告追蹤，並會依適用的 App Tracking Transparency 同意狀態處理。拒絕追蹤不會阻止非個人化廣告載入。瀏覽器版本只使用本機測試廣告畫面，不會向第三方廣告 SDK 發出請求。'] },
       { heading: '兒童隱私', paragraphs: ['本遊戲不以收集兒童個人資料為目的，也不會要求兒童提供個人資料。如果你認為未成年者在未經同意下向我們提供了個人資料，請透過客服信箱聯絡我們。'] },
-      { heading: '你的選擇', paragraphs: ['你可以透過刪除 App 或清除瀏覽器網站資料移除裝置上的遊戲資料。若你曾透過客服信箱聯絡我們，也可以來信要求更正或刪除該次客服往來資料。'] },
-      { heading: '政策更新與聯絡方式', paragraphs: [`如果未來正式接入廣告 SDK、帳號、雲端同步、分析或付費服務，我們會在啟用前更新本政策與 App Store 的隱私標示。若你有隱私問題，請寄信至 ${SUPPORT_EMAIL}。`] }
+      { heading: '你的選擇', paragraphs: ['你可以透過刪除 App 或清除瀏覽器網站資料移除裝置上的遊戲資料與匿名工作階段憑證。若你曾透過客服信箱聯絡我們，可以來信要求更正或刪除該次客服往來資料；若要詢問匿名分析事件，請提供大約使用時間與裝置資訊，但由於未建立可辨識身分的帳號，我們可能無法定位或刪除特定匿名事件。'] },
+      { heading: '政策更新與聯絡方式', paragraphs: [`如果資料收集方式、廣告 SDK、雲端同步或付費服務改變，我們會更新本政策與 App Store 的隱私標示。若你有隱私問題，請寄信至 ${SUPPORT_EMAIL}。`] }
     ]
   },
   terms: {
@@ -64,14 +64,14 @@ const enDocs: Record<LegalDocumentId, LegalDocument> = {
       { heading: 'We value your privacy', paragraphs: ['Meow Line (“the game”) is provided by the Meow Line team. We explain in simple, transparent terms how the current version handles data.'] },
       {
         heading: 'What does the current version handle?',
-        paragraphs: ['The game needs no account and never asks for your name, phone, address, location, contacts, photos, camera, or microphone.'],
-        bullets: ['Progress, stars, and settings stay on your device.', 'The iPhone app uses system preferences; the mobile web version uses browser local storage.', 'If you email support, we receive the address, message, and attachments you send.']
+        paragraphs: ['The game needs no account and never asks for your name, phone, address, location, contacts, photos, camera, or microphone. To improve levels and gameplay, it uses Supabase to create an anonymous identifier without your name or email and records necessary anonymous game events.'],
+        bullets: ['Progress, stars, and settings stay on your device.', 'The iPhone app uses system preferences; the mobile web version uses browser local storage.', 'Anonymous analytics records sessions, level starts/completions/failures, hints, clear times, stars, level IDs, and event timestamps; it does not record your name, email, phone number, or direct identifiers.', 'If you email support, we receive the address, message, and attachments you send.']
       },
-      { heading: 'Use and retention', paragraphs: ['On-device data is only used to restore progress, apply settings, and run the game. It stays until you delete the app, clear site data, or reset the game. Support emails are kept only while handling your request.'] },
-      { heading: 'Third-party services', paragraphs: ['The current version shows a local test interstitial after every five play actions and offers a local test rewarded ad when the current level has no undos left; the test gateway does not send an ad request to a third-party SDK. Once AdMob or another provider is connected, that provider may process ad requests, device identifiers, consent signals, impression, and completion data under its policy. We do not upload game progress or undo bonuses to our servers. Apple, the OS, and email providers may process necessary technical data under their own policies.'] },
+      { heading: 'Use and retention', paragraphs: ['On-device data is used to restore progress, apply settings, and run the game. Anonymous analytics is used to understand level difficulty, completion, actual clear times, hints, and failure signals so we can improve the game. There is currently no fixed automatic deletion period. Deleting the app or clearing site data removes the local anonymous session credential; earlier anonymous events may not be traceable to a particular person. Support emails are kept only while handling your request.'] },
+      { heading: 'Third-party services', paragraphs: ['Anonymous analytics events are sent to a Supabase-hosted database. The client can submit only validated events and cannot read raw events; the player-status page reads aggregate results. Supabase may process necessary connection data under its policies. The iOS app enables Google Mobile Ads SDK / User Messaging Platform for interstitial and rewarded ads; the SDK handles ad requests, presentation, and completion callbacks. To provide and measure ads, Google may process IP address / coarse location, device ID including the advertising identifier, advertising data, product interaction, performance data, crash data, and other diagnostic data. These may be used for third-party advertising, developer advertising, or analytics; device ID may be used for advertising tracking subject to applicable App Tracking Transparency consent. Refusing tracking does not prevent non-personalized ads from loading. The browser version uses only a local test ad screen and does not contact a third-party ad SDK.'] },
       { heading: 'Children’s privacy', paragraphs: ['The game is not designed to collect children’s personal data and never asks children for it. If you believe a minor shared personal data without consent, please contact us.'] },
-      { heading: 'Your choices', paragraphs: ['Remove on-device data by deleting the app or clearing site data. If you contacted support, you can ask us to correct or delete that correspondence.'] },
-      { heading: 'Updates and contact', paragraphs: [`If a production ad SDK, accounts, cloud sync, analytics, or paid features arrive, we will update this policy and the App Store privacy labels first. For privacy questions, email ${SUPPORT_EMAIL}.`] }
+      { heading: 'Your choices', paragraphs: ['Remove on-device data and the anonymous session credential by deleting the app or clearing site data. If you contacted support, you can ask us to correct or delete that correspondence. To ask about anonymous analytics, provide an approximate time and device; because there is no identifiable account, we may be unable to locate or delete specific anonymous events.'] },
+      { heading: 'Updates and contact', paragraphs: [`If our data collection, ad SDK, cloud sync, or paid features change, we will update this policy and the App Store privacy labels. For privacy questions, email ${SUPPORT_EMAIL}.`] }
     ]
   },
   terms: {
@@ -111,14 +111,14 @@ const jaDocs: Record<LegalDocumentId, LegalDocument> = {
       { heading: 'プライバシーを大切にします', paragraphs: ['Meow Line（以下「本ゲーム」）は Meow Line 開発チームが提供します。現行バージョンのデータ取扱いを、シンプルで分かりやすく説明します。'] },
       {
         heading: '現行バージョンで扱うデータ',
-        paragraphs: ['本ゲームはアカウント登録不要で、氏名・電話・住所・位置・連絡先・写真・カメラ・マイクの情報を求めません。'],
-        bullets: ['進行状況・星・設定はお使いの端末に保存されます。', 'iPhoneアプリはシステム設定、モバイルWeb版はブラウザのローカル保存を使います。', 'サポートにメールした場合、送信いただいたアドレス・内容・添付を受け取ります。']
+        paragraphs: ['本ゲームはアカウント登録不要で、氏名・電話・住所・位置・連絡先・写真・カメラ・マイクの情報を求めません。ステージと体験の改善のため、氏名やメールアドレスを含まない匿名識別子を Supabase で作成し、必要なゲームイベントを記録します。'],
+        bullets: ['進行状況・星・設定はお使いの端末に保存されます。', 'iPhoneアプリはシステム設定、モバイルWeb版はブラウザのローカル保存を使います。', '匿名分析ではセッション、ステージの開始・完了・失敗、ヒント、クリア時間、星、ステージ番号、イベント時刻を記録します。氏名・メールアドレス・電話番号・直接識別子は記録しません。', 'サポートにメールした場合、送信いただいたアドレス・内容・添付を受け取ります。']
       },
-      { heading: '利用と保存', paragraphs: ['端末上のデータは進行復元・設定適用・ゲーム機能のためだけに使います。アプリ削除・サイトデータ消去・リセットまで保持されます。サポートメールは対応に必要な期間のみ保存します。'] },
-      { heading: '第三者サービス', paragraphs: ['現行バージョンは5回のプレイ操作ごとにローカルのテストインタースティシャルを表示し、現在のステージの戻す回数がなくなった場合はローカルのテスト報酬広告を表示します。このテスト gateway は第三者広告SDKへ広告リクエストを送りません。AdMobなど正式な広告事業者を接続した場合、広告リクエスト・端末識別子・同意情報・表示・完了データを各ポリシーに基づき扱う場合があります。進行状況や戻す回数を当方サーバーに送信することはありません。Apple・OS・メール事業者が必要な技術データを扱う場合もあります。'] },
+      { heading: '利用と保存', paragraphs: ['端末上のデータは進行復元・設定適用・ゲーム機能のために使います。匿名分析はステージの難易度、完了、実際のクリア時間、ヒント、失敗を理解し改善するために使います。現在、固定の自動削除期間は設定していません。アプリ削除やサイトデータ消去で端末上の匿名セッション情報は削除されますが、過去の匿名イベントを特定の個人に結び付けられない場合があります。サポートメールは対応に必要な期間のみ保存します。'] },
+      { heading: '第三者サービス', paragraphs: ['匿名分析イベントは Supabase がホストするデータベースへ送信されます。クライアントは検証済みイベントだけを送信でき、元のイベントを読み取れません。プレイヤー状態ページは集計結果だけを読み取ります。Supabase はポリシーに基づき必要な接続技術データを扱う場合があります。iOSアプリでは Google Mobile Ads SDK / User Messaging Platform を使い、インタースティシャル広告とリワード広告を表示します。広告の提供と測定のため、Google が IPアドレス／概略位置、端末ID（広告識別子を含む）、広告データ、アプリ操作、パフォーマンス、クラッシュ、その他の診断データを扱う場合があります。これらは第三者広告、開発者広告、分析に使われる場合があり、端末IDは適用される App Tracking Transparency の同意に応じて広告追跡に使われる場合があります。追跡を拒否してもパーソナライズされていない広告は読み込まれます。ブラウザ版のテスト広告画面は第三者広告SDKへ接続しません。'] },
       { heading: '子どものプライバシー', paragraphs: ['本ゲームは子どもの個人データ収集を目的とせず、求めることもありません。未成年者が同意なく提供したと思われる場合はご連絡ください。'] },
-      { heading: 'あなたの選択', paragraphs: ['アプリ削除やサイトデータ消去で端末データを削除できます。サポート連絡済みの場合は、その往復メールの訂正・削除をご依頼いただけます。'] },
-      { heading: '更新と連絡先', paragraphs: [`正式な広告SDK・アカウント・クラウド同期・分析・課金機能を追加する場合は、事前に本ポリシーとApp Storeのプライバシー表示を更新します。ご質問は ${SUPPORT_EMAIL} まで。`] }
+      { heading: 'あなたの選択', paragraphs: ['アプリ削除やサイトデータ消去で端末データと匿名セッション情報を削除できます。サポート連絡済みの場合は、その往復メールの訂正・削除をご依頼いただけます。匿名分析については、おおよその利用時刻と端末情報をお知らせください。ただし識別可能なアカウントがないため、特定の匿名イベントを特定・削除できない場合があります。'] },
+      { heading: '更新と連絡先', paragraphs: [`データ収集、広告SDK、クラウド同期、課金機能が変わる場合は、本ポリシーとApp Storeのプライバシー表示を更新します。ご質問は ${SUPPORT_EMAIL} まで。`] }
     ]
   },
   terms: {

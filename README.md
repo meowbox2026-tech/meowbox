@@ -29,6 +29,7 @@ npm run build
 
 - [遊玩規則](docs/遊玩規則.md)
 - [後續關卡設計](docs/後續關卡設計.md)：包含 16–30 關現行設計、五關版型意圖與驗證結果。
+- [31–90 關卡設計規格](docs/31-90關卡設計規格.md)：依目前配置解謎規則規劃的 60 關逐關藍圖，尚待資料實作與真人試玩驗收。
 
 ### 程式分層
 
@@ -61,7 +62,7 @@ npm run test:coverage -- --coverage.include='src/game/core/dropEngine.ts' --cove
 ## App Store 與 iOS
 
 - 隱私權政策、使用條款與客服頁面已放在 `public/privacy.html`、`public/terms.html`、`public/support.html`，客服信箱為 `meowbox2026@gmail.com`。
-- App 內設定頁也可開啟相同內容；`ios/App/App/PrivacyInfo.xcprivacy` 已聲明目前只使用本機 UserDefaults 儲存進度，不做追蹤。
+- App 內設定頁也可開啟相同內容；目前會以 Supabase 匿名使用者與事件資料記錄工作階段、關卡結果、過關時間、提示與星等，用於關卡與體驗分析，不收集玩家註冊資料。`ios/App/App/PrivacyInfo.xcprivacy` 同步聲明匿名分析資料類型，未將分析資料用於跨 App 追蹤。
 - iOS App 圖示為 `public/app-icon.png`，Xcode 1024 × 1024 圖示位於 `ios/App/App/Assets.xcassets/AppIcon.appiconset/`。
 
 在 Xcode 執行 iPhone 版本：
@@ -72,17 +73,17 @@ npx cap sync ios
 open ios/App/App.xcworkspace
 ```
 
-在 Xcode 選取 `App` target、連接已信任的 iPhone，確認 Signing Team 後按 Run。App Store Connect 網址如下：Privacy Policy：`https://meowbox.pages.dev/privacy.html`、Terms of Use：`https://meowbox.pages.dev/terms.html`、Support：`https://meowbox.pages.dev/support.html`。
+在 Xcode 選取 `App` target、連接已信任的 iPhone，確認 Signing Team 後按 Run。App Store Connect 網址如下：Privacy Policy：`https://meowbox.vercel.app/privacy.html`、Terms of Use：`https://meowbox.vercel.app/terms.html`、Support：`https://meowbox.vercel.app/support.html`。
 
 ## 原生上架前設定
 
-`capacitor.config.ts` 已經就緒。專案已加入 `@capacitor-community/admob`，瀏覽器仍使用本機測試 gateway；iOS 原生環境在設定完整 AdMob ID 後，才會改用 SDK 的插頁與獎勵廣告回呼。先複製環境範本並填入 AdMob 後台產生的三個 ID：
+`capacitor.config.ts` 已經就緒。專案已加入 `@capacitor-community/admob`，瀏覽器仍使用本機測試 gateway；iOS 原生環境在 `.env.local` 設定完整 AdMob ID 後，會改用 SDK 的插頁與獎勵廣告回呼。正式廣告單位已在 AdMob 的 Meow Box iOS 應用程式中啟用；請不要把本機環境檔加入 git。先複製環境範本並填入 AdMob 後台產生的三個 ID：
 
 ```bash
 cp .env.example .env.local
 ```
 
-開發測試時保持 `VITE_ADMOB_TESTING=true`；只有使用正式廣告單位、完成同意訊息與上架前審查後才設為 `false`。iOS 還必須把同一個 App ID 寫入 `ios/App/App/Info.plist` 的 `GADApplicationIdentifier`，再同步原生專案：
+開發測試時保持 `VITE_ADMOB_TESTING=true`；正式 App Store／TestFlight build 使用已啟用的正式廣告單位時設為 `false`。iOS 還必須把同一個 App ID 寫入 `ios/App/App/Info.plist` 的 `GADApplicationIdentifier`，並保留 SKAdNetwork 與 ATT 設定，再同步原生專案：
 
 ```bash
 npx cap sync ios

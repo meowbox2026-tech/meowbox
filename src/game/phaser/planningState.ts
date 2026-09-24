@@ -98,7 +98,7 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
     case 'grant-undo':
       return state.undoUses === 0 ? { ...state, undoUses: 5 } : state
     case 'grant-hint':
-      return state.hintUses === 0 ? { ...state, hintUses: 3 } : state
+      return { ...state, hintUses: state.hintUses + 3 }
     case 'clear':
       if (state.pendingHint) return state
       return { ...state, placements: [], selected: level.cats[0]?.id, hintCell: undefined, failureReason: undefined }

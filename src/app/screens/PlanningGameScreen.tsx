@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
+import { getLevelTimeTargets, getStarsForTime } from '../../game/core/levelTiming'
 import { getCatAssetPath } from '../../game/data/catAssets'
 import { MAX_PLANNING_LEVEL } from '../../game/data/planningLevels'
 import { usePlanningGame } from '../../game/phaser/usePlanningGame'
 import { planningCopy } from '../../game/phaser/planningCopy'
+import { useLevelTimer } from '../../game/phaser/useLevelTimer'
 import { getDropCatName, useLocale } from '../../i18n'
 import type { CatAsset } from '../../game/types'
 import { usePlayer } from '../../state/PlayerContext'
 import { pauseBackgroundMusic, startBackgroundMusic, stopBackgroundMusic } from '../../services/audio/audioService'
 import { playPlacementHaptic } from '../../services/haptics/hapticsService'
+import { createAnalyticsId, recordPlayerEvent } from '../../services/analytics/analytics'
 import { AppButton } from '../components/AppButton'
 import { ArtworkButton } from '../components/ArtworkButton'
+import { LevelScoreReveal } from '../components/LevelScoreReveal'
+import { LevelTimerDisplay } from '../components/LevelTimerDisplay'
 import { Modal } from '../components/Modal'
 import { PauseModal } from '../components/PauseModal'
 import { PlanningBoardEffects, type PlanningBoardEffect } from '../components/PlanningBoardEffects'
@@ -35,39 +40,64 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const locale = useLocale()
   const text = planningCopy[locale]
   const [paused, setPaused] = useState(false)
+  const [failureModalOpen, setFailureModalOpen] = useState(false)
   const [rewardAdConfirm, setRewardAdConfirm] = useState<RewardAdKind>()
   const [rewardAdPending, setRewardAdPending] = useState(false)
   const [rewardAdStatus, setRewardAdStatus] = useState<string>()
   const tutorial = useDiagonalTutorial(activeLevelId)
   const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || tutorial.open, activeLevelId)
   const completionRecorded = useRef(false)
+  const attemptId = useRef(createAnalyticsId())
+  const failureRecorded = useRef(false)
   const boardEffectId = useRef(0)
   const lastHintEffect = useRef<string | undefined>(undefined)
   const [boardEffect, setBoardEffect] = useState<PlanningBoardEffect>()
   const editing = state.phase === 'editing'
-  const locked = paused || tutorial.open || hidden || !editing || state.pendingHint || rewardAdPending
-  const stars = Math.max(1, 3 - state.failures)
+  const locked = paused || tutorial.open || hidden || !editing || state.pendingHint || rewardAdPending || failureModalOpen
   const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
+  const timeTargets = getLevelTimeTargets(activeLevelId, cats.length)
+  const timerRunning = !paused && !tutorial.open && !hidden && !failureModalOpen
+    && !rewardAdPending && rewardAdConfirm === undefined && state.phase !== 'completed'
+  const { elapsedMs, read, reset } = useLevelTimer(timerRunning)
+  const [completionTimeMs, setCompletionTimeMs] = useState<number>()
+  const [completionStars, setCompletionStars] = useState<1 | 2 | 3>(3)
+  const stars = completionStars
+  useEffect(() => {
+    attemptId.current = createAnalyticsId()
+    failureRecorded.current = false
+    void recordPlayerEvent({ eventName: 'level_started', levelId: activeLevelId, attemptId: attemptId.current })
+  }, [activeLevelId])
   const triggerBoardEffect = (effect: Omit<PlanningBoardEffect, 'id'>) => {
     boardEffectId.current += 1
     setBoardEffect({ ...effect, id: boardEffectId.current })
   }
   useEffect(() => {
-    if (paused || tutorial.open || hidden) pauseBackgroundMusic()
+    if (paused || tutorial.open || hidden || failureModalOpen) pauseBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
-  }, [paused, tutorial.open, hidden, player.settings.music])
+  }, [paused, tutorial.open, hidden, failureModalOpen, player.settings.music])
   useEffect(() => {
     if (state.phase === 'completed') pauseBackgroundMusic()
   }, [state.phase])
   useEffect(() => () => stopBackgroundMusic(), [])
   useEffect(() => {
-    if (state.phase === 'completed' && !completionRecorded.current) {
-      completionRecorded.current = true
-      completeLevel(activeLevelId, stars)
-    }
-  }, [state.phase, completeLevel, activeLevelId, stars])
+    if (state.phase !== 'completed' || completionRecorded.current) return
+    completionRecorded.current = true
+    const finalElapsedMs = read()
+    const earnedStars = getStarsForTime(finalElapsedMs, timeTargets)
+    setCompletionTimeMs(finalElapsedMs)
+    setCompletionStars(earnedStars)
+    completeLevel(activeLevelId, earnedStars)
+    void recordPlayerEvent({ eventName: 'level_completed', levelId: activeLevelId, attemptId: attemptId.current, clearTimeMs: finalElapsedMs, starsEarned: earnedStars })
+  }, [state.phase, completeLevel, activeLevelId, read, timeTargets.threeStarMs, timeTargets.twoStarMs])
+  useEffect(() => {
+    if (state.failureReason !== 'resolution') return
+    setFailureModalOpen(true)
+    if (failureRecorded.current) return
+    failureRecorded.current = true
+    void recordPlayerEvent({ eventName: 'level_failed', levelId: activeLevelId, attemptId: attemptId.current })
+  }, [state.failureReason, activeLevelId])
   useEffect(() => {
     const hint = state.hintCell
     if (!hint) {
@@ -81,16 +111,23 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   }, [state.hintCell])
   const restart = () => {
     completionRecorded.current = false
+    failureRecorded.current = false
+    attemptId.current = createAnalyticsId()
+    void recordPlayerEvent({ eventName: 'level_started', levelId: activeLevelId, attemptId: attemptId.current })
+    reset()
+    setCompletionTimeMs(undefined)
+    setCompletionStars(3)
     setBoardEffect(undefined)
     dispatch({ type: 'restart' })
     void onPlayAction()
     setRewardAdConfirm(undefined)
     setRewardAdStatus(undefined)
+    setFailureModalOpen(false)
     setPaused(false)
   }
-  const watchRewardAd = async (kind: RewardAdKind) => {
+  const watchRewardAd = async (kind: RewardAdKind, allowExistingHint = false) => {
     if (rewardAdPending || state.phase !== 'editing') return
-    if (kind === 'undo' ? state.undoUses > 0 : state.hintUses > 0) return
+    if (kind === 'undo' ? state.undoUses > 0 : !allowExistingHint && state.hintUses > 0) return
     setRewardAdPending(true)
     setRewardAdStatus(undefined)
     try {
@@ -119,9 +156,14 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     if (locked || rewardAdPending || state.selected === undefined) return
     if (state.hintUses > 0) {
       dispatch({ type: 'hint' })
+      void recordPlayerEvent({ eventName: 'hint_used', levelId: activeLevelId, attemptId: attemptId.current })
       return
     }
     setRewardAdConfirm('hint')
+  }
+  const requestFailureHint = () => {
+    setFailureModalOpen(false)
+    void watchRewardAd('hint', true)
   }
   const confirmRewardAd = () => {
     if (!rewardAdConfirm) return
@@ -141,8 +183,12 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     dispatch({ type: 'remove', id })
   }
   const catName = (type: string) => getDropCatName(type, locale)
+  const shownElapsedMs = completionTimeMs ?? elapsedMs
   return <main className={`screen screen--game screen--drop screen--planning${hidden ? ' is-suspended' : ''}`}>
-    <TopBar level={activeLevelId} onPause={() => setPaused(true)} status={<div className="planning-top-goal">{text.goal(totalCats)}</div>} />
+    <TopBar level={activeLevelId} onPause={() => setPaused(true)} status={<div className="planning-top-status">
+      <div className="planning-top-goal">{text.goal(totalCats)}</div>
+      <LevelTimerDisplay elapsedMs={shownElapsedMs} label={text.timerLabel} paused={!timerRunning && state.phase !== 'completed'} complete={state.phase === 'completed'} />
+    </div>} />
     <section className="planning-tray" aria-label={text.tray}>
       <div className="planning-tray__heading"><span>{text.tray}</span>
         {remainingCats.length > 8 && <small className="planning-tray__hint">↔ {text.swipe}</small>}
@@ -192,7 +238,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       />
       <div className="planning-board__label">MEOW LINE <span>8 × 8</span></div>
     </div>
-    {editing && state.failureReason === 'resolution' && state.placements.length === 0 && <p className="planning-status" role="status">{text.retryNotice}</p>}
+    {editing && !failureModalOpen && state.failureReason === 'resolution' && state.placements.length === 0 && <p className="planning-status" role="status">{text.retryNotice}</p>}
     <div className="planning-edit-actions">
       <ArtworkButton
         asset="undo"
@@ -208,7 +254,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         badge={state.hintUses}
         disabled={locked || rewardAdPending || state.selected === undefined}
         aria-label={`${text.useHint} ${state.hintUses}${state.hintUses === 0 ? `，${text.hintAdAttention}` : ''}`}
-        onClick={requestHint}
+        onClick={() => requestHint()}
       />
     </div>
     {rewardAdStatus && <p className="planning-ad-status" role="status">{rewardAdStatus}</p>}
@@ -228,13 +274,39 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         <AppButton variant="cream" onClick={() => setRewardAdConfirm(undefined)}>{text.cancel}</AppButton>
       </div>
     </Modal>
-    <Modal open={state.phase === 'completed' && !paused} ariaLabel={text.completed} className="drop-result">
-      <img src={getCatAssetPath('orange')} alt="" /><h2>{text.completed}</h2>
-      <div className="drop-result__stars" aria-label={`${stars} ★`}>{[1, 2, 3].map(i => <span className={i <= stars ? 'is-earned' : ''} key={i}>★</span>)}</div>
-      <p>{text.wave} {wave} · {text.failures} {state.failures} {text.times}</p>
-      {activeLevelId < MAX_PLANNING_LEVEL && <AppButton onClick={() => onNextLevel(activeLevelId + 1)}>{text.next(activeLevelId + 1)}</AppButton>}
-      {activeLevelId === MAX_PLANNING_LEVEL && <p className="planning-mainline-done">{text.mainlineDone}</p>}
-      <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>
+    <Modal
+      open={failureModalOpen && state.failureReason === 'resolution' && !paused}
+      onClose={() => setFailureModalOpen(false)}
+      ariaLabel={text.failureTitle}
+      className="drop-result drop-result--failure"
+    >
+      <div className="drop-result__header">
+        <img src={getCatAssetPath('sleeping')} alt="" />
+        <span className="drop-result__eyebrow">{text.failureEyebrow}</span>
+        <h2>{text.failureTitle}</h2>
+        <p className="drop-result__encouragement">{text.failureEncouragement}</p>
+      </div>
+      <p className="drop-result__summary">{text.failures} {state.failures} {text.times}</p>
+      <div className="drop-result__actions">
+        <AppButton onClick={restart}>{text.restart}</AppButton>
+        <AppButton variant="blue" onClick={requestFailureHint}>{text.failureHintAd}</AppButton>
+        <AppButton variant="cream" onClick={() => setFailureModalOpen(false)}>{text.keepTrying}</AppButton>
+      </div>
+    </Modal>
+    <Modal open={state.phase === 'completed' && !paused} ariaLabel={text.completed} className="drop-result drop-result--success">
+      <div className="drop-result__header">
+        <img src={getCatAssetPath('orange')} alt="" />
+        <span className="drop-result__eyebrow">{text.successEyebrow}</span>
+        <h2>{text.completed}</h2>
+        <p className="drop-result__encouragement">{text.successEncouragement}</p>
+      </div>
+      <LevelScoreReveal elapsedMs={shownElapsedMs} stars={stars} timeLabel={text.resultTime} starsLabel={text.starsLabel(stars)} />
+      <p className="drop-result__summary">{text.wave} {wave}</p>
+      <div className="drop-result__actions">
+        {activeLevelId < MAX_PLANNING_LEVEL && <AppButton onClick={() => onNextLevel(activeLevelId + 1)}>{text.next(activeLevelId + 1)}</AppButton>}
+        {activeLevelId === MAX_PLANNING_LEVEL && <p className="planning-mainline-done">{text.mainlineDone}</p>}
+        <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>
+      </div>
     </Modal>
   </main>
 }

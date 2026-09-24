@@ -13,6 +13,8 @@ export function usePageSuspended(): boolean {
     const resume = () => { if (!pageIsHidden()) setSuspended(false) }
     const syncVisibility = () => setSuspended(pageIsHidden())
 
+    syncVisibility()
+
     document.addEventListener('visibilitychange', syncVisibility)
     document.addEventListener('freeze', suspend)
     document.addEventListener('resume', resume)

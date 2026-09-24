@@ -7,10 +7,11 @@ let backgroundMusicPlaying = false
 let uiSound: HTMLAudioElement | undefined
 let lastUiSoundAt = 0
 let backgroundMusicEnabled = true
+let audioSuspended = false
 const UI_SOUND_COOLDOWN_MS = 80
 
 export function playUiSound(enabled: boolean): void {
-  if (!enabled || typeof window === 'undefined') return
+  if (!enabled || audioSuspended || pageIsHidden() || typeof window === 'undefined') return
   const AudioConstructor = window.Audio
   if (typeof AudioConstructor !== 'function') return
 
@@ -26,7 +27,7 @@ export function playUiSound(enabled: boolean): void {
 }
 
 export function startBackgroundMusic(enabled: boolean): void {
-  if (!enabled || !backgroundMusicEnabled || typeof window === 'undefined') return
+  if (!enabled || !backgroundMusicEnabled || audioSuspended || pageIsHidden() || typeof window === 'undefined') return
   const AudioConstructor = window.Audio
   if (typeof AudioConstructor !== 'function') return
 
@@ -39,6 +40,15 @@ export function startBackgroundMusic(enabled: boolean): void {
   if (backgroundMusicPlaying) return
   backgroundMusicPlaying = true
   safelyPlay(backgroundMusic, () => { backgroundMusicPlaying = false })
+}
+
+/** Block media immediately while the native web view or browser page is backgrounded. */
+export function setAudioSuspended(suspended: boolean): void {
+  audioSuspended = suspended
+  if (suspended) {
+    pauseBackgroundMusic()
+    uiSound?.pause()
+  }
 }
 
 export function setBackgroundMusicEnabled(enabled: boolean): void {
@@ -67,4 +77,27 @@ function safelyPlay(audio: HTMLAudioElement, onReject?: () => void): void {
     onReject?.()
     // Browsers can reject media playback until the user has interacted once.
   }
+}
+
+function pageIsHidden(): boolean {
+  return typeof document !== 'undefined' && (document.hidden || document.visibilityState === 'hidden')
+}
+
+installPageAudioLifecycle()
+
+function installPageAudioLifecycle(): void {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return
+
+  const suspend = () => setAudioSuspended(true)
+  const resume = () => { if (!pageIsHidden()) setAudioSuspended(false) }
+  const syncVisibility = () => setAudioSuspended(pageIsHidden())
+
+  syncVisibility()
+  document.addEventListener('visibilitychange', syncVisibility)
+  document.addEventListener('freeze', suspend)
+  document.addEventListener('resume', resume)
+  window.addEventListener('blur', suspend)
+  window.addEventListener('focus', resume)
+  window.addEventListener('pagehide', suspend)
+  window.addEventListener('pageshow', resume)
 }

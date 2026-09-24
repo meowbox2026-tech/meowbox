@@ -79,13 +79,14 @@ describe('planning failure boundaries', () => {
     expect(reduce(placed, { type: 'restart' }).hintUses).toBe(1)
   })
 
-  it('adds three hint uses only after the current level reaches zero', () => {
+  it('adds three hint uses to the current balance after a rewarded ad', () => {
     let state = freshPlanning(level)
-    state = reduce(state, { type: 'hint' })
 
     const rewarded = reduce(state, { type: 'grant-hint' })
-    expect(rewarded.hintUses).toBe(3)
-    expect(reduce(rewarded, { type: 'grant-hint' })).toBe(rewarded)
+    expect(rewarded.hintUses).toBe(4)
+    expect(reduce(rewarded, { type: 'grant-hint' }).hintUses).toBe(7)
+    state = reduce(state, { type: 'hint' })
+    expect(reduce(state, { type: 'grant-hint' }).hintUses).toBe(3)
     expect(reduce(rewarded, { type: 'restart' }).hintUses).toBe(1)
   })
 

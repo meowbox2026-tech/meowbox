@@ -10,6 +10,7 @@ const player = vi.hoisted(() => ({
 const recordPlay = vi.hoisted(() => vi.fn())
 const showInterstitialAd = vi.hoisted(() => vi.fn())
 const showUndoRewardAd = vi.hoisted(() => vi.fn())
+const recordPlayerEvent = vi.hoisted(() => vi.fn())
 
 vi.mock('../state/PlayerContext', () => ({
   usePlayer: () => ({
@@ -24,6 +25,7 @@ vi.mock('../services/ads/interstitialAds', () => ({
   showInterstitialAd
 }))
 vi.mock('../services/ads/undoRewardAd', () => ({ showUndoRewardAd }))
+vi.mock('../services/analytics/analytics', () => ({ recordPlayerEvent }))
 
 vi.mock('./screens/GameScreen', () => ({
   GameScreen: ({ onHome, onWatchUndoAd, onWatchHintAd }: { onHome: () => void; onWatchUndoAd: () => Promise<boolean>; onWatchHintAd: () => Promise<boolean> }) => <div data-testid="game-screen">
@@ -41,6 +43,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
+  window.history.replaceState({}, '', '/')
   player.isReady = true
   recordPlay.mockReset()
   showInterstitialAd.mockReset()
@@ -49,6 +52,15 @@ afterEach(() => {
 })
 
 describe('App game loading', () => {
+  it('renders the player status dashboard on its standalone route', () => {
+    window.history.pushState({}, '', '/player-status')
+
+    render(<App />)
+
+    expect(screen.getByRole('heading', { name: '玩家狀態' })).toBeInTheDocument()
+    expect(screen.getByText('資料尚未接入')).toBeInTheDocument()
+  })
+
   it('opens the game without a full-screen loading interstitial', () => {
     render(<App />)
 

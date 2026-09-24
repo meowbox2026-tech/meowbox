@@ -21,7 +21,7 @@ export function usePlanningGame(paused: boolean, levelId = 1) {
   }, [level])
   const hidden = usePageSuspended()
   useEffect(() => {
-    if (!state.pendingHint) return
+    if (!state.pendingHint || hidden) return
     const controller = new AbortController()
     void findSafePlacementAsync(level, state.placements, controller.signal).then(hintCell => {
       if (!controller.signal.aborted) dispatch({ type: 'hint-result', hintCell })
@@ -29,7 +29,7 @@ export function usePlanningGame(paused: boolean, levelId = 1) {
       if (!controller.signal.aborted) dispatch({ type: 'hint-result' })
     })
     return () => controller.abort()
-  }, [level, state.pendingHint, state.placements])
+  }, [level, state.pendingHint, state.placements, hidden])
   useEffect(() => {
     if (state.phase !== 'running' || paused || hidden) return
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches

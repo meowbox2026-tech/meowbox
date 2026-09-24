@@ -15,7 +15,7 @@ describe('GameScreen mainline routing', () => {
     render(<GameScreen levelId={30} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={vi.fn()} onWatchUndoAd={vi.fn()} />)
 
     expect(document.querySelectorAll('.planning-cell')).toHaveLength(64)
-    expect(screen.queryByRole('timer')).toBeNull()
+    expect(screen.getByRole('timer', { name: /關卡時間/ })).toBeInTheDocument()
     expect(screen.getByText('救出全部 54 隻貓咪')).toHaveClass('planning-top-goal')
   })
 
@@ -23,6 +23,6 @@ describe('GameScreen mainline routing', () => {
     render(<GameScreen levelId={31} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={vi.fn()} onWatchUndoAd={vi.fn()} />)
 
     expect(screen.getByText('救出全部 54 隻貓咪')).toHaveClass('planning-top-goal')
-    expect(screen.queryByRole('timer')).toBeNull()
+    expect(screen.getByRole('timer', { name: /關卡時間/ })).toBeInTheDocument()
   })
 })

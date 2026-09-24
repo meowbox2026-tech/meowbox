@@ -12,8 +12,14 @@ import { usePlayer } from '../state/PlayerContext'
 import { recordPlay } from '../services/ads/playCadence'
 import { showInterstitialAd } from '../services/ads/interstitialAds'
 import { showUndoRewardAd } from '../services/ads/undoRewardAd'
+import { recordPlayerEvent } from '../services/analytics/analytics'
+import { PlayerStatusScreen } from './player-status/PlayerStatusScreen'
 
 type Screen = 'home' | 'levels' | 'game' | 'settings' | 'legal'
+
+function isPlayerStatusRoute() {
+  return typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/player-status'
+}
 
 export function App() {
   const { player, isReady } = usePlayer()
@@ -25,7 +31,17 @@ export function App() {
   const [legalDocument, setLegalDocument] = useState<LegalDocumentId>('privacy')
   const adInFlight = useRef(false)
   const hasEnteredGame = useRef(false)
+  const analyticsSessionStarted = useRef(false)
   useStageScale()
+
+  useEffect(() => {
+    if (isPlayerStatusRoute() || analyticsSessionStarted.current) return undefined
+    analyticsSessionStarted.current = true
+    void recordPlayerEvent({ eventName: 'session_started' })
+    const handlePageHide = () => { void recordPlayerEvent({ eventName: 'session_ended' }) }
+    window.addEventListener('pagehide', handlePageHide)
+    return () => window.removeEventListener('pagehide', handlePageHide)
+  }, [])
 
   useEffect(() => {
     if (!toast) return undefined
@@ -76,6 +92,8 @@ export function App() {
     setLegalDocument(documentId)
     setScreen('legal')
   }
+
+  if (isPlayerStatusRoute()) return <PlayerStatusScreen />
 
   // Keep the first paint quiet while the local save is being read. The game
   // used to flash an orange full-screen loading card during this short gap.

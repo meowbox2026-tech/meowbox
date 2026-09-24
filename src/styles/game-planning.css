@@ -3,8 +3,8 @@
 .app-stage .screen.screen--planning { background: transparent; }
 .screen--planning .top-bar__status { position: absolute; left: 50%; width: min(calc(100% - 120px), 220px); min-width: 0; margin: 0; text-align: center; transform: translateX(-50%); }
 .planning-top-goal { overflow: hidden; color: #714932; font-size: clamp(15px, 4.6cqw, 19px); font-weight: 900; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
-.planning-tray { width: min(100%, 360px); margin: clamp(11px, 2cqh, 15px) auto 0; padding: 7px 8px; border: 1px solid #dec1a0; border-radius: 16px; background: #fffaf0e8; }
-.planning-tray__heading { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 5px; font-size: 12px; color: #8e674a; }
+.planning-tray { width: min(100%, 360px); min-height: 70px; box-sizing: border-box; margin: clamp(11px, 2cqh, 15px) auto 0; padding: 7px 8px; border: 1px solid #dec1a0; border-radius: 16px; background: #fffaf0e8; }
+.planning-tray__heading { display: flex; min-height: 1.2em; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 5px; font-size: 12px; color: #8e674a; }
 .planning-tray__cats { display: flex; gap: 0; overflow-x: auto; padding-bottom: 3px; scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none; }
 .planning-tray__cats::-webkit-scrollbar { display: none; }
 .planning-tray__cat { position: relative; display: flex; align-items: center; justify-content: center; flex: 0 0 12.5%; min-width: 0; aspect-ratio: 1; padding: 2px; border-radius: 9px; background: #fff8e9; box-shadow: inset 0 0 0 1px #ead5b9; scroll-snap-align: start; }
@@ -78,7 +78,7 @@ button.planning-cat { z-index: 3; pointer-events: auto; cursor: pointer; }
 .planning-cat.is-clearing img { animation: planning-clear .4s ease-in both; }
 .planning-board__label { display: flex; justify-content: center; gap: 9px; padding: 6px 0 5px; color: #587594; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 1px 0 rgba(255, 255, 255, .9); }
 .planning-board__label span { letter-spacing: 0; opacity: .8; }
-.planning-edit-actions { position: relative; top: -4px; display: flex; min-height: clamp(68px, 19vw, 76px); align-items: center; justify-content: center; gap: clamp(12px, 5vw, 20px); }
+.planning-edit-actions { position: relative; top: 1px; display: flex; min-height: clamp(68px, 19vw, 76px); align-items: center; justify-content: center; gap: clamp(12px, 5vw, 20px); }
 .planning-edit-actions .artwork-button { width: clamp(68px, 19vw, 76px); height: clamp(68px, 19vw, 76px); flex: 0 0 clamp(68px, 19vw, 76px); aspect-ratio: 1; }
 .planning-edit-actions .artwork-button__badge { top: -3px; right: -4px; min-width: 21px; height: 21px; font-size: 12px; }
 .planning-undo-button.is-attention, .planning-hint-button.is-attention { filter: drop-shadow(0 0 5px rgba(255, 213, 113, .9)); }
