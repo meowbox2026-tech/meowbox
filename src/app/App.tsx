@@ -10,8 +10,9 @@ import { GameScreen } from './screens/GameScreen'
 import type { LegalDocumentId } from './legal/legalContent'
 import { usePlayer } from '../state/PlayerContext'
 import { recordPlay } from '../services/ads/playCadence'
-import { showInterstitialAd } from '../services/ads/interstitialAds'
-import { showUndoRewardAd } from '../services/ads/undoRewardAd'
+import { DEMO_INTERSTITIAL_DURATION_MS, showInterstitialAd } from '../services/ads/interstitialAds'
+import { DEMO_UNDO_AD_DURATION_MS, showUndoRewardAd } from '../services/ads/undoRewardAd'
+import { shouldRenderDemoAd } from '../services/ads/adPresentation'
 import { recordPlayerEvent } from '../services/analytics/analytics'
 import { PlayerStatusScreen } from './player-status/PlayerStatusScreen'
 
@@ -27,6 +28,7 @@ export function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedLevel, setSelectedLevel] = useState(player.currentLevel)
   const [isAdOpen, setIsAdOpen] = useState(false)
+  const [adDurationMs, setAdDurationMs] = useState(DEMO_INTERSTITIAL_DURATION_MS)
   const [toast, setToast] = useState<string>()
   const [legalDocument, setLegalDocument] = useState<LegalDocumentId>('privacy')
   const adInFlight = useRef(false)
@@ -49,10 +51,16 @@ export function App() {
     return () => window.clearTimeout(timer)
   }, [toast])
 
+  const openDemoAdSurface = useCallback((durationMs: number) => {
+    if (!shouldRenderDemoAd()) return
+    setAdDurationMs(durationMs)
+    setIsAdOpen(true)
+  }, [])
+
   const maybeShowPlayAd = useCallback(async () => {
     if (adInFlight.current || !recordPlay().shouldShowAd) return
     adInFlight.current = true
-    setIsAdOpen(true)
+    openDemoAdSurface(DEMO_INTERSTITIAL_DURATION_MS)
     try {
       await showInterstitialAd()
     } catch {
@@ -61,12 +69,12 @@ export function App() {
       adInFlight.current = false
       setIsAdOpen(false)
     }
-  }, [])
+  }, [openDemoAdSurface])
 
   const maybeGrantRewardAd = useCallback(async (): Promise<boolean> => {
     if (adInFlight.current) return false
     adInFlight.current = true
-    setIsAdOpen(true)
+    openDemoAdSurface(DEMO_UNDO_AD_DURATION_MS)
     try {
       const result = await showUndoRewardAd()
       return result.completed
@@ -76,7 +84,7 @@ export function App() {
       adInFlight.current = false
       setIsAdOpen(false)
     }
-  }, [])
+  }, [openDemoAdSurface])
 
   const openGame = (levelId: number) => {
     setSelectedLevel(levelId)
@@ -109,7 +117,7 @@ export function App() {
       {screen === 'settings' && <SettingsScreen onBack={() => setScreen('home')} onToast={setToast} onLegal={openLegal} />}
       {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}
       </div>
-      <AdBreakModal open={isAdOpen} />
+      <AdBreakModal open={isAdOpen} durationMs={adDurationMs} />
       {toast && <div className="app-toast" role="status">🐾 {toast}</div>}
     </div>
   )

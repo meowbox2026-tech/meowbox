@@ -24,7 +24,10 @@ vi.mock('../services/ads/interstitialAds', () => ({
   DEMO_INTERSTITIAL_DURATION_MS: 30000,
   showInterstitialAd
 }))
-vi.mock('../services/ads/undoRewardAd', () => ({ showUndoRewardAd }))
+vi.mock('../services/ads/undoRewardAd', () => ({
+  DEMO_UNDO_AD_DURATION_MS: 5000,
+  showUndoRewardAd
+}))
 vi.mock('../services/analytics/analytics', () => ({ recordPlayerEvent }))
 
 vi.mock('./screens/GameScreen', () => ({

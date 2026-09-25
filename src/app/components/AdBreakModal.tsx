@@ -5,20 +5,21 @@ import { Modal } from './Modal'
 
 interface AdBreakModalProps {
   open: boolean
+  durationMs?: number
 }
 
-export function AdBreakModal({ open }: AdBreakModalProps) {
+export function AdBreakModal({ open, durationMs = DEMO_INTERSTITIAL_DURATION_MS }: AdBreakModalProps) {
   const strings = useStrings()
-  const [remainingMs, setRemainingMs] = useState(DEMO_INTERSTITIAL_DURATION_MS)
+  const [remainingMs, setRemainingMs] = useState(durationMs)
 
   useEffect(() => {
     if (!open) return undefined
     const startedAt = Date.now()
-    const update = () => setRemainingMs(Math.max(0, DEMO_INTERSTITIAL_DURATION_MS - (Date.now() - startedAt)))
+    const update = () => setRemainingMs(Math.max(0, durationMs - (Date.now() - startedAt)))
     update()
     const timer = window.setInterval(update, 250)
     return () => window.clearInterval(timer)
-  }, [open])
+  }, [durationMs, open])
 
   const remainingSeconds = Math.ceil(remainingMs / 1000)
   return <Modal open={open} ariaLabel={strings.ads.dialogAria} className="ad-break-modal">

@@ -25,4 +25,15 @@ describe('AdBreakModal', () => {
     expect(screen.getByText('廣告即將結束')).toBeInTheDocument()
     vi.useRealTimers()
   })
+
+  it('uses the reward provider duration when requested', () => {
+    vi.useFakeTimers()
+    render(<AdBreakModal open durationMs={5000} />)
+
+    expect(screen.getByText('還剩 5 秒')).toBeInTheDocument()
+
+    act(() => vi.advanceTimersByTime(5000))
+    expect(screen.getByText('廣告即將結束')).toBeInTheDocument()
+    vi.useRealTimers()
+  })
 })
