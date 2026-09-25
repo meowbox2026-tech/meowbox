@@ -24,11 +24,26 @@ interface NativeAdMobDependencies {
   config: AdMobConfig
 }
 
+const TEST_CONSENT_TIMEOUT_MS = 3000
+
 const removeListeners = async (handles: ListenerHandle[]): Promise<void> => {
   await Promise.all(handles.map((handle) => handle.remove().catch(() => undefined)))
 }
 
 const getFulfilledHandles = (results: PromiseSettledResult<ListenerHandle>[]): ListenerHandle[] => results.flatMap((result) => result.status === 'fulfilled' ? [result.value] : [])
+
+const settleWithin = async <T>(promise: Promise<T>, timeoutMs: number): Promise<T | undefined> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<undefined>((resolve) => {
+    timeoutId = setTimeout(() => resolve(undefined), timeoutMs)
+  })
+
+  try {
+    return await Promise.race([promise, timeout])
+  } finally {
+    if (timeoutId !== undefined) clearTimeout(timeoutId)
+  }
+}
 
 class NativeAdMobProvider {
   private initializePromise?: Promise<boolean>
@@ -48,6 +63,16 @@ class NativeAdMobProvider {
       if (platform === 'ios') {
         const tracking = await client.trackingAuthorizationStatus()
         if (tracking.status === 'notDetermined') await client.requestTrackingAuthorization()
+      }
+
+      if (config.isTesting) {
+        // Test ads must remain usable while UMP is unavailable on a simulator,
+        // an offline TestFlight device, or before the app's consent message is ready.
+        const consent = await settleWithin(client.requestConsentInfo(), TEST_CONSENT_TIMEOUT_MS)
+        if (consent && !consent.canRequestAds && consent.isConsentFormAvailable) {
+          await settleWithin(client.showConsentForm(), TEST_CONSENT_TIMEOUT_MS)
+        }
+        return true
       }
 
       let consent = await client.requestConsentInfo()

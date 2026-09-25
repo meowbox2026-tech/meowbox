@@ -2,14 +2,14 @@ import { describe, expect, it, vi } from 'vitest'
 import { RewardAdPluginEvents, type AdMobPlugin } from '@capacitor-community/admob'
 import { createNativeAdMobGateways } from './nativeAdMob'
 
-function createFakeClient() {
+function createFakeClient(consentInfo: { canRequestAds: boolean; isConsentFormAvailable?: boolean } = { canRequestAds: true }) {
   const listeners = new Map<string, (payload?: { amount: number; type: string }) => void>()
   const remove = vi.fn().mockResolvedValue(undefined)
   const client = {
     initialize: vi.fn().mockResolvedValue(undefined),
     trackingAuthorizationStatus: vi.fn().mockResolvedValue({ status: 'authorized' }),
     requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
-    requestConsentInfo: vi.fn().mockResolvedValue({ canRequestAds: true }),
+    requestConsentInfo: vi.fn().mockResolvedValue(consentInfo),
     showConsentForm: vi.fn(),
     prepareInterstitial: vi.fn().mockResolvedValue({ adUnitId: 'interstitial' }),
     showInterstitial: vi.fn().mockImplementation(async () => {
@@ -50,5 +50,21 @@ describe('native AdMob gateways', () => {
     await expect(gateways?.rewarded.show()).resolves.toEqual({ completed: true })
     expect(client.initialize).toHaveBeenCalledOnce()
     expect(remove).toHaveBeenCalledTimes(5)
+  })
+
+  it('keeps test ads available when UMP cannot request ads yet', async () => {
+    const { client } = createFakeClient({ canRequestAds: false, isConsentFormAvailable: false })
+    const gateways = createNativeAdMobGateways({ client, platform: 'ios', config })
+
+    await expect(gateways?.interstitial.show()).resolves.toEqual({ shown: true })
+    expect(client.prepareInterstitial).toHaveBeenCalledOnce()
+  })
+
+  it('keeps production ads gated by UMP consent', async () => {
+    const { client } = createFakeClient({ canRequestAds: false, isConsentFormAvailable: false })
+    const gateways = createNativeAdMobGateways({ client, platform: 'ios', config: { ...config, isTesting: false } })
+
+    await expect(gateways?.interstitial.show()).resolves.toEqual({ shown: false })
+    expect(client.prepareInterstitial).not.toHaveBeenCalled()
   })
 })
