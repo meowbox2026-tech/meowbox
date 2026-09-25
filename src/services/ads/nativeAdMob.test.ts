@@ -60,6 +60,15 @@ describe('native AdMob gateways', () => {
     expect(client.prepareInterstitial).toHaveBeenCalledOnce()
   })
 
+  it('keeps test ads available when UMP rejects', async () => {
+    const { client } = createFakeClient()
+    client.requestConsentInfo = vi.fn().mockRejectedValue(new Error('consent unavailable'))
+    const gateways = createNativeAdMobGateways({ client, platform: 'ios', config })
+
+    await expect(gateways?.interstitial.show()).resolves.toEqual({ shown: true })
+    expect(client.prepareInterstitial).toHaveBeenCalledOnce()
+  })
+
   it('keeps production ads gated by UMP consent', async () => {
     const { client } = createFakeClient({ canRequestAds: false, isConsentFormAvailable: false })
     const gateways = createNativeAdMobGateways({ client, platform: 'ios', config: { ...config, isTesting: false } })

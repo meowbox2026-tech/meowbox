@@ -68,9 +68,9 @@ class NativeAdMobProvider {
       if (config.isTesting) {
         // Test ads must remain usable while UMP is unavailable on a simulator,
         // an offline TestFlight device, or before the app's consent message is ready.
-        const consent = await settleWithin(client.requestConsentInfo(), TEST_CONSENT_TIMEOUT_MS)
+        const consent = await settleWithin(client.requestConsentInfo().catch(() => undefined), TEST_CONSENT_TIMEOUT_MS)
         if (consent && !consent.canRequestAds && consent.isConsentFormAvailable) {
-          await settleWithin(client.showConsentForm(), TEST_CONSENT_TIMEOUT_MS)
+          await settleWithin(client.showConsentForm().catch(() => undefined), TEST_CONSENT_TIMEOUT_MS)
         }
         return true
       }
