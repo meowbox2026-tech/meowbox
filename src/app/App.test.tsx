@@ -31,10 +31,17 @@ vi.mock('../services/ads/undoRewardAd', () => ({
 vi.mock('../services/analytics/analytics', () => ({ recordPlayerEvent }))
 
 vi.mock('./screens/GameScreen', () => ({
-  GameScreen: ({ onHome, onWatchUndoAd, onWatchHintAd }: { onHome: () => void; onWatchUndoAd: () => Promise<boolean>; onWatchHintAd: () => Promise<boolean> }) => <div data-testid="game-screen">
+  GameScreen: ({ onHome, onSettings, onWatchUndoAd, onWatchHintAd }: { onHome: () => void; onSettings: () => void; onWatchUndoAd: () => Promise<boolean>; onWatchHintAd: () => Promise<boolean> }) => <div data-testid="game-screen">
     <button type="button" onClick={onHome}>回主頁</button>
+    <button type="button" onClick={onSettings}>設定</button>
     <button type="button" onClick={() => void onWatchUndoAd()}>撤銷上一步 0</button>
     <button type="button" onClick={() => void onWatchHintAd()}>提示 0</button>
+  </div>
+}))
+
+vi.mock('./screens/SettingsScreen', () => ({
+  SettingsScreen: ({ onBack }: { onBack: () => void }) => <div data-testid="settings-screen">
+    <button type="button" onClick={onBack}>返回設定</button>
   </div>
 }))
 
@@ -71,6 +78,23 @@ describe('App game loading', () => {
 
     expect(screen.queryByText('正在整理棋盤…')).not.toBeInTheDocument()
     expect(screen.getByTestId('game-screen')).toBeInTheDocument()
+  })
+
+  it('returns to the same mounted game after settings is opened from the game', () => {
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: '開始遊戲' }))
+    const gameScreen = screen.getByTestId('game-screen')
+    fireEvent.click(screen.getByRole('button', { name: '設定' }))
+
+    expect(screen.getByTestId('settings-screen')).toBeInTheDocument()
+    expect(gameScreen.closest('[hidden]')).not.toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: '返回設定' }))
+
+    expect(screen.queryByTestId('settings-screen')).not.toBeInTheDocument()
+    expect(screen.getByTestId('game-screen')).toBe(gameScreen)
+    expect(gameScreen.closest('[hidden]')).toBeNull()
   })
 
   it('skips the interstitial on the first game entry of a session', async () => {

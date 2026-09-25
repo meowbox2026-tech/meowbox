@@ -13,27 +13,52 @@ vi.mock('../../state/PlayerContext', () => ({
 
 afterEach(() => { cleanup(); player.currentLevel = 1 })
 
-describe('LevelSelectScreen active mainline', () => {
-  it('renders all thirty planning levels without world tabs', () => {
+describe('LevelSelectScreen worlds', () => {
+  it('renders one world of thirty levels and locks later worlds', () => {
     const { container } = render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={vi.fn()} />)
 
     expect(screen.getByRole('region', { name: '關卡清單' })).toBeInTheDocument()
+    expect(screen.getAllByRole('tab')).toHaveLength(3)
+    expect(screen.getByRole('tab', { name: /世界 1/ })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: /世界 2/ })).toBeDisabled()
+    expect(screen.getByRole('tab', { name: /世界 3/ })).toBeDisabled()
     expect(container.querySelectorAll('.level-tile')).toHaveLength(30)
     expect(container.querySelectorAll('.level-tile__lock img[src="/assets/lock.webp"]')).toHaveLength(29)
-    expect(container.querySelector('.world-tabs')).toBeNull()
     expect(screen.getByRole('button', { name: /第 26 關/ })).toBeDisabled()
-    expect(screen.queryByText(/世界/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /第 31 關/ })).not.toBeInTheDocument()
   })
 
-  it('unlocks through level thirty and keeps later levels absent', () => {
-    player.currentLevel = 30
+  it('opens world two at level thirty-one and switches between worlds', () => {
+    player.currentLevel = 31
     const onSelectLevel = vi.fn()
     const { container } = render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={onSelectLevel} />)
 
-    expect(container.querySelectorAll('.level-tile--locked')).toHaveLength(0)
+    expect(screen.getByRole('tab', { name: /世界 2/ })).toBeEnabled()
+    expect(screen.getByRole('tab', { name: /世界 2/ })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: /世界 3/ })).toBeDisabled()
+    expect(container.querySelectorAll('.level-tile')).toHaveLength(30)
+    expect(screen.getByRole('button', { name: '第 31 關' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /第 60 關/ })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: '第 30 關' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('tab', { name: /世界 1/ }))
+    expect(screen.getByRole('tab', { name: /世界 1/ })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('button', { name: '第 30 關' })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: '第 31 關' })).not.toBeInTheDocument()
+
     fireEvent.click(screen.getByRole('button', { name: '第 30 關' }))
     expect(onSelectLevel).toHaveBeenCalledWith(30)
-    expect(screen.queryByRole('button', { name: /第 31 關/ })).not.toBeInTheDocument()
+  })
+
+  it('opens world three at level sixty-one', () => {
+    player.currentLevel = 61
+    const { container } = render(<LevelSelectScreen onBack={vi.fn()} onSelectLevel={vi.fn()} />)
+
+    expect(screen.getByRole('tab', { name: /世界 3/ })).toBeEnabled()
+    expect(screen.getByRole('tab', { name: /世界 3/ })).toHaveAttribute('aria-selected', 'true')
+    expect(container.querySelectorAll('.level-tile')).toHaveLength(30)
+    expect(screen.getByRole('button', { name: '第 61 關' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /第 90 關/ })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: '第 60 關' })).not.toBeInTheDocument()
   })
 })

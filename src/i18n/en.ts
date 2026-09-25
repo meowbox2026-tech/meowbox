@@ -16,7 +16,10 @@ export const en: Strings = {
   },
   levels: {
     title: 'Levels',
-    board: 'Level list', levelAria: 'Level {id}', lockedSuffix: ', locked', locked: 'Locked'
+    board: 'Level list', worldsLabel: 'World selection', worldLabel: 'World {world}',
+    worldAria: 'World {world}, levels {start} to {end}', worldRange: 'Levels {start}–{end}',
+    worldLocked: 'Locked', worldHint: 'World {world} · Levels {start}–{end}',
+    levelAria: 'Level {id}', lockedSuffix: ', locked', locked: 'Locked'
   },
   settings: {
     title: 'Settings',

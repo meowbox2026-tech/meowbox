@@ -33,10 +33,10 @@ function fullLayoutKey(level: (typeof PLANNING_LEVELS)[number], transform: (x: n
 
 describe('authored planning levels', () => {
   it('keeps every board at 8x8 and increases the authored puzzle density', () => {
-    expect(PLANNING_LEVELS).toHaveLength(30)
+    expect(PLANNING_LEVELS).toHaveLength(90)
     expect(PLANNING_LEVELS.every(level => level.width === 8 && level.height === 8)).toBe(true)
-    expect(PLANNING_LEVELS.map(level => level.board.flat().filter(Boolean).length)).toEqual([6, 8, 10, 12, 14, 16, 18, 20, 20, 20, 20, 20, 22, 22, 24, 26, 28, 30, 32, 36, 31, 32, 36, 36, 36, 34, 35, 36, 36, 36])
-    expect(PLANNING_LEVELS.map(level => level.cats.length)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 11, 11, 12, 13, 14, 15, 16, 18, 16, 17, 18, 18, 18, 17, 18, 18, 18, 18])
+    expect(PLANNING_LEVELS.slice(0, 30).map(level => level.board.flat().filter(Boolean).length)).toEqual([6, 8, 10, 12, 14, 16, 18, 20, 20, 20, 20, 20, 22, 22, 24, 26, 28, 30, 32, 36, 31, 32, 36, 36, 36, 34, 35, 36, 36, 36])
+    expect(PLANNING_LEVELS.slice(0, 30).map(level => level.cats.length)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 11, 11, 12, 13, 14, 15, 16, 18, 16, 17, 18, 18, 18, 17, 18, 18, 18, 18])
   })
 
   it('starts without a free match and has a complete authored solution for each level', () => {
@@ -48,7 +48,7 @@ describe('authored planning levels', () => {
       expect(result.waves, `level ${level.id} has no elimination`).toBeGreaterThan(0)
       return result.remaining
     })
-    expect(outcomes).toEqual(Array(30).fill(0))
+    expect(outcomes).toEqual(Array(90).fill(0))
   })
 
   it('introduces a fourth cat type by level four and keeps it readable through level ten', () => {
@@ -85,9 +85,9 @@ describe('authored planning levels', () => {
 
   it('gives every level a distinct authored board signature', () => {
     const signatures = PLANNING_LEVELS.map(level => JSON.stringify(level.board))
-    expect(new Set(signatures)).toHaveLength(30)
+    expect(new Set(signatures)).toHaveLength(90)
     const silhouettes = PLANNING_LEVELS.map(level => level.board.map(row => row.map(cat => cat ? '#' : '.').join('')).join('/'))
-    expect(new Set(silhouettes)).toHaveLength(30)
+    expect(new Set(silhouettes)).toHaveLength(90)
   })
 
   it('adds a second chapter with four matching cats and fixed authored density', () => {
@@ -186,7 +186,7 @@ describe('authored planning levels', () => {
   })
 
   it('adds the 26–30 support-and-merge chapter without a fifth cat type', () => {
-    const chapterFive = PLANNING_LEVELS.slice(25)
+    const chapterFive = PLANNING_LEVELS.slice(25, 30)
     expect(chapterFive.map(level => level.id)).toEqual([26, 27, 28, 29, 30])
     expect(chapterFive.map(level => level.board.flat().filter(Boolean).length)).toEqual([34, 35, 36, 36, 36])
     expect(chapterFive.map(level => level.cats.length)).toEqual([17, 18, 18, 18, 18])
@@ -198,7 +198,7 @@ describe('authored planning levels', () => {
   })
 
   it('gives 26–30 distinct topologies with all existing line directions', () => {
-    const chapterFive = PLANNING_LEVELS.slice(25)
+    const chapterFive = PLANNING_LEVELS.slice(25, 30)
     const silhouettes = chapterFive.map(level => level.board.map(row => row.map(cell => cell ? '#' : '.').join('')).join('/'))
     expect(new Set(silhouettes)).toHaveLength(5)
 

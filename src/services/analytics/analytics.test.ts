@@ -31,7 +31,7 @@ describe('player analytics', () => {
   it('creates an anonymous identity and records a validated event', async () => {
     const result = await analytics.recordPlayerEvent({
       eventName: 'level_completed',
-      levelId: 4,
+      levelId: 90,
       attemptId: '11111111-1111-4111-8111-111111111111',
       clearTimeMs: 8123,
       starsEarned: 3,
@@ -43,7 +43,7 @@ describe('player analytics', () => {
     expect(insert).toHaveBeenCalledWith([expect.objectContaining({
       player_id: 'player-1',
       event_name: 'level_completed',
-      level_id: 4,
+      level_id: 90,
       attempt_id: '11111111-1111-4111-8111-111111111111',
       clear_time_ms: 8123,
       stars_earned: 3,
@@ -63,7 +63,7 @@ describe('player analytics', () => {
   it('rejects malformed gameplay values before they reach Supabase', async () => {
     const result = await analytics.recordPlayerEvent({
       eventName: 'level_completed',
-      levelId: 31,
+      levelId: 91,
       clearTimeMs: -1,
       starsEarned: 9,
     })

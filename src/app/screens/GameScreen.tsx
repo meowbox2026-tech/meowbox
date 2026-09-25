@@ -13,7 +13,7 @@ interface GameScreenProps {
   onWatchHintAd?: () => Promise<boolean>
 }
 
-/** The active game is deliberately bounded to the authored 1–30 mainline. */
+/** The active game is bounded to the authored 1–90 mainline. */
 export function GameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction, onWatchUndoAd, onWatchHintAd }: GameScreenProps) {
   const activeLevelId = Math.min(MAX_PLANNING_LEVEL, Math.max(1, levelId))
   return <PlanningGameScreen

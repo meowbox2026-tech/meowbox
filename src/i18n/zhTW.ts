@@ -16,7 +16,10 @@ export const zhTW: Strings = {
   },
   levels: {
     title: '關卡選擇',
-    board: '關卡清單', levelAria: '第 {id} 關', lockedSuffix: '，尚未解鎖', locked: '未解鎖'
+    board: '關卡清單', worldsLabel: '世界選擇', worldLabel: '世界 {world}',
+    worldAria: '世界 {world}，第 {start} 至 {end} 關', worldRange: '第 {start}–{end} 關',
+    worldLocked: '尚未解鎖', worldHint: '世界 {world}｜第 {start}–{end} 關',
+    levelAria: '第 {id} 關', lockedSuffix: '，尚未解鎖', locked: '未解鎖'
   },
   settings: {
     title: '設定',

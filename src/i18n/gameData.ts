@@ -1,6 +1,7 @@
 import type { CatSkin } from '../game/types'
 import type { Locale } from './locale'
 import { toLocale } from './locale'
+import { EXTENDED_LEVEL_GUIDANCE, EXTENDED_LEVEL_NAMES } from './planningLevelCopy'
 
 export const DROP_CAT_NAMES: Record<Locale, Record<string, string>> = {
   'zh-TW': {
@@ -51,7 +52,7 @@ export function getBoxName(boxId: string, locale: unknown): string {
   return BOX_NAMES[toLocale(locale)]?.[boxId] ?? boxId
 }
 
-export const LEVEL_NAMES: Record<Locale, readonly string[]> = {
+const BASE_LEVEL_NAMES: Record<Locale, readonly string[]> = {
   'zh-TW': [
     '初次相遇', '疊疊午茶', '斜斜的祕密', '一起回家', '小小整理師', '窗邊陽光',
     '小墨報到', '四色軟糖', '愛心接力', '小屋派對', '魚丸來訪', '魚乾時間',
@@ -75,11 +76,17 @@ export const LEVEL_NAMES: Record<Locale, readonly string[]> = {
   ]
 }
 
+export const LEVEL_NAMES: Record<Locale, readonly string[]> = {
+  'zh-TW': [...BASE_LEVEL_NAMES['zh-TW'], ...EXTENDED_LEVEL_NAMES['zh-TW']],
+  en: [...BASE_LEVEL_NAMES.en, ...EXTENDED_LEVEL_NAMES.en],
+  ja: [...BASE_LEVEL_NAMES.ja, ...EXTENDED_LEVEL_NAMES.ja]
+}
+
 export function getLevelName(levelId: number, locale: unknown): string {
   return LEVEL_NAMES[toLocale(locale)][levelId - 1] ?? `Lv. ${levelId}`
 }
 
-export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
+const BASE_LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
   'zh-TW': [
     '先點第 3 欄，讓三隻橘子相遇！', '把同款貓咪疊在一起，試試直線消除。',
     '階梯上的貓咪可以組成兩種斜線。', '先消除眼前的線，看看重力會帶來什麼。',
@@ -134,6 +141,12 @@ export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
     '落下連鎖が終わるまで、次のラインを追わずに待とう。', 'ヨコ・ナナメ・タテの折り返し、次の角を残しておこう。',
     '左右のルートが中央で合流するよ、順番を考えてね。'
   ]
+}
+
+export const LEVEL_GUIDANCE: Record<Locale, readonly string[]> = {
+  'zh-TW': [...BASE_LEVEL_GUIDANCE['zh-TW'], ...EXTENDED_LEVEL_GUIDANCE['zh-TW']],
+  en: [...BASE_LEVEL_GUIDANCE.en, ...EXTENDED_LEVEL_GUIDANCE.en],
+  ja: [...BASE_LEVEL_GUIDANCE.ja, ...EXTENDED_LEVEL_GUIDANCE.ja]
 }
 
 export function getLevelGuidance(levelId: number, locale: unknown): string {

@@ -18,7 +18,7 @@ export interface PlayerSave {
 }
 
 const STORAGE_KEY = 'meow-box-player-save'
-export const MAX_SAVED_LEVEL = 30
+export const MAX_SAVED_LEVEL = 90
 
 export function createDefaultPlayerSave(): PlayerSave {
   return {

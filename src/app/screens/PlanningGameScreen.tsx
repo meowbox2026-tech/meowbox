@@ -59,7 +59,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
   const timeTargets = getLevelTimeTargets(activeLevelId, cats.length)
   const timerRunning = !paused && !tutorial.open && !hidden && !failureModalOpen
-    && !rewardAdPending && rewardAdConfirm === undefined && state.phase !== 'completed'
+    && !rewardAdPending && rewardAdConfirm === undefined && state.phase === 'editing'
   const { elapsedMs, read, reset } = useLevelTimer(timerRunning)
   const [completionTimeMs, setCompletionTimeMs] = useState<number>()
   const [completionStars, setCompletionStars] = useState<1 | 2 | 3>(3)
@@ -74,9 +74,9 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     setBoardEffect({ ...effect, id: boardEffectId.current })
   }
   useEffect(() => {
-    if (paused || tutorial.open || hidden || failureModalOpen) pauseBackgroundMusic()
+    if (tutorial.open || hidden || failureModalOpen) pauseBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
-  }, [paused, tutorial.open, hidden, failureModalOpen, player.settings.music])
+  }, [tutorial.open, hidden, failureModalOpen, player.settings.music])
   useEffect(() => {
     if (state.phase === 'completed') pauseBackgroundMusic()
   }, [state.phase])

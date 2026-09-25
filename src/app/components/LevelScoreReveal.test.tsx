@@ -27,6 +27,7 @@ describe('LevelScoreReveal', () => {
     expect(stars[0]).toHaveClass('is-earned')
     expect(stars[1]).toHaveClass('is-earned')
     expect(stars[2]).not.toHaveClass('is-earned')
+    expect(stars[0]).toHaveAttribute('src', '/assets/stars.webp')
     expect(stars[0]).toHaveStyle({ animationDelay: '180ms' })
     expect(stars[1]).toHaveStyle({ animationDelay: '360ms' })
   })

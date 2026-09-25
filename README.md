@@ -17,7 +17,7 @@ npm run build
 
 ## 目前玩法
 
-第 1–30 關使用固定 8×8 配置解謎：依托盤順序把貓咪放入空格，全部放好後才依序進行橫、直、斜三連線與局部重力；每關提供一次提示，標出下一隻貓的推薦位置，清空本關貓咪便過關。第 30 關完成後回到選關，暫不提供第 31 關以後的主線。
+第 1–90 關使用固定 8×8 配置解謎：依托盤順序把貓咪放入空格，全部放好後才依序進行橫、直、斜三連線與局部重力；每關提供一次提示，標出下一隻貓的推薦位置，清空本關貓咪便過關。第 90 關完成後回到選關並顯示主線完成。
 
 - NOW／NEXT 預覽、落點虛影、鍵盤操作、第一手引導。
 - 每累計五次遊玩操作（開始新局、從選關進入、前往下一關或點擊重新開始）顯示一次廣告；瀏覽器測試 gateway 以全螢幕畫面模擬 30 秒，沒有商店跳轉或誘導點擊控制。正式 iOS 插頁廣告的長度、廣告內商店連結與 X 關閉按鈕由 AdMob SDK／廣告素材控制。
@@ -28,16 +28,16 @@ npm run build
 ### 設計文件
 
 - [遊玩規則](docs/遊玩規則.md)
-- [後續關卡設計](docs/後續關卡設計.md)：包含 16–30 關現行設計、五關版型意圖與驗證結果。
-- [31–90 關卡設計規格](docs/31-90關卡設計規格.md)：依目前配置解謎規則規劃的 60 關逐關藍圖，尚待資料實作與真人試玩驗收。
+- [後續關卡設計](docs/後續關卡設計.md)：包含 16–30 關基礎設計、五關版型意圖，以及 31–90 關的主線銜接說明。
+- [31–90 關卡設計規格](docs/31-90關卡設計規格.md)：60 關固定盤面、逐關設計卡、resolver 驗證與難度驗收記錄。
 
 ### 程式分層
 
 - `src/game/core/dropEngine.ts`：落下、四方向消除、重力、分數、勝負。
 - `src/game/phaser/useDropGame.ts`：動畫階段、輸入鎖、暫停與重玩生命週期。
 - `src/game/phaser/DropBoard.tsx`：React 棋盤與落點預覽。
-- `src/game/data/planningLevels.ts`、`src/game/data/planningLevelTwo.ts`、`src/game/data/planningLevelThree.ts`、`src/game/data/planningLevelFour.ts`、`src/game/data/planningLevelFive.ts`：第 1–30 關固定棋盤與托盤解法。
-- 第 26–30 關已加入主線，使用支撐與合流章的固定版型；第 30 關完成後暫停主線，31+ 尚未加入。
+- `src/game/data/planningLevels.ts`、`src/game/data/planningLevelTwo.ts`、`src/game/data/planningLevelThree.ts`、`src/game/data/planningLevelFour.ts`、`src/game/data/planningLevelFive.ts`、`src/game/data/planningExtendedLevels.ts`：第 1–90 關固定棋盤與托盤解法。
+- 第 31–90 關已加入主線，沿用同一套支撐、方向與合流規則；關卡資料使用固定 seed 載入，不依賴裝置隨機或線上題庫。
 - `src/app/screens/GameScreen.tsx`：資料驅動的關卡介面、說明與結算。
 - `src/styles/game-drop.css`：新版棋盤樣式與動畫。
 - `src/services/`、`src/state/`：沿用音效、震動、設定與本機存檔。

@@ -16,7 +16,10 @@ export const ja: Strings = {
   },
   levels: {
     title: 'レベル選択',
-    board: 'レベル一覧', levelAria: 'レベル {id}', lockedSuffix: '、まだロック中', locked: 'ロック中'
+    board: 'レベル一覧', worldsLabel: '世界選択', worldLabel: '世界 {world}',
+    worldAria: '世界 {world}、レベル {start}〜{end}', worldRange: 'レベル {start}〜{end}',
+    worldLocked: 'ロック中', worldHint: '世界 {world}｜レベル {start}〜{end}',
+    levelAria: 'レベル {id}', lockedSuffix: '、まだロック中', locked: 'ロック中'
   },
   settings: {
     title: '設定',

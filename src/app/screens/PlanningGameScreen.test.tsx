@@ -64,8 +64,8 @@ describe('8x8 planning level through the game entry point', () => {
     expect(container.querySelectorAll('.planning-cell')).toHaveLength(64)
   })
 
-  it('routes levels two through thirty into the same 8x8 planning rules and scrollable tray', () => {
-    for (const levelId of Array.from({ length: 29 }, (_, index) => index + 2)) {
+  it('routes levels two through ninety into the same 8x8 planning rules and scrollable tray', () => {
+    for (const levelId of Array.from({ length: 89 }, (_, index) => index + 2)) {
       cleanup()
       mountLevel(levelId)
       expect(document.querySelectorAll('.planning-cell')).toHaveLength(64)
@@ -149,6 +149,20 @@ describe('8x8 planning level through the game entry point', () => {
     expect(stopBackgroundMusic).not.toHaveBeenCalled()
   })
 
+  it('freezes the level timer when the arranged rescue run starts', async () => {
+    mount()
+    await place(4, 5, 1)
+    await place(3, 5, 2)
+    await place(2, 5, 3)
+    act(() => vi.advanceTimersByTime(1_500))
+    const beforeStart = screen.getByTestId('level-timer-value').textContent
+
+    start()
+    act(() => vi.advanceTimersByTime(5_000))
+
+    expect(screen.getByTestId('level-timer-value')).toHaveTextContent(beforeStart ?? '')
+  })
+
   it('freezes the level timer while the pause modal is open', () => {
     mount()
     act(() => vi.advanceTimersByTime(1_500))
@@ -161,6 +175,14 @@ describe('8x8 planning level through the game entry point', () => {
     fireEvent.click(screen.getByRole('button', { name: '繼續遊戲' }))
     act(() => vi.advanceTimersByTime(200))
     expect(screen.getByTestId('level-timer-value').textContent).not.toBe(beforePause)
+  })
+
+  it('keeps background music playing while the pause modal is open', () => {
+    mount()
+
+    fireEvent.click(screen.getByRole('button', { name: '暫停' }))
+
+    expect(pauseBackgroundMusic).not.toHaveBeenCalled()
   })
 
   it('replaces take-all with one free hint per planning level', async () => {

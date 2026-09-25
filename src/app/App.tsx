@@ -27,6 +27,8 @@ export function App() {
   useDocumentLanguage()
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedLevel, setSelectedLevel] = useState(player.currentLevel)
+  const [gameMounted, setGameMounted] = useState(false)
+  const [settingsReturnScreen, setSettingsReturnScreen] = useState<'home' | 'game'>('home')
   const [isAdOpen, setIsAdOpen] = useState(false)
   const [adDurationMs, setAdDurationMs] = useState(DEMO_INTERSTITIAL_DURATION_MS)
   const [toast, setToast] = useState<string>()
@@ -88,12 +90,23 @@ export function App() {
 
   const openGame = (levelId: number) => {
     setSelectedLevel(levelId)
+    setGameMounted(true)
     setScreen('game')
     if (!hasEnteredGame.current) {
       hasEnteredGame.current = true
       return
     }
     void maybeShowPlayAd()
+  }
+
+  const openSettings = (returnScreen: 'home' | 'game') => {
+    setSettingsReturnScreen(returnScreen)
+    setScreen('settings')
+  }
+
+  const leaveGame = (nextScreen: 'home' | 'levels') => {
+    setGameMounted(false)
+    setScreen(nextScreen)
   }
 
   const openLegal = (documentId: LegalDocumentId) => {
@@ -111,10 +124,10 @@ export function App() {
     <div className="app-frame">
       <div className="app-bleed" data-screen={screen} aria-hidden="true" />
       <div className="app-stage">
-      {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={setScreen} />}
+      {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={(destination) => destination === 'settings' ? openSettings('home') : setScreen(destination)} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
-      {screen === 'game' && <GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => setScreen('home')} onSettings={() => setScreen('settings')} onLevelSelect={() => setScreen('levels')} onNextLevel={openGame} onToast={setToast} onPlayAction={maybeShowPlayAd} onWatchUndoAd={maybeGrantRewardAd} onWatchHintAd={maybeGrantRewardAd} />}
-      {screen === 'settings' && <SettingsScreen onBack={() => setScreen('home')} onToast={setToast} onLegal={openLegal} />}
+      {gameMounted && <div className="app-screen-layer" hidden={screen !== 'game'}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => leaveGame('home')} onSettings={() => openSettings('game')} onLevelSelect={() => leaveGame('levels')} onNextLevel={openGame} onToast={setToast} onPlayAction={maybeShowPlayAd} onWatchUndoAd={maybeGrantRewardAd} onWatchHintAd={maybeGrantRewardAd} /></div>}
+      {screen === 'settings' && <SettingsScreen onBack={() => setScreen(settingsReturnScreen)} onToast={setToast} onLegal={openLegal} />}
       {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}
       </div>
       <AdBreakModal open={isAdOpen} durationMs={adDurationMs} />

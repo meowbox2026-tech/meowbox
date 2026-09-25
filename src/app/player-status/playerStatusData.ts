@@ -128,7 +128,7 @@ function parseLevels(value: unknown): PlayerStatusLevel[] | null {
     const completedAttempts = asRequiredCount(row.completed_attempts)
     const failures = asRequiredCount(row.failures)
     const hints = asRequiredCount(row.hints)
-    if (levelId === null || levelId < 1 || levelId > 30 || attempts === null || completedAttempts === null || failures === null || hints === null) return null
+    if (levelId === null || levelId < 1 || levelId > 90 || attempts === null || completedAttempts === null || failures === null || hints === null) return null
     levels.push({
       levelId,
       attempts,

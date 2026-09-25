@@ -19,7 +19,7 @@ describe('GameScreen mainline routing', () => {
     expect(screen.getByText('救出全部 54 隻貓咪')).toHaveClass('planning-top-goal')
   })
 
-  it('clamps an obsolete level request to the last active planning level', () => {
+  it('routes an extended level request to the authored planning level', () => {
     render(<GameScreen levelId={31} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={vi.fn()} onWatchUndoAd={vi.fn()} />)
 
     expect(screen.getByText('救出全部 54 隻貓咪')).toHaveClass('planning-top-goal')

@@ -21,6 +21,12 @@ export interface Strings {
   levels: {
     title: string
     board: string
+    worldsLabel: string
+    worldLabel: string
+    worldAria: string
+    worldRange: string
+    worldLocked: string
+    worldHint: string
     levelAria: string
     lockedSuffix: string
     locked: string

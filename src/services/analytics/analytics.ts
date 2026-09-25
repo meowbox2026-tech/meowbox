@@ -36,7 +36,7 @@ interface PendingPlayerEvent extends PlayerEventInput {
 const PENDING_EVENTS_KEY = 'meowbox.analytics.pending.v1'
 const SESSION_ID_KEY = 'meowbox.analytics.session.v1'
 const MAX_PENDING_EVENTS = 100
-const MAX_LEVEL_ID = 30
+const MAX_LEVEL_ID = 90
 
 let anonymousUserPromise: Promise<string | null> | undefined
 
