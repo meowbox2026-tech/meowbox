@@ -20,3 +20,6 @@ coverage/
 # Local design/reference screenshots
 Codex 圖像 *.png
 .vercel
+
+# Local release artifacts
+release/
