@@ -10,9 +10,10 @@ interface SettingsScreenProps {
   onBack: () => void
   onToast: (message: string) => void
   onLegal: (documentId: LegalDocumentId) => void
+  onPrivacyOptions?: () => void
 }
 
-export function SettingsScreen({ onBack, onToast, onLegal }: SettingsScreenProps) {
+export function SettingsScreen({ onBack, onToast, onLegal, onPrivacyOptions }: SettingsScreenProps) {
   const { player, updateSettings } = usePlayer()
   const strings = useStrings()
   const legalLinks: Array<{ label: string; documentId: LegalDocumentId }> = [
@@ -32,6 +33,7 @@ export function SettingsScreen({ onBack, onToast, onLegal }: SettingsScreenProps
           <Toggle icon="haptics" label={strings.settings.hapticsLabel} checked={player.settings.haptics} onChange={(haptics) => updateSettings({ haptics })} />
         </div>
         <div className="settings-language"><span>◎</span><strong>{strings.settings.language}</strong><div>{LOCALES.map((language) => <button key={language} className={player.settings.language === language ? 'is-active' : ''} onClick={() => updateSettings({ language })} type="button">{LOCALE_LABELS[language]}</button>)}</div></div>
+        {onPrivacyOptions && <button aria-label={strings.settings.privacyOptions} className="settings-link" onClick={onPrivacyOptions} type="button"><span aria-hidden="true">⚙</span><strong>{strings.settings.privacyOptions}</strong><b aria-hidden="true">›</b></button>}
         {legalLinks.map(({ label, documentId }) => <button className="settings-link" key={label} onClick={() => onLegal(documentId)} type="button"><span>{label === strings.settings.support ? '◖◗' : '▤'}</span><strong>{label}</strong><b>›</b></button>)}
         <button className="settings-link" onClick={() => onToast(strings.settings.aboutToast)} type="button"><span>ⓘ</span><strong>{strings.settings.about}</strong><b>›</b></button>
       </section>

@@ -62,4 +62,13 @@ describe('SettingsScreen controls', () => {
 
     expect(mocks.updateSettings).toHaveBeenCalledWith({ sound: false })
   })
+
+  it('opens the native privacy options when the platform provides it', () => {
+    const onPrivacyOptions = vi.fn()
+
+    render(<SettingsScreen onBack={vi.fn()} onToast={vi.fn()} onLegal={vi.fn()} onPrivacyOptions={onPrivacyOptions} />)
+    fireEvent.click(screen.getByRole('button', { name: '隱私權選項' }))
+
+    expect(onPrivacyOptions).toHaveBeenCalledOnce()
+  })
 })

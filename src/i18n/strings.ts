@@ -41,6 +41,9 @@ export interface Strings {
     aboutToast: string
     backHome: string
     privacy: string
+    privacyOptions: string
+    privacyOptionsOpened: string
+    privacyOptionsUnavailable: string
     terms: string
     support: string
   }

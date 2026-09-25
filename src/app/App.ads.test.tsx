@@ -12,6 +12,8 @@ const showInterstitialAd = vi.hoisted(() => vi.fn())
 const showUndoRewardAd = vi.hoisted(() => vi.fn())
 const shouldRenderDemoAd = vi.hoisted(() => vi.fn())
 const recordPlayerEvent = vi.hoisted(() => vi.fn())
+const initializeNativeAdMob = vi.hoisted(() => vi.fn())
+const showNativePrivacyOptions = vi.hoisted(() => vi.fn())
 
 vi.mock('../state/PlayerContext', () => ({
   usePlayer: () => ({ player, isReady: player.isReady })
@@ -27,6 +29,7 @@ vi.mock('../services/ads/undoRewardAd', () => ({
 }))
 vi.mock('../services/ads/adPresentation', () => ({ shouldRenderDemoAd }))
 vi.mock('../services/analytics/analytics', () => ({ recordPlayerEvent }))
+vi.mock('../services/ads/nativeAdMob', () => ({ initializeNativeAdMob, showNativePrivacyOptions }))
 
 vi.mock('./screens/GameScreen', () => ({
   GameScreen: ({ onPlayAction, onWatchUndoAd }: { onPlayAction: () => Promise<void>; onWatchUndoAd: () => Promise<boolean> }) => (
@@ -42,6 +45,8 @@ beforeEach(() => {
   showInterstitialAd.mockResolvedValue({ shown: true })
   showUndoRewardAd.mockResolvedValue({ completed: true })
   shouldRenderDemoAd.mockReturnValue(false)
+  initializeNativeAdMob.mockResolvedValue(true)
+  showNativePrivacyOptions.mockResolvedValue(true)
 })
 
 afterEach(() => {
@@ -70,6 +75,13 @@ describe('App ad presentation', () => {
 
     resolveAd?.({ shown: true })
     await act(async () => { await Promise.resolve() })
+  })
+
+  it('initializes native AdMob after the saved player is ready', async () => {
+    render(<App />)
+    await act(async () => { await Promise.resolve() })
+
+    expect(initializeNativeAdMob).toHaveBeenCalledOnce()
   })
 
   it('does not render the local ad surface for native rewarded ads', async () => {

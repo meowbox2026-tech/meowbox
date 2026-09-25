@@ -26,7 +26,9 @@ export const en: Strings = {
     musicLabel: 'Music', soundLabel: 'Sound', hapticsLabel: 'Haptics',
     language: 'Language',
     about: 'About', aboutToast: 'Meow Line Cat Drop Match Puzzle, version 1.0.0.',
-    backHome: 'Back Home', privacy: 'Privacy Policy', terms: 'Terms of Service', support: 'Support'
+    backHome: 'Back Home', privacy: 'Privacy Policy', privacyOptions: 'Privacy options',
+    privacyOptionsOpened: 'Privacy options opened', privacyOptionsUnavailable: 'Privacy options are currently unavailable',
+    terms: 'Terms of Service', support: 'Support'
   },
   legal: { backToSettings: '‹　Back to Settings', emailCta: 'Email Support' },
   ads: {

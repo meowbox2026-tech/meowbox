@@ -11,9 +11,11 @@ import type { UndoRewardAdGateway } from './undoRewardAd'
 import { getAdMobConfig, hasRequiredAdMobConfig, type AdMobConfig } from './adMobConfig'
 
 type ListenerHandle = { remove: () => Promise<void> }
-type AdMobClient = Pick<AdMobPlugin, 'initialize' | 'trackingAuthorizationStatus' | 'requestTrackingAuthorization' | 'requestConsentInfo' | 'showConsentForm' | 'prepareInterstitial' | 'showInterstitial' | 'prepareRewardVideoAd' | 'showRewardVideoAd' | 'addListener'>
+type AdMobClient = Pick<AdMobPlugin, 'initialize' | 'trackingAuthorizationStatus' | 'requestTrackingAuthorization' | 'requestConsentInfo' | 'showConsentForm' | 'showPrivacyOptionsForm' | 'prepareInterstitial' | 'showInterstitial' | 'prepareRewardVideoAd' | 'showRewardVideoAd' | 'addListener'>
 
 export interface NativeAdMobGateways {
+  initialize: () => Promise<boolean>
+  showPrivacyOptions: () => Promise<boolean>
   interstitial: InterstitialAdGateway
   rewarded: UndoRewardAdGateway
 }
@@ -23,8 +25,6 @@ interface NativeAdMobDependencies {
   platform: string
   config: AdMobConfig
 }
-
-const TEST_CONSENT_TIMEOUT_MS = 3000
 
 const removeListeners = async (handles: ListenerHandle[]): Promise<void> => {
   await Promise.all(handles.map((handle) => handle.remove().catch(() => undefined)))
@@ -50,8 +50,14 @@ class NativeAdMobProvider {
 
   constructor(private readonly dependencies: NativeAdMobDependencies) {}
 
-  private ensureReady(): Promise<boolean> {
-    this.initializePromise ??= this.initialize()
+  ensureReady(): Promise<boolean> {
+    if (!this.initializePromise) {
+      const initialization = this.initialize()
+      this.initializePromise = initialization.then((ready) => {
+        if (!ready) this.initializePromise = undefined
+        return ready
+      })
+    }
     return this.initializePromise
   }
 
@@ -65,19 +71,20 @@ class NativeAdMobProvider {
         if (tracking.status === 'notDetermined') await client.requestTrackingAuthorization()
       }
 
-      if (config.isTesting) {
-        // Test ads must remain usable while UMP is unavailable on a simulator,
-        // an offline TestFlight device, or before the app's consent message is ready.
-        const consent = await settleWithin(client.requestConsentInfo().catch(() => undefined), TEST_CONSENT_TIMEOUT_MS)
-        if (consent && !consent.canRequestAds && consent.isConsentFormAvailable) {
-          await settleWithin(client.showConsentForm().catch(() => undefined), TEST_CONSENT_TIMEOUT_MS)
-        }
-        return true
-      }
-
       let consent = await client.requestConsentInfo()
       if (!consent.canRequestAds && consent.isConsentFormAvailable) consent = await client.showConsentForm()
       return consent.canRequestAds
+    } catch {
+      return false
+    }
+  }
+
+  async showPrivacyOptions(): Promise<boolean> {
+    if (!await this.ensureReady()) return false
+
+    try {
+      await this.dependencies.client.showPrivacyOptionsForm()
+      return true
     } catch {
       return false
     }
@@ -162,15 +169,30 @@ export function createNativeAdMobGateways(dependencies: NativeAdMobDependencies)
 
   const provider = new NativeAdMobProvider(dependencies)
   return {
+    initialize: () => provider.ensureReady(),
+    showPrivacyOptions: () => provider.showPrivacyOptions(),
     interstitial: { show: () => provider.showInterstitial() },
     rewarded: { show: () => provider.showRewarded() }
   }
 }
 
+let cachedNativeGateways: NativeAdMobGateways | null | undefined
+
 export function getNativeAdMobGateways(): NativeAdMobGateways | undefined {
-  return createNativeAdMobGateways({
+  if (cachedNativeGateways !== undefined) return cachedNativeGateways ?? undefined
+
+  cachedNativeGateways = createNativeAdMobGateways({
     client: AdMob,
     platform: Capacitor.getPlatform(),
     config: getAdMobConfig()
   })
+  return cachedNativeGateways ?? undefined
+}
+
+export function initializeNativeAdMob(): Promise<boolean> {
+  return getNativeAdMobGateways()?.initialize() ?? Promise.resolve(false)
+}
+
+export function showNativePrivacyOptions(): Promise<boolean> {
+  return getNativeAdMobGateways()?.showPrivacyOptions() ?? Promise.resolve(false)
 }

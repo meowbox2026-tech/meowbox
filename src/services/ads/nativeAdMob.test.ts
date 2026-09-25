@@ -11,6 +11,7 @@ function createFakeClient(consentInfo: { canRequestAds: boolean; isConsentFormAv
     requestTrackingAuthorization: vi.fn().mockResolvedValue(undefined),
     requestConsentInfo: vi.fn().mockResolvedValue(consentInfo),
     showConsentForm: vi.fn(),
+    showPrivacyOptionsForm: vi.fn().mockResolvedValue(undefined),
     prepareInterstitial: vi.fn().mockResolvedValue({ adUnitId: 'interstitial' }),
     showInterstitial: vi.fn().mockImplementation(async () => {
       listeners.get('interstitialAdDismissed')?.()
@@ -52,21 +53,42 @@ describe('native AdMob gateways', () => {
     expect(remove).toHaveBeenCalledTimes(5)
   })
 
-  it('keeps test ads available when UMP cannot request ads yet', async () => {
+  it('initializes consent before the first ad action and reuses that initialization', async () => {
+    const { client } = createFakeClient()
+    const gateways = createNativeAdMobGateways({ client, platform: 'ios', config })
+
+    await expect(gateways?.initialize()).resolves.toBe(true)
+    await expect(gateways?.initialize()).resolves.toBe(true)
+    await expect(gateways?.interstitial.show()).resolves.toEqual({ shown: true })
+
+    expect(client.initialize).toHaveBeenCalledOnce()
+    expect(client.requestConsentInfo).toHaveBeenCalledOnce()
+  })
+
+  it('exposes the privacy options form for an already initialized user', async () => {
+    const { client } = createFakeClient()
+    const gateways = createNativeAdMobGateways({ client, platform: 'ios', config })
+
+    await expect(gateways?.showPrivacyOptions()).resolves.toBe(true)
+
+    expect(client.showPrivacyOptionsForm).toHaveBeenCalledOnce()
+  })
+
+  it('does not request test ads when UMP cannot request ads yet', async () => {
     const { client } = createFakeClient({ canRequestAds: false, isConsentFormAvailable: false })
     const gateways = createNativeAdMobGateways({ client, platform: 'ios', config })
 
-    await expect(gateways?.interstitial.show()).resolves.toEqual({ shown: true })
-    expect(client.prepareInterstitial).toHaveBeenCalledOnce()
+    await expect(gateways?.interstitial.show()).resolves.toEqual({ shown: false })
+    expect(client.prepareInterstitial).not.toHaveBeenCalled()
   })
 
-  it('keeps test ads available when UMP rejects', async () => {
+  it('does not request ads when UMP rejects', async () => {
     const { client } = createFakeClient()
     client.requestConsentInfo = vi.fn().mockRejectedValue(new Error('consent unavailable'))
     const gateways = createNativeAdMobGateways({ client, platform: 'ios', config })
 
-    await expect(gateways?.interstitial.show()).resolves.toEqual({ shown: true })
-    expect(client.prepareInterstitial).toHaveBeenCalledOnce()
+    await expect(gateways?.interstitial.show()).resolves.toEqual({ shown: false })
+    expect(client.prepareInterstitial).not.toHaveBeenCalled()
   })
 
   it('keeps production ads gated by UMP consent', async () => {

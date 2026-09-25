@@ -1,5 +1,6 @@
+import { Capacitor } from '@capacitor/core'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useDocumentLanguage } from '../i18n'
+import { useDocumentLanguage, useStrings } from '../i18n'
 import { AdBreakModal } from './components/AdBreakModal'
 import { useStageScale } from './useStageScale'
 import { HomeScreen } from './screens/HomeScreen'
@@ -14,6 +15,7 @@ import { DEMO_INTERSTITIAL_DURATION_MS, showInterstitialAd } from '../services/a
 import { DEMO_UNDO_AD_DURATION_MS, showUndoRewardAd } from '../services/ads/undoRewardAd'
 import { shouldRenderDemoAd } from '../services/ads/adPresentation'
 import { recordPlayerEvent } from '../services/analytics/analytics'
+import { initializeNativeAdMob, showNativePrivacyOptions } from '../services/ads/nativeAdMob'
 import { PlayerStatusScreen } from './player-status/PlayerStatusScreen'
 
 type Screen = 'home' | 'levels' | 'game' | 'settings' | 'legal'
@@ -25,6 +27,7 @@ function isPlayerStatusRoute() {
 export function App() {
   const { player, isReady } = usePlayer()
   useDocumentLanguage()
+  const strings = useStrings()
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedLevel, setSelectedLevel] = useState(player.currentLevel)
   const [gameMounted, setGameMounted] = useState(false)
@@ -37,6 +40,11 @@ export function App() {
   const hasEnteredGame = useRef(false)
   const analyticsSessionStarted = useRef(false)
   useStageScale()
+
+  useEffect(() => {
+    if (!isReady || isPlayerStatusRoute()) return
+    void initializeNativeAdMob()
+  }, [isReady])
 
   useEffect(() => {
     if (isPlayerStatusRoute() || analyticsSessionStarted.current) return undefined
@@ -114,6 +122,12 @@ export function App() {
     setScreen('legal')
   }
 
+  const openPrivacyOptions = useCallback(() => {
+    void showNativePrivacyOptions().then((shown) => {
+      setToast(shown ? strings.settings.privacyOptionsOpened : strings.settings.privacyOptionsUnavailable)
+    })
+  }, [strings.settings.privacyOptionsOpened, strings.settings.privacyOptionsUnavailable])
+
   if (isPlayerStatusRoute()) return <PlayerStatusScreen />
 
   // Keep the first paint quiet while the local save is being read. The game
@@ -127,7 +141,7 @@ export function App() {
       {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={(destination) => destination === 'settings' ? openSettings('home') : setScreen(destination)} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
       {gameMounted && <div className="app-screen-layer" hidden={screen !== 'game'}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => leaveGame('home')} onSettings={() => openSettings('game')} onLevelSelect={() => leaveGame('levels')} onNextLevel={openGame} onToast={setToast} onPlayAction={maybeShowPlayAd} onWatchUndoAd={maybeGrantRewardAd} onWatchHintAd={maybeGrantRewardAd} /></div>}
-      {screen === 'settings' && <SettingsScreen onBack={() => setScreen(settingsReturnScreen)} onToast={setToast} onLegal={openLegal} />}
+      {screen === 'settings' && <SettingsScreen onBack={() => setScreen(settingsReturnScreen)} onToast={setToast} onLegal={openLegal} onPrivacyOptions={Capacitor.isNativePlatform() ? openPrivacyOptions : undefined} />}
       {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}
       </div>
       <AdBreakModal open={isAdOpen} durationMs={adDurationMs} />
