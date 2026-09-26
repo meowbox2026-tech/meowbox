@@ -1,0 +1,143 @@
+:root {
+  --theme-page-background: #5f3c2b;
+  --theme-text-primary: #633c2f;
+  --theme-text-strong: #6d3925;
+  --theme-text-muted: #8c6b54;
+  --theme-surface: #fffaf1;
+  --theme-surface-alt: #f3d6b9;
+  --theme-surface-elevated: #fffdf7;
+  --theme-surface-border: #d6b08e;
+  --theme-brand: #6d3925;
+  --theme-brand-strong: #5a3023;
+  --theme-accent: #f4c589;
+  --theme-accent-strong: #f3a647;
+  --theme-button-text: #fffdf7;
+  --theme-button-primary-start: #8de965;
+  --theme-button-primary-end: #45b932;
+  --theme-button-secondary-start: #72dfff;
+  --theme-button-secondary-end: #199ed9;
+  --theme-button-warm-start: #fffaf1;
+  --theme-button-warm-end: #f3d6b8;
+  --theme-positive-start: #dfff92;
+  --theme-positive-end: #a7dc65;
+  --theme-positive-strong: #62a640;
+  --theme-danger: #ee4f85;
+  --theme-focus: #fff7a6;
+  --theme-board: #fffaf0;
+  --theme-board-line: #dec1a0;
+  --theme-selection: #ffe58a;
+  --theme-overlay-top: #fff4df0f;
+  --theme-overlay-bottom: #5b2a1314;
+  --theme-modal-overlay: #271814aa;
+}
+
+.app-frame { background: var(--theme-page-background); }
+.app-bleed { background-color: var(--theme-page-background); }
+.app-bleed::after { background: linear-gradient(180deg, var(--theme-overlay-top), var(--theme-overlay-bottom)); }
+.app-frame { color: var(--theme-text-primary); }
+.app-frame :focus-visible { outline-color: var(--theme-focus); }
+.app-toast { border-color: var(--theme-surface-border); color: var(--theme-button-text); background: var(--theme-brand); }
+.app-frame .artwork-button__label { color: var(--theme-brand); text-shadow: 0 2px 0 var(--theme-surface); }
+.app-frame .artwork-button__badge,
+.app-frame .app-button__badge { background: var(--theme-danger); }
+.app-frame .modal-backdrop { background: var(--theme-modal-overlay); }
+
+.app-frame .app-button {
+  border-color: var(--theme-surface-border);
+  color: var(--theme-button-text);
+  background: linear-gradient(180deg, var(--theme-button-primary-start), var(--theme-button-primary-end));
+}
+.app-frame .app-button--blue { background: linear-gradient(180deg, var(--theme-button-secondary-start), var(--theme-button-secondary-end)); }
+.app-frame .app-button--purple { background: linear-gradient(180deg, var(--theme-accent), var(--theme-brand)); }
+.app-frame .app-button--cream,
+.app-frame .app-button--icon { color: var(--theme-text-strong); background: linear-gradient(180deg, var(--theme-button-warm-start), var(--theme-button-warm-end)); }
+.app-frame .app-button--pink { background: linear-gradient(180deg, var(--theme-danger), var(--theme-brand-strong)); }
+
+.app-frame .screen-title h1,
+.app-frame .screen-title p,
+.app-frame .level-pill,
+.app-frame .level-pill strong,
+.app-frame .settings-link,
+.app-frame .settings-language strong { color: var(--theme-text-strong); }
+.app-frame .screen-title h1 { text-shadow: 0 1px 0 var(--theme-surface); }
+.app-frame .screen-title p,
+.app-frame .planning-tray__heading,
+.app-frame .planning-tray__hint,
+.app-frame .planning-status,
+.app-frame .planning-mainline-done { color: var(--theme-text-muted); }
+
+.app-frame .modal-card,
+.app-frame .settings-card {
+  border-color: var(--theme-surface-border);
+  color: var(--theme-text-strong);
+  background: linear-gradient(180deg, var(--theme-surface-elevated), var(--theme-surface-alt));
+}
+.app-frame .settings-toggle-row,
+.app-frame .settings-toggle + .settings-toggle,
+.app-frame .settings-language,
+.app-frame .settings-link { border-color: var(--theme-surface-border); }
+.app-frame .settings-toggle__icon { color: var(--theme-text-strong); }
+.app-frame .toggle-track { border-color: var(--theme-positive-strong); background: var(--theme-positive-end); }
+
+.app-frame .world-tabs,
+.app-frame .world-tabs__hint,
+.app-frame .level-board,
+.app-frame .level-tile,
+.app-frame .planning-tray,
+.app-frame .cat-selection-tray,
+.app-frame .cat-selection-tray__card,
+.app-frame .game-objective {
+  border-color: var(--theme-surface-border);
+  color: var(--theme-text-strong);
+  background: var(--theme-surface);
+}
+.app-frame .world-tabs button { color: var(--theme-text-muted); border-color: var(--theme-surface-border); }
+.app-frame .world-tabs .is-active { color: var(--theme-brand-strong); background: linear-gradient(180deg, var(--theme-positive-start), var(--theme-positive-end)); box-shadow: inset 0 -4px 0 var(--theme-positive-strong); }
+.app-frame .level-tile { background: linear-gradient(180deg, var(--theme-surface-elevated), var(--theme-surface-alt)); }
+.app-frame .level-tile--locked { color: var(--theme-text-muted); background: var(--theme-surface-alt); }
+.app-frame .level-tile--current { border-color: var(--theme-positive-strong); background: linear-gradient(180deg, var(--theme-positive-start), var(--theme-positive-end)); }
+.app-frame .level-board:focus-visible,
+.app-frame .level-tile:focus-visible,
+.app-frame .screen--planning button:focus-visible { outline-color: var(--theme-focus); }
+
+.app-frame .game-objective { background: var(--theme-surface-elevated); }
+.app-frame .planning-top-goal,
+.app-frame .planning-undo-confirm p,
+.app-frame .planning-diagonal-tutorial { color: var(--theme-text-strong); }
+.app-frame .planning-board--prism {
+  border-color: var(--theme-surface-border);
+  background: linear-gradient(145deg, var(--theme-surface-elevated), var(--theme-board), var(--theme-surface-alt));
+}
+.app-frame .planning-grid { background: linear-gradient(155deg, var(--theme-board), var(--theme-surface-alt), var(--theme-selection)); }
+.app-frame .planning-cell { --prism-cell-top: var(--theme-surface-elevated); --prism-cell-bottom: var(--theme-board); border-color: var(--theme-surface-border); }
+.app-frame .planning-cell:nth-child(4n + 2) { --prism-cell-bottom: var(--theme-surface-alt); }
+.app-frame .planning-cell:nth-child(4n + 3) { --prism-cell-bottom: var(--theme-selection); }
+.app-frame .planning-cell:nth-child(4n + 4) { --prism-cell-bottom: var(--theme-accent); }
+.app-frame .planning-tray { background: var(--theme-board); }
+.app-frame .planning-tray__cat { background: var(--theme-surface-elevated); box-shadow: inset 0 0 0 1px var(--theme-board-line); }
+.app-frame .planning-tray__cat.is-next,
+.app-frame .cat-selection-tray__card.is-selected { border-color: var(--theme-accent-strong); background: var(--theme-selection); }
+.app-frame .planning-placement-cell.is-hint { background: var(--theme-selection); box-shadow: inset 0 0 0 3px var(--theme-accent-strong); }
+.app-frame .planning-cat b { color: var(--theme-brand-strong); background: var(--theme-selection); }
+.app-frame .planning-board__label { color: var(--theme-text-muted); }
+
+.app-frame .drop-result--success,
+.app-frame .drop-result--failure {
+  border-color: var(--theme-surface-border);
+  color: var(--theme-text-strong);
+  background: linear-gradient(145deg, var(--theme-surface-elevated), var(--theme-board), var(--theme-surface-alt));
+}
+.app-frame .drop-result .drop-result__eyebrow,
+.app-frame .drop-result .drop-result__title h2,
+.app-frame .drop-result .drop-result__encouragement,
+.app-frame .drop-result .drop-result__summary,
+.app-frame .drop-result .planning-score-reveal__time,
+.app-frame .drop-result .planning-score-reveal__time strong { color: var(--theme-text-strong); }
+.app-frame .drop-result--failure .drop-result__eyebrow,
+.app-frame .drop-result--failure .drop-result__title h2,
+.app-frame .drop-result--failure .drop-result__summary strong { color: var(--theme-danger); }
+.app-frame .drop-result .drop-result__actions .app-button {
+  border-color: var(--theme-surface-border);
+  color: var(--theme-text-strong);
+  background: linear-gradient(180deg, var(--theme-button-warm-start), var(--theme-button-warm-end));
+}

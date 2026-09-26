@@ -66,6 +66,22 @@
   background: transparent;
 }
 
+/* Non-game pages may need more vertical room on taller native screens. Keep
+   the fixed stage, but let those pages scroll inside it instead of clipping
+   their last action or legal content. The game is nested in app-screen-layer,
+   so its authored overflow behavior remains unchanged. */
+.app-stage > .screen:not(.screen--game) {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  scroll-padding-block: 12px 24px;
+}
+
+.app-stage > .screen:not(.screen--game)::-webkit-scrollbar {
+  display: none;
+}
+
 /* Inside the fixed stage the composition already sits inset from the physical
    edges via bleed margins, so device safe-area insets must not shift it again
    (SE devtools report zero insets, which is the layout truth). */

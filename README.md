@@ -4,6 +4,8 @@
 
 ## 開始使用
 
+正式 Web 版本部署於 Cloudflare Pages 專案 `meowbox`，網址為 `https://meowbox.pages.dev`。使用者以 `cloudflare2k7` 稱呼 Cloudflare 環境；它不是目前 Dashboard 顯示的 Pages 專案名稱。
+
 ```bash
 npm install
 npm run dev
@@ -14,6 +16,22 @@ npm run dev
 ```bash
 npm run build
 ```
+
+### 遠端關卡與介面配色
+
+遊戲啟動時會檢查 Cloudflare Pages 專案 `meowbox` 的內容版本；iOS App 使用 `https://meowbox.pages.dev/game-content/manifest.json`，網頁版使用目前 Pages 網址。關卡與主題色都只以 JSON 資料更新，不下載或執行遠端 JavaScript、HTML 或 CSS。App 內建完整遊戲和關卡，離線或遠端資料不合法時仍可玩。
+
+遠端 manifest 以 RSA-PSS / SHA-256 簽名，App 內固定公開金鑰並同時驗證簽名、檔案雜湊、關卡格式與每關解答。私鑰只用於建置簽名，不會放進 App。成功下載的內容先作為候選版；App 完成啟動後才確認為穩定版。若下次開啟時候選版未被確認，App 會退回上一份已確認內容並暫時封鎖該版。啟動期間 0.9 秒內完成的更新會立即試用；較慢的下載先快取，在下次開啟時試用。玩家正在玩的棋盤不會被中途替換。
+
+- `src/game/content/levels.json`：正式關卡資料，也是 App 內建備份。保留既有關卡 ID 和順序；調整難度時修改該關盤面、托盤或解答。新增關卡只能接在目前最後一關之後。
+- `src/game/content/theme.json`：介面主題色。可調整頁面底色、文字、卡片、按鈕、關卡選單、棋盤和提示色；`src/styles/theme.css` 定義各色套用位置。修改時保留所有色彩欄位；貓咪插圖和按鈕圖片中的顏色仍由圖片素材決定。
+- `src/game/content/manifest.json`：內容版本。每次發布關卡或主題變更，都把 `version` 加 1；回復舊內容時也要以新的、更大的版本號重新發布，不能把版本號倒退。
+
+首次設定時，`npm run content:generate-key` 會產生一組簽名金鑰：公開金鑰放在 `src/services/gameContent/trustedContentPublicKey.pem` 並隨 App 發布；私鑰放在 `.secrets/game-content-private.pem`（已忽略、不提交）。請安全備份私鑰，並只把它設成 Cloudflare Pages 專案 `meowbox` 的 Production secret `GAME_CONTENT_SIGNING_PRIVATE_KEY`；不可改成 `VITE_` 變數或提交進 Git。這個 Production secret 已於 2026-09-26 設定，但尚未經 Cloudflare 建置驗證；Cloudflare 不會再顯示 secret 原文。不要未經安全評估就把 Production 私鑰複製到 Preview。每次修改內容後執行 `npm run build` 檢查；建置會產生簽名 manifest 與帶 SHA-256 的版本檔。Cloudflare Pages 已連接 `vvstudiocode/meowbox`，`main` 生產分支自動部署已啟用；審查並提交要發布的改動後，推送到 `main` 才會部署。若遺失私鑰，必須更換 App 內公開金鑰並重新送審新的 iOS binary。
+
+首次支援遠端內容的 iOS App 仍須經 App Store 發布；之後只調整既有機制可顯示的關卡資料或配色，可透過 Cloudflare Pages 更新 JSON。這不是完整網頁程式碼 Live Update：Apple 指引 2.5.2 禁止下載或執行會新增或改變 App 功能的程式碼。只更新既有格式的 JSON 內容，審查風險較低，但不能保證一定通過；簽名也不會讓遠端程式碼更新變合規。[Apple App Review Guideline 2.5.2](https://developer.apple.com/app-store/review/guidelines/)
+
+遠端資料必須保留 1–90 關的 ID，並通過資料格式及完整解答驗證；任何一關格式錯誤或解不出來，整包更新都會被拒絕。玩家已取得的關卡進度與星星會保留。存檔目前支援最多 500 關。
 
 ## 目前玩法
 
@@ -36,8 +54,10 @@ npm run build
 - `src/game/core/dropEngine.ts`：落下、四方向消除、重力、分數、勝負。
 - `src/game/phaser/useDropGame.ts`：動畫階段、輸入鎖、暫停與重玩生命週期。
 - `src/game/phaser/DropBoard.tsx`：React 棋盤與落點預覽。
-- `src/game/data/planningLevels.ts`、`src/game/data/planningLevelTwo.ts`、`src/game/data/planningLevelThree.ts`、`src/game/data/planningLevelFour.ts`、`src/game/data/planningLevelFive.ts`、`src/game/data/planningExtendedLevels.ts`：第 1–90 關固定棋盤與托盤解法。
-- 第 31–90 關已加入主線，沿用同一套支撐、方向與合流規則；關卡資料使用固定 seed 載入，不依賴裝置隨機或線上題庫。
+- `src/game/content/levels.json`：第 1–90 關的正式資料，也是原生 App 的內建備份；`src/game/data/planningLevels.ts` 載入並驗證關卡。
+- `src/services/gameContent/contentUpdate.ts`：向 Cloudflare 檢查關卡與主題版本，驗證後快取並套用。
+- `src/services/gameContent/contentSignature.ts`、`contentRollback.ts`：驗證簽名、管理候選版與失敗回退。
+- 第 31–90 關沿用同一套支撐、方向與合流規則；上架版本內含完整關卡資料，遠端版本可調整難度或追加新關。
 - `src/app/screens/GameScreen.tsx`：資料驅動的關卡介面、說明與結算。
 - `src/styles/game-drop.css`：新版棋盤樣式與動畫。
 - `src/services/`、`src/state/`：沿用音效、震動、設定與本機存檔。
@@ -73,7 +93,7 @@ npx cap sync ios
 open ios/App/App.xcworkspace
 ```
 
-在 Xcode 選取 `App` target、連接已信任的 iPhone，確認 Signing Team 後按 Run。App Store Connect 網址如下：Privacy Policy：`https://meowbox.vercel.app/privacy.html`、Terms of Use：`https://meowbox.vercel.app/terms.html`、Support：`https://meowbox.vercel.app/support.html`。
+在 Xcode 選取 `App` target、連接已信任的 iPhone，確認 Signing Team 後按 Run。Cloudflare Pages 網址如下：Privacy Policy：`https://meowbox.pages.dev/privacy.html`、Terms of Use：`https://meowbox.pages.dev/terms.html`、Support：`https://meowbox.pages.dev/support.html`。
 
 ## 原生上架前設定
 

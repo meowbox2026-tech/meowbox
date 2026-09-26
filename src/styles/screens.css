@@ -135,3 +135,54 @@
   .screen--home .home-brand { margin-top: min(12cqw, 54px); }
   .screen--home .home-start { height: min(12cqh, 110px); min-height: min(12cqh, 110px); }
 }
+
+/* Keep the native privacy row and the return action inside the fixed game stage. */
+.app-stage > .screen--settings {
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+  flex-direction: column;
+  padding-top: 8px;
+  padding-bottom: 10px;
+  overflow-y: auto;
+  scroll-padding-block: 8px;
+}
+.screen--settings .top-bar { flex: 0 0 auto; min-height: 44px; }
+.screen--settings .screen-title {
+  flex: 0 0 auto;
+  height: min(15cqh, 96px);
+  min-height: min(15cqh, 96px);
+  margin: 0 auto 4px;
+  padding: 15px 20px 10px;
+}
+.screen--settings .settings-card {
+  flex: 0 0 auto;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 5px 11px 9px;
+}
+.screen--settings .settings-toggle-row,
+.screen--settings .settings-toggle { min-height: 59px; }
+.screen--settings .settings-toggle { padding: 7px 2px; }
+.screen--settings .settings-language {
+  min-height: 64px;
+  grid-template-columns: 34px .8fr 2.2fr;
+  gap: 4px;
+}
+.screen--settings .settings-language > span { font-size: 26px; }
+.screen--settings .settings-language strong { font-size: 16px; }
+.screen--settings .settings-language button { min-height: 32px; font-size: 9px; }
+.screen--settings .settings-link {
+  min-height: 52px;
+  grid-template-columns: 34px minmax(0, 1fr) 18px;
+  gap: 5px;
+  padding-inline: 4px;
+}
+.screen--settings .settings-link span { font-size: 21px; }
+.screen--settings .settings-link strong { font-size: 16px; }
+.screen--settings .settings-link b { font-size: 31px; }
+.screen--settings .settings-home {
+  flex: 0 0 auto;
+  height: min(10cqh, 68px);
+  min-height: min(10cqh, 68px);
+}

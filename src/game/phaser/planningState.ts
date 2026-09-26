@@ -1,7 +1,7 @@
 import { arrangeCats, resolvePlanning, type Placement, type PlanningLevel, type PlanningResult } from '../core/planningEngine'
 import { findSafePlacement } from '../core/planningSolvability'
 
-export type PlanningFailureReason = 'resolution'
+export type PlanningFailureReason = 'resolution' | 'no-solution'
 
 export interface PlanningState {
   puzzle: PlanningLevel
@@ -78,15 +78,17 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
       if (state.pendingHint) return state
       if (state.hintUses <= 0 || state.selected === undefined) return state
       const hintCell = findSafePlacement(level, state.placements)
-      return hintCell ? applyHintPlacement(state, hintCell) : state
+      return hintCell ? applyHintPlacement(state, hintCell) : { ...state, failureReason: 'no-solution' }
     }
     case 'hint-pending':
       return state.pendingHint || state.hintUses <= 0 || state.selected === undefined
         ? state
-        : { ...state, pendingHint: true, hintCell: undefined }
+        : { ...state, pendingHint: true, hintCell: undefined, failureReason: undefined }
     case 'hint-result':
       if (!state.pendingHint) return state
-      return action.hintCell ? applyHintPlacement(state, action.hintCell) : { ...state, pendingHint: false }
+      return action.hintCell
+        ? applyHintPlacement(state, action.hintCell)
+        : { ...state, pendingHint: false, hintCell: undefined, failureReason: 'no-solution' }
     case 'remove':
       if (state.pendingHint) return state
       return state.undoUses > 0 && state.placements.at(-1)?.catId === action.id

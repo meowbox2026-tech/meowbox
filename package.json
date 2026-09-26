@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/content/publishGameContent.mjs",
+    "content:generate-key": "node scripts/content/generateGameContentSigningKey.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "analyze:planning": "vite-node --script scripts/levels/analyzePlanningDifficulty.ts",

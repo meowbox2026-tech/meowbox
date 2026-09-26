@@ -103,6 +103,19 @@ describe('planning failure boundaries', () => {
     expect(state.hintCell).toEqual(level.solution[0])
   })
 
+  it('marks a configuration with no available hint so the screen can offer recovery', () => {
+    let state = freshPlanning(level)
+    state = reduce(state, { type: 'place', x: 0, y: 0 })
+    state = reduce(state, { type: 'hint-pending' })
+
+    const unavailable = reduce(state, { type: 'hint-result' })
+
+    expect(unavailable.pendingHint).toBe(false)
+    expect(unavailable.failureReason).toBe('no-solution')
+    expect(unavailable.placements).toEqual([{ catId: level.cats[0].id, x: 0, y: 0 }])
+    expect(unavailable.hintUses).toBe(1)
+  })
+
   it('keeps the level retryable after repeated failed arrangements', () => {
     let state = freshPlanning(level)
     for (let attempt = 1; attempt <= 3; attempt += 1) {

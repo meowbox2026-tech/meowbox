@@ -8,11 +8,12 @@ import { useLevelTimer } from '../../game/phaser/useLevelTimer'
 import { getDropCatName, useLocale } from '../../i18n'
 import type { CatAsset } from '../../game/types'
 import { usePlayer } from '../../state/PlayerContext'
-import { pauseBackgroundMusic, startBackgroundMusic, stopBackgroundMusic } from '../../services/audio/audioService'
+import { pauseBackgroundMusic, playClearSound, playLevelResultSound, startBackgroundMusic, stopBackgroundMusic } from '../../services/audio/audioService'
 import { playPlacementHaptic } from '../../services/haptics/hapticsService'
 import { createAnalyticsId, recordPlayerEvent } from '../../services/analytics/analytics'
 import { AppButton } from '../components/AppButton'
 import { ArtworkButton } from '../components/ArtworkButton'
+import { GameImage } from '../components/GameImage'
 import { LevelScoreReveal } from '../components/LevelScoreReveal'
 import { LevelTimerDisplay } from '../components/LevelTimerDisplay'
 import { Modal } from '../components/Modal'
@@ -49,6 +50,8 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const completionRecorded = useRef(false)
   const attemptId = useRef(createAnalyticsId())
   const failureRecorded = useRef(false)
+  const resultSoundPlayed = useRef<'clear' | 'over' | undefined>(undefined)
+  const clearSoundWavePlayed = useRef(0)
   const boardEffectId = useRef(0)
   const lastHintEffect = useRef<string | undefined>(undefined)
   const [boardEffect, setBoardEffect] = useState<PlanningBoardEffect>()
@@ -74,12 +77,24 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     setBoardEffect({ ...effect, id: boardEffectId.current })
   }
   useEffect(() => {
-    if (tutorial.open || hidden || failureModalOpen) pauseBackgroundMusic()
+    if (tutorial.open || hidden) pauseBackgroundMusic()
     else startBackgroundMusic(player.settings.music)
-  }, [tutorial.open, hidden, failureModalOpen, player.settings.music])
+  }, [tutorial.open, hidden, player.settings.music])
   useEffect(() => {
-    if (state.phase === 'completed') pauseBackgroundMusic()
+    if (state.phase !== 'running') clearSoundWavePlayed.current = 0
   }, [state.phase])
+  useEffect(() => {
+    if (state.phase !== 'running' || paused || tutorial.open || hidden || clearing.length === 0 || wave <= clearSoundWavePlayed.current) return
+    clearSoundWavePlayed.current = wave
+    playClearSound(wave, player.settings.sound)
+  }, [clearing, hidden, paused, player.settings.sound, state.phase, tutorial.open, wave])
+  useEffect(() => {
+    const result = state.phase === 'completed' ? 'clear' : state.failureReason === 'resolution' ? 'over' : undefined
+    if (!result || resultSoundPlayed.current === result) return
+    resultSoundPlayed.current = result
+    stopBackgroundMusic()
+    playLevelResultSound(result, player.settings.sound)
+  }, [state.phase, state.failureReason, player.settings.sound])
   useEffect(() => () => stopBackgroundMusic(), [])
   useEffect(() => {
     if (state.phase !== 'completed' || completionRecorded.current) return
@@ -92,7 +107,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     void recordPlayerEvent({ eventName: 'level_completed', levelId: activeLevelId, attemptId: attemptId.current, clearTimeMs: finalElapsedMs, starsEarned: earnedStars })
   }, [state.phase, completeLevel, activeLevelId, read, timeTargets.threeStarMs, timeTargets.twoStarMs])
   useEffect(() => {
-    if (state.failureReason !== 'resolution') return
+    if (!state.failureReason) return
     setFailureModalOpen(true)
     if (failureRecorded.current) return
     failureRecorded.current = true
@@ -112,6 +127,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const restart = () => {
     completionRecorded.current = false
     failureRecorded.current = false
+    resultSoundPlayed.current = undefined
     attemptId.current = createAnalyticsId()
     void recordPlayerEvent({ eventName: 'level_started', levelId: activeLevelId, attemptId: attemptId.current })
     reset()
@@ -125,7 +141,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     setFailureModalOpen(false)
     setPaused(false)
   }
-  const watchRewardAd = async (kind: RewardAdKind, allowExistingHint = false) => {
+  const watchRewardAd = async (kind: RewardAdKind, allowExistingHint = false, restartAfterReward = false) => {
     if (rewardAdPending || state.phase !== 'editing') return
     if (kind === 'undo' ? state.undoUses > 0 : !allowExistingHint && state.hintUses > 0) return
     setRewardAdPending(true)
@@ -133,13 +149,16 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     try {
       const completed = await (kind === 'hint' ? onWatchHintAd() : onWatchUndoAd())
       if (completed) {
+        if (restartAfterReward) restart()
         dispatch({ type: kind === 'hint' ? 'grant-hint' : 'grant-undo' })
         setRewardAdStatus(kind === 'hint' ? text.hintAdGranted : text.undoAdGranted)
       } else {
         setRewardAdStatus(kind === 'hint' ? text.hintAdUnavailable : text.undoAdUnavailable)
+        if (restartAfterReward) setFailureModalOpen(true)
       }
     } catch {
       setRewardAdStatus(kind === 'hint' ? text.hintAdUnavailable : text.undoAdUnavailable)
+      if (restartAfterReward) setFailureModalOpen(true)
     } finally {
       setRewardAdPending(false)
     }
@@ -162,8 +181,9 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     setRewardAdConfirm('hint')
   }
   const requestFailureHint = () => {
+    const restartAfterReward = state.failureReason === 'no-solution'
     setFailureModalOpen(false)
-    void watchRewardAd('hint', true)
+    void watchRewardAd('hint', true, restartAfterReward)
   }
   const confirmRewardAd = () => {
     if (!rewardAdConfirm) return
@@ -275,35 +295,55 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
       </div>
     </Modal>
     <Modal
-      open={failureModalOpen && state.failureReason === 'resolution' && !paused}
-      onClose={() => setFailureModalOpen(false)}
-      ariaLabel={text.failureTitle}
+      open={failureModalOpen && state.failureReason !== undefined && !paused}
+      onClose={state.failureReason === 'no-solution' ? undefined : () => setFailureModalOpen(false)}
+      ariaLabel={state.failureReason === 'no-solution' ? text.noSolutionTitle : text.failureTitle}
       className="drop-result drop-result--failure"
     >
       <div className="drop-result__header">
-        <img src={getCatAssetPath('sleeping')} alt="" />
-        <span className="drop-result__eyebrow">{text.failureEyebrow}</span>
-        <h2>{text.failureTitle}</h2>
-        <p className="drop-result__encouragement">{text.failureEncouragement}</p>
+        <div className="drop-result__level-chip" aria-label={`第 ${activeLevelId} 關`}>
+          <GameImage asset="levelcard" alt="" aria-hidden="true" />
+          <span>{activeLevelId}</span>
+        </div>
+        <div className="drop-result__mascot">
+          <img src={getCatAssetPath('sleeping')} alt="" />
+        </div>
+        <div className="drop-result__title">
+          <span className="drop-result__eyebrow">{state.failureReason === 'no-solution' ? text.noSolutionEyebrow : text.failureEyebrow}</span>
+          <h2>{state.failureReason === 'no-solution' ? text.noSolutionTitle : text.failureTitle}</h2>
+        </div>
+        <p className="drop-result__encouragement">{state.failureReason === 'no-solution' ? text.noSolutionEncouragement : text.failureEncouragement}</p>
       </div>
-      <p className="drop-result__summary">{text.failures} {state.failures} {text.times}</p>
+      {state.failureReason === 'resolution' && <div className="drop-result__score-panel drop-result__failure-summary"><p className="drop-result__summary"><span>{text.failures}</span><strong>{state.failures}</strong><span>{text.times}</span></p></div>}
       <div className="drop-result__actions">
         <AppButton onClick={restart}>{text.restart}</AppButton>
-        <AppButton variant="blue" onClick={requestFailureHint}>{text.failureHintAd}</AppButton>
-        <AppButton variant="cream" onClick={() => setFailureModalOpen(false)}>{text.keepTrying}</AppButton>
+        <AppButton variant="blue" onClick={requestFailureHint}>{state.failureReason === 'no-solution' ? text.noSolutionHintAd : text.failureHintAd}</AppButton>
+        {state.failureReason === 'resolution'
+          ? <AppButton variant="cream" onClick={() => setFailureModalOpen(false)}>{text.keepTrying}</AppButton>
+          : <AppButton variant="cream" onClick={() => setFailureModalOpen(false)}>{text.continueAction}</AppButton>}
       </div>
     </Modal>
     <Modal open={state.phase === 'completed' && !paused} ariaLabel={text.completed} className="drop-result drop-result--success">
       <div className="drop-result__header">
-        <img src={getCatAssetPath('orange')} alt="" />
-        <span className="drop-result__eyebrow">{text.successEyebrow}</span>
-        <h2>{text.completed}</h2>
+        <div className="drop-result__level-chip" aria-label={`第 ${activeLevelId} 關`}>
+          <GameImage asset="levelcard" alt="" aria-hidden="true" />
+          <span>{activeLevelId}</span>
+        </div>
+        <div className="drop-result__mascot">
+          <img src={getCatAssetPath('orange')} alt="" />
+        </div>
+        <div className="drop-result__title">
+          <span className="drop-result__eyebrow">{text.successEyebrow}</span>
+          <h2>{text.completed}</h2>
+        </div>
         <p className="drop-result__encouragement">{text.successEncouragement}</p>
       </div>
-      <LevelScoreReveal elapsedMs={shownElapsedMs} stars={stars} timeLabel={text.resultTime} starsLabel={text.starsLabel(stars)} />
-      <p className="drop-result__summary">{text.wave} {wave}</p>
+      <div className="drop-result__score-panel">
+        <LevelScoreReveal elapsedMs={shownElapsedMs} stars={stars} timeLabel={text.resultTime} starsLabel={text.starsLabel(stars)} />
+        <p className="drop-result__summary"><span>{text.wave}</span><strong>{wave}</strong></p>
+      </div>
       <div className="drop-result__actions">
-        {activeLevelId < MAX_PLANNING_LEVEL && <AppButton onClick={() => onNextLevel(activeLevelId + 1)}>{text.next(activeLevelId + 1)}</AppButton>}
+        {activeLevelId < MAX_PLANNING_LEVEL && <AppButton variant="cream" className="drop-result__next-button" onClick={() => onNextLevel(activeLevelId + 1)}>{text.next(activeLevelId + 1)}</AppButton>}
         {activeLevelId === MAX_PLANNING_LEVEL && <p className="planning-mainline-done">{text.mainlineDone}</p>}
         <AppButton variant="cream" onClick={onLevelSelect}>{text.levels}</AppButton>
       </div>

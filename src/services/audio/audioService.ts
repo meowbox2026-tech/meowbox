@@ -1,10 +1,23 @@
 export const UI_SOUND_PATH = '/assets/audio/andressamd-pop-click-576326.mp3'
 
 export const BACKGROUND_MUSIC_PATH = '/assets/audio/geoffharvey-excuse-me-cat-150613.mp3'
+export const LEVEL_CLEAR_SOUND_PATH = '/assets/audio/gameClear.wav'
+export const LEVEL_OVER_SOUND_PATH = '/assets/audio/game-over.wav'
+export const CLEAR_SOUND_PATHS = [
+  '/assets/audio/combo-bubble-01-original.wav',
+  '/assets/audio/combo-bubble-tone-02-bright.wav',
+  '/assets/audio/combo-bubble-tone-03-crisp.wav',
+  '/assets/audio/combo-bubble-tone-04-sparkle.wav'
+] as const
+
+export type LevelResultSound = 'clear' | 'over'
 
 let backgroundMusic: HTMLAudioElement | undefined
 let backgroundMusicPlaying = false
 let uiSound: HTMLAudioElement | undefined
+let clearSound: HTMLAudioElement | undefined
+let clearSoundPath: string | undefined
+let levelResultSound: HTMLAudioElement | undefined
 let lastUiSoundAt = 0
 let backgroundMusicEnabled = true
 let audioSuspended = false
@@ -24,6 +37,44 @@ export function playUiSound(enabled: boolean): void {
   }
   uiSound.currentTime = 0
   safelyPlay(uiSound)
+}
+
+export function getClearSoundPath(combo: number): string {
+  const normalizedCombo = Number.isFinite(combo) ? Math.max(1, Math.floor(combo)) : 1
+  if (normalizedCombo >= 6) return CLEAR_SOUND_PATHS[3]
+  if (normalizedCombo >= 4) return CLEAR_SOUND_PATHS[2]
+  if (normalizedCombo >= 2) return CLEAR_SOUND_PATHS[1]
+  return CLEAR_SOUND_PATHS[0]
+}
+
+export function playClearSound(combo: number, enabled: boolean): void {
+  if (!enabled || audioSuspended || pageIsHidden() || typeof window === 'undefined') return
+  const AudioConstructor = window.Audio
+  if (typeof AudioConstructor !== 'function') return
+
+  const path = getClearSoundPath(combo)
+  clearSound?.pause()
+  if (!clearSound || clearSoundPath !== path) {
+    clearSound = new AudioConstructor(path)
+    clearSound.volume = 0.42
+    clearSoundPath = path
+  }
+  clearSound.currentTime = 0
+  safelyPlay(clearSound)
+}
+
+export function playLevelResultSound(result: LevelResultSound, enabled: boolean): void {
+  if (!enabled || audioSuspended || pageIsHidden() || typeof window === 'undefined') return
+  const AudioConstructor = window.Audio
+  if (typeof AudioConstructor !== 'function') return
+
+  levelResultSound?.pause()
+  const sound = new AudioConstructor(result === 'clear' ? LEVEL_CLEAR_SOUND_PATH : LEVEL_OVER_SOUND_PATH)
+  sound.volume = 0.5
+  levelResultSound = sound
+  safelyPlay(sound, () => {
+    if (levelResultSound === sound) levelResultSound = undefined
+  })
 }
 
 export function startBackgroundMusic(enabled: boolean): void {
@@ -48,6 +99,8 @@ export function setAudioSuspended(suspended: boolean): void {
   if (suspended) {
     pauseBackgroundMusic()
     uiSound?.pause()
+    clearSound?.pause()
+    levelResultSound?.pause()
   }
 }
 
@@ -64,8 +117,11 @@ export function pauseBackgroundMusic(): void {
 
 export function stopBackgroundMusic(): void {
   pauseBackgroundMusic()
+  clearSound?.pause()
   backgroundMusic = undefined
   uiSound = undefined
+  clearSound = undefined
+  clearSoundPath = undefined
   lastUiSoundAt = 0
 }
 

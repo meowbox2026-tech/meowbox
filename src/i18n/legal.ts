@@ -38,7 +38,7 @@ const zh: Record<LegalDocumentId, LegalDocument> = {
         bullets: ['不得反向工程、修改、破解、轉售或重新散布本遊戲或其素材。', '不得利用錯誤、機器人或其他未授權方式取得遊戲進度或內容。', '不得移除著作權、商標或其他權利聲明。']
       },
       { heading: '遊戲資料與功能', paragraphs: ['目前版本主要將進度儲存在你的裝置上。刪除 App、清除網站資料、裝置故障或系統重置可能造成進度遺失。請在進行上述操作前自行備份重要資料。'] },
-      { heading: '付費內容與廣告', paragraphs: ['目前版本不提供遊戲內貨幣、商店、每日獎勵或購買獎勵。主線每累計五次開始新局、從選關進入關卡、前往下一關或點擊重新開始後，會顯示全螢幕測試插頁廣告畫面；若當前關卡的上一步次數歸零，可觀看測試獎勵廣告，完成後增加五次上一步且只限當前關卡使用。瀏覽器測試畫面模擬 30 秒且不能提前關閉。正式接入廣告 SDK 後，廣告的載入、曝光、獎勵完成與關閉時機會由廣告供應商回呼控制；遊戲不要求玩家點擊廣告或開啟商店，並會在上線前更新相關說明。若未來提供 App 內購買，交易會透過 Apple App Store 處理。'] },
+      { heading: '付費內容與廣告', paragraphs: ['目前版本不提供遊戲內貨幣、商店、每日獎勵或購買獎勵。iOS App 主線每累計五次開始新局、從選關進入關卡、前往下一關或點擊重新開始後，會由 Google Mobile Ads SDK 顯示全螢幕插頁廣告；提示或上一步次數歸零時，可觀看獎勵式廣告，完成後分別增加三次提示或五次上一步，僅限當前關卡使用。瀏覽器版本只顯示本機測試畫面，不會請求第三方廣告。正式廣告的載入、曝光、獎勵完成與關閉時機由廣告供應商回呼控制；遊戲不要求玩家點擊廣告或開啟商店。若未來提供 App 內購買，交易會透過 Apple App Store 處理。'] },
       { heading: '智慧財產權', paragraphs: ['本遊戲的程式、畫面、文字、角色、圖像、音效與品牌識別均由 Meow Line 開發團隊或合法授權方擁有。除本條款明確允許的個人使用外，不授予你任何智慧財產權。'] },
       { heading: '服務變更與免責', paragraphs: ['我們可能為了修正錯誤、改善安全性或調整遊戲內容而更新、暫停或停止部分功能。法律允許的最大範圍內，本遊戲依「現況」提供，不保證永遠不中斷或完全沒有錯誤。'] },
       { heading: '聯絡方式', paragraphs: [`若你對本條款有疑問，請寄信至 ${SUPPORT_EMAIL}。`] }
@@ -85,7 +85,7 @@ const enDocs: Record<LegalDocumentId, LegalDocument> = {
         bullets: ['Do not reverse-engineer, modify, hack, resell, or redistribute the game or its assets.', 'Do not exploit bugs, bots, or unauthorized means to gain progress or content.', 'Do not remove copyright, trademark, or other rights notices.']
       },
       { heading: 'Game data and features', paragraphs: ['The current version stores progress mainly on your device. Deleting the app, clearing site data, device failure, or OS resets may lose progress. Please back up anything important first.'] },
-      { heading: 'Paid content and ads', paragraphs: ['The current version has no in-game currency, shop, daily rewards, or purchase rewards. A test interstitial appears after every five play actions, including starting from level select, moving to the next level, and restarting a level. When a level has no undos left, a test rewarded ad can add five undos for that level only. The local test screen lasts at least five seconds and cannot be closed early. In production, the ad provider controls loading, impression, completion, and dismissal callbacks. Future in-app purchases would go through the Apple App Store with updated instructions.'] },
+      { heading: 'Paid content and ads', paragraphs: ['The current version has no in-game currency, shop, daily rewards, or purchase rewards. In the iOS app, Google Mobile Ads shows a full-screen interstitial after every five play actions, including starting from level select, moving to the next level, and restarting a level. When hints or undos reach zero, a rewarded ad can add three hints or five undos for the current level only. The browser version uses only a local test screen and does not request a third-party ad. The provider controls production ad loading, impressions, reward completion, and dismissal callbacks; the game never asks players to click an ad or open a store. Future in-app purchases would go through the Apple App Store with updated instructions.'] },
       { heading: 'Intellectual property', paragraphs: ['Code, visuals, text, characters, art, audio, and branding belong to the Meow Line team or its licensors. Nothing beyond personal use is granted.'] },
       { heading: 'Changes and disclaimer', paragraphs: ['We may update, suspend, or stop features to fix bugs, improve safety, or adjust content. To the maximum extent allowed by law, the game is provided “as is” without guarantees of uninterrupted or error-free play.'] },
       { heading: 'Contact', paragraphs: [`Questions about these terms? Email ${SUPPORT_EMAIL}.`] }
@@ -132,7 +132,7 @@ const jaDocs: Record<LegalDocumentId, LegalDocument> = {
         bullets: ['リバースエンジニアリング・改変・不正利用・転売・再配布を禁じます。', '不具合・Bot・未承認手段による進行・コンテンツの取得を禁じます。', '著作権・商標その他の権利表示を削除しないでください。']
       },
       { heading: 'ゲームデータと機能', paragraphs: ['現行バージョンは進行状況を主に端末に保存します。アプリ削除・サイトデータ消去・故障・初期化で消失する恐れがあります。大切なデータは事前にご自身でお控えください。'] },
-      { heading: '課金と広告', paragraphs: ['現行バージョンにゲーム内通貨・ショップ・デイリー報酬・購入報酬はありません。プレイ操作5回ごとに全画面のテストインタースティシャルを表示し、レベル選択からの開始・次のレベルへの移動・やり直しも含みます。現在のステージの戻す回数がなくなったら、報酬広告の完了後にそのステージだけ5回追加します。ブラウザのテスト画面は30秒をシミュレーションし、早く閉じることはできません。正式版では広告事業者の読み込み・表示・完了・閉じるコールバックに従い、ゲームから広告クリックやストア移動を要求しません。将来的なアプリ内課金はApple App Store経由で処理し、事前に関連説明を更新します。'] },
+      { heading: '課金と広告', paragraphs: ['現行バージョンにゲーム内通貨・ショップ・デイリー報酬・購入報酬はありません。iOSアプリでは Google Mobile Ads が、レベル選択からの開始・次のレベルへの移動・やり直しを含むプレイ操作5回ごとに全画面インタースティシャルを表示します。ヒントまたは戻す回数がなくなったら、報酬広告の完了後にそのステージだけヒント3回または戻す5回を追加します。ブラウザ版はローカルのテスト画面だけを使い、第三者広告へリクエストしません。正式広告の読み込み・表示・完了・閉じるコールバックは広告事業者が制御し、ゲームから広告クリックやストア移動を要求しません。将来的なアプリ内課金はApple App Store経由で処理します。'] },
       { heading: '知的財産権', paragraphs: ['プログラム・画面・文章・キャラ・画像・音・ブランドはMeow Line開発チームまたは正規ライセンサーが保有します。個人利用以外の権利は付与されません。'] },
       { heading: '変更と免責', paragraphs: ['不具合修正・安全性向上・内容調整のため、機能の更新・停止・終了を行う場合があります。法令で認められる最大範囲で、本ゲームは「現状有姿」で提供され、中断なし・無誤動作を保証しません。'] },
       { heading: '連絡先', paragraphs: [`本規約へのご質問は ${SUPPORT_EMAIL} まで。`] }

@@ -5,7 +5,7 @@ import { GameScreen } from './GameScreen'
 vi.mock('../../state/PlayerContext', () => ({ usePlayer: () => ({
   player: { settings: { music: false, sound: false, haptics: false } }, completeLevel: vi.fn()
 }) }))
-vi.mock('../../services/audio/audioService', () => ({ startBackgroundMusic: vi.fn(), stopBackgroundMusic: vi.fn() }))
+vi.mock('../../services/audio/audioService', () => ({ startBackgroundMusic: vi.fn(), stopBackgroundMusic: vi.fn(), playLevelResultSound: vi.fn() }))
 vi.mock('../../services/haptics/hapticsService', () => ({ playPlacementHaptic: vi.fn() }))
 
 afterEach(cleanup)

@@ -1,0 +1,12 @@
+/game-content/*
+  Access-Control-Allow-Origin: *
+  X-Content-Type-Options: nosniff
+
+/game-content/levels-*.json
+  Cache-Control: public, max-age=31536000, immutable
+
+/game-content/theme-*.json
+  Cache-Control: public, max-age=31536000, immutable
+
+/game-content/manifest.json
+  Cache-Control: no-cache, must-revalidate

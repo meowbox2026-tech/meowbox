@@ -18,7 +18,7 @@ export interface PlayerSave {
 }
 
 const STORAGE_KEY = 'meow-box-player-save'
-export const MAX_SAVED_LEVEL = 90
+export const MAX_SAVED_LEVEL = 500
 
 export function createDefaultPlayerSave(): PlayerSave {
   return {
@@ -87,7 +87,7 @@ function normaliseStars(value: unknown): Record<number, number> {
   if (!isRecord(value)) return {}
   return Object.fromEntries(Object.entries(value)
     .filter((entry): entry is [string, number] => Number.isInteger(Number(entry[0])) && typeof entry[1] === 'number')
-    .filter(([id]) => Number(id) <= MAX_SAVED_LEVEL)
+    .filter(([id]) => Number(id) >= 1 && Number(id) <= MAX_SAVED_LEVEL)
     .map(([id, stars]) => [Number(id), Math.max(0, Math.min(3, Math.floor(stars)))]))
 }
 

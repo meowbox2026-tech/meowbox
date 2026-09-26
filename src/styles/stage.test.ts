@@ -8,4 +8,9 @@ describe('stage background layers', () => {
   it('does not apply the ambient overlay to the game screen', () => {
     expect(stageCss).toMatch(/\.app-bleed\[data-screen='game'\]::after\s*\{[^}]*display:\s*none/)
   })
+
+  it('allows only direct non-game pages to scroll inside the fixed stage', () => {
+    expect(stageCss).toMatch(/\.app-stage > \.screen:not\(\.screen--game\)\s*\{[^}]*overflow-y:\s*auto/)
+    expect(stageCss).toMatch(/\.app-stage > \.screen:not\(\.screen--game\)::\-webkit-scrollbar\s*\{[^}]*display:\s*none/)
+  })
 })

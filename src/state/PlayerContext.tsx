@@ -3,11 +3,12 @@ import type { ReactNode } from 'react'
 import {
   createDefaultPlayerSave,
   loadPlayerSave,
+  MAX_SAVED_LEVEL,
   persistPlayerSave,
   type PlayerSave,
   type PlayerSettings
 } from '../services/save/playerSave'
-import { MAX_PLANNING_LEVEL } from '../game/data/planningLevels'
+import { confirmGameContentReady, initializeGameContent } from '../services/gameContent/contentUpdate'
 import { setBackgroundMusicEnabled, startBackgroundMusic } from '../services/audio/audioService'
 import { installGlobalAudioFeedback } from '../services/audio/globalAudioFeedback'
 
@@ -26,13 +27,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true
-    void loadPlayerSave().then((savedPlayer) => {
+    void Promise.all([loadPlayerSave(), initializeGameContent().catch(() => undefined)]).then(([savedPlayer]) => {
       if (!mounted) return
       setPlayer(savedPlayer)
       setIsReady(true)
     })
     return () => { mounted = false }
   }, [])
+
+  useEffect(() => {
+    if (isReady) confirmGameContentReady()
+  }, [isReady])
 
   useEffect(() => {
     if (isReady) void persistPlayerSave(player)
@@ -60,7 +65,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const completeLevel = useCallback((levelId: number, stars: number) => {
     update((current) => ({
       ...current,
-      currentLevel: Math.max(current.currentLevel, Math.min(MAX_PLANNING_LEVEL, levelId + 1)),
+      currentLevel: Math.max(current.currentLevel, Math.min(MAX_SAVED_LEVEL, levelId + 1)),
       completedLevels: uniqueNumbers([...current.completedLevels, levelId]),
       stars: { ...current.stars, [levelId]: Math.max(current.stars[levelId] ?? 0, stars) }
     }))

@@ -12,6 +12,7 @@ import './styles/game.css'
 import './styles/legal.css'
 import './styles/native-assets.css'
 import './styles/player-status.css'
+import './styles/theme.css'
 
 document.documentElement.classList.toggle('native-platform', Capacitor.isNativePlatform())
 

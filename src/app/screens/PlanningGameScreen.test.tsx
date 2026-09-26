@@ -9,13 +9,15 @@ const watchHintAd = vi.hoisted(() => vi.fn())
 const startBackgroundMusic = vi.hoisted(() => vi.fn())
 const pauseBackgroundMusic = vi.hoisted(() => vi.fn())
 const stopBackgroundMusic = vi.hoisted(() => vi.fn())
+const playClearSound = vi.hoisted(() => vi.fn())
+const playLevelResultSound = vi.hoisted(() => vi.fn())
 const setAudioSuspended = vi.hoisted(() => vi.fn())
 const recordPlayerEvent = vi.hoisted(() => vi.fn())
 const createAnalyticsId = vi.hoisted(() => vi.fn(() => '11111111-1111-4111-8111-111111111111'))
 vi.mock('../../state/PlayerContext', () => ({ usePlayer: () => ({
-  player: { settings: { music: true, sound: false, haptics: false } }, completeLevel
+  player: { settings: { music: true, sound: true, haptics: false } }, completeLevel
 }) }))
-vi.mock('../../services/audio/audioService', () => ({ pauseBackgroundMusic, startBackgroundMusic, stopBackgroundMusic, setAudioSuspended }))
+vi.mock('../../services/audio/audioService', () => ({ pauseBackgroundMusic, startBackgroundMusic, stopBackgroundMusic, playClearSound, playLevelResultSound, setAudioSuspended }))
 vi.mock('../../services/analytics/analytics', () => ({ recordPlayerEvent, createAnalyticsId }))
 vi.mock('../../services/haptics/hapticsService', () => ({ playPlacementHaptic: vi.fn() }))
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks() })
@@ -243,6 +245,44 @@ describe('8x8 planning level through the game entry point', () => {
     expect(screen.getByText('廣告尚未完成，沒有增加提示')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /提示 0/ })).toBeEnabled()
   })
+  it('explains when a misplaced cat leaves no hint route and resets after the recovery ad', async () => {
+    watchHintAd.mockResolvedValue(true)
+    mount()
+
+    await place(1, 1, 1)
+    fireEvent.click(screen.getByRole('button', { name: '提示 1' }))
+    await flushAsyncState()
+
+    expect(screen.getByRole('dialog', { name: '目前配置無法完成' })).toBeInTheDocument()
+    expect(screen.getByText('剛才的放置方式已經沒有可行解，請重新開始本關。')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '重新開始本關' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '觀看廣告取得提示並重新開始' })).toBeEnabled()
+
+    fireEvent.click(screen.getByRole('button', { name: '觀看廣告取得提示並重新開始' }))
+    await flushAsyncState()
+
+    expect(watchHintAd).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('dialog', { name: '目前配置無法完成' })).toBeNull()
+    expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '提示 4' })).toBeEnabled()
+  })
+  it('lets the player continue from the no-solution notice without pausing music', async () => {
+    mount()
+
+    await place(1, 1, 1)
+    fireEvent.click(screen.getByRole('button', { name: '提示 1' }))
+    await flushAsyncState()
+
+    expect(screen.getByRole('dialog', { name: '目前配置無法完成' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '繼續' })).toBeEnabled()
+    expect(pauseBackgroundMusic).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: '繼續' }))
+
+    expect(screen.queryByRole('dialog', { name: '目前配置無法完成' })).toBeNull()
+    expect(screen.getByText('已安排 1 / 3')).toBeInTheDocument()
+    expect(pauseBackgroundMusic).not.toHaveBeenCalled()
+  })
   it('opens an ad confirmation from the attention-marked undo button', async () => {
     watchUndoAd.mockResolvedValue({ completed: true })
     const { container } = mount()
@@ -296,6 +336,12 @@ describe('8x8 planning level through the game entry point', () => {
     finish()
     expect(screen.getByRole('dialog', { name: '全部回家了！' })).toBeInTheDocument()
     expect(completeLevel).toHaveBeenCalledExactlyOnceWith(1, 3)
+    expect(stopBackgroundMusic).toHaveBeenCalled()
+    expect(playLevelResultSound).toHaveBeenCalledWith('clear', true)
+    expect(playClearSound).toHaveBeenCalledTimes(3)
+    expect(playClearSound).toHaveBeenNthCalledWith(1, 1, true)
+    expect(playClearSound).toHaveBeenNthCalledWith(2, 2, true)
+    expect(playClearSound).toHaveBeenNthCalledWith(3, 3, true)
     expect(recordPlayerEvent).toHaveBeenCalledWith(expect.objectContaining({ eventName: 'level_completed', levelId: 1, clearTimeMs: expect.any(Number), starsEarned: 3 }))
     finish()
     expect(completeLevel).toHaveBeenCalledTimes(1)
@@ -312,6 +358,11 @@ describe('8x8 planning level through the game entry point', () => {
     await flushAsyncState()
 
     expect(screen.getByRole('dialog', { name: '挑戰失敗' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '挑戰失敗' })).toHaveClass('drop-result--failure')
+    expect(stopBackgroundMusic).toHaveBeenCalled()
+    expect(playLevelResultSound).toHaveBeenCalledWith('over', true)
+    expect(document.querySelector('.drop-result--failure .drop-result__level-chip')).toHaveTextContent('1')
+    expect(document.querySelector('.drop-result--failure .drop-result__score-panel')).toBeInTheDocument()
     expect(recordPlayerEvent).toHaveBeenCalledWith(expect.objectContaining({ eventName: 'level_failed', levelId: 1 }))
     expect(screen.getByText('沒關係！換個順序再試一次，貓咪還在等你帶回家 ♡')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '重新開始本關' })).toBeEnabled()
@@ -323,6 +374,23 @@ describe('8x8 planning level through the game entry point', () => {
     expect(screen.getByText('本關已獲得 3 次提示')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '提示 4' })).toBeEnabled()
     expect(screen.queryByRole('dialog', { name: '挑戰失敗' })).toBeNull()
+  })
+  it('resets the timer when restarting from the failure modal', async () => {
+    mount()
+    act(() => vi.advanceTimersByTime(1_500))
+    await place(1, 1, 1)
+    await place(1, 2, 2)
+    await place(1, 3, 3)
+    start()
+    await flushAsyncState()
+
+    expect(screen.getByRole('dialog', { name: '挑戰失敗' })).toBeInTheDocument()
+    expect(screen.getByRole('timer', { name: /關卡時間 00:01\.5/ })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '重新開始本關' }))
+
+    expect(screen.getByRole('timer', { name: '關卡時間 00:00.0' })).toBeInTheDocument()
+    expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
   })
   it('keeps the original hint count when the failure ad is not completed', async () => {
     watchHintAd.mockResolvedValue(false)
@@ -353,6 +421,9 @@ describe('8x8 planning level through the game entry point', () => {
 
     expect(screen.getByRole('dialog', { name: '全部回家了！' })).toHaveClass('drop-result', 'drop-result--success')
     expect(screen.getByText('太棒了！貓咪都安全回家了 ♡')).toBeInTheDocument()
+    expect(document.querySelector('.drop-result__banner-art')).toBeNull()
+    expect(document.querySelector('.drop-result__level-chip')).toHaveTextContent('1')
+    expect(screen.getByRole('button', { name: '前往第 2 關' })).toHaveClass('app-button--cream')
     expect(document.querySelectorAll('.planning-score-reveal__stars img')).toHaveLength(3)
     expect(screen.getByTestId('result-time')).toHaveTextContent(/^\d{2}:\d{2}\.\d$/)
   })
