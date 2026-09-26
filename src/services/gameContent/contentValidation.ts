@@ -14,8 +14,11 @@ const THEME_KEYS: readonly (keyof GameTheme)[] = [
   'pageBackground', 'textPrimary', 'textStrong', 'textMuted', 'surface', 'surfaceAlt', 'surfaceElevated',
   'surfaceBorder', 'brand', 'brandStrong', 'accent', 'accentStrong', 'buttonText', 'buttonPrimaryStart',
   'buttonPrimaryEnd', 'buttonSecondaryStart', 'buttonSecondaryEnd', 'buttonWarmStart', 'buttonWarmEnd',
-  'positiveStart', 'positiveEnd', 'positiveStrong', 'danger', 'focus', 'board', 'boardLine', 'selection',
-  'overlayTop', 'overlayBottom', 'modalOverlay'
+  'positiveStart', 'positiveEnd', 'positiveStrong', 'danger', 'focus', 'board', 'boardLine',
+  'boardFrameTop', 'boardFrameMiddle', 'boardFrameBottom', 'boardGridMiddle', 'boardGridBottom',
+  'boardCellTop', 'boardCellBottom', 'boardCellAltPink', 'boardCellAltPurple', 'boardCellAltYellow',
+  'boardFrameBorder', 'boardGridBorder', 'boardLabel', 'selection',
+  'overlayTop', 'overlayBottom', 'modalOverlay', 'pauseModalBackground'
 ]
 
 export function parsePlanningLevels(value: unknown): PlanningLevel[] | undefined {

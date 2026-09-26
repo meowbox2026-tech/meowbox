@@ -23,12 +23,26 @@
   --theme-positive-strong: #62a640;
   --theme-danger: #ee4f85;
   --theme-focus: #fff7a6;
-  --theme-board: #fffaf0;
-  --theme-board-line: #dec1a0;
+  --theme-board: #d8f7f2;
+  --theme-board-line: #ffffffd1;
+  --theme-board-frame-top: #fffdf7;
+  --theme-board-frame-middle: #e8fbf6;
+  --theme-board-frame-bottom: #dfeaff;
+  --theme-board-grid-middle: #dcecff;
+  --theme-board-grid-bottom: #f4e5ff;
+  --theme-board-cell-top: #ffffff;
+  --theme-board-cell-bottom: #dff7f1;
+  --theme-board-cell-alt-pink: #ffe6e2;
+  --theme-board-cell-alt-purple: #e7e0ff;
+  --theme-board-cell-alt-yellow: #fff1c9;
+  --theme-board-frame-border: #ffffffc7;
+  --theme-board-grid-border: #ffffffe6;
+  --theme-board-label: #587594;
   --theme-selection: #ffe58a;
   --theme-overlay-top: #fff4df0f;
   --theme-overlay-bottom: #5b2a1314;
   --theme-modal-overlay: #271814aa;
+  --theme-pause-modal-background: #00000000;
 }
 
 .app-frame { background: var(--theme-page-background); }
@@ -105,14 +119,15 @@
 .app-frame .planning-undo-confirm p,
 .app-frame .planning-diagonal-tutorial { color: var(--theme-text-strong); }
 .app-frame .planning-board--prism {
-  border-color: var(--theme-surface-border);
-  background: linear-gradient(145deg, var(--theme-surface-elevated), var(--theme-board), var(--theme-surface-alt));
+  border-color: var(--theme-board-frame-border);
+  background: linear-gradient(145deg, var(--theme-board-frame-top) 0%, var(--theme-board-frame-middle) 46%, var(--theme-board-frame-bottom) 100%);
 }
-.app-frame .planning-grid { background: linear-gradient(155deg, var(--theme-board), var(--theme-surface-alt), var(--theme-selection)); }
-.app-frame .planning-cell { --prism-cell-top: var(--theme-surface-elevated); --prism-cell-bottom: var(--theme-board); border-color: var(--theme-surface-border); }
-.app-frame .planning-cell:nth-child(4n + 2) { --prism-cell-bottom: var(--theme-surface-alt); }
-.app-frame .planning-cell:nth-child(4n + 3) { --prism-cell-bottom: var(--theme-selection); }
-.app-frame .planning-cell:nth-child(4n + 4) { --prism-cell-bottom: var(--theme-accent); }
+.app-frame .planning-grid { border-color: var(--theme-board-grid-border); background: linear-gradient(155deg, var(--theme-board), var(--theme-board-grid-middle) 53%, var(--theme-board-grid-bottom)); }
+.app-frame .planning-cell { --prism-cell-top: var(--theme-board-cell-top); --prism-cell-bottom: var(--theme-board-cell-bottom); border-color: var(--theme-board-line); }
+.app-frame .planning-cell:nth-child(4n + 2) { --prism-cell-bottom: var(--theme-board-cell-alt-pink); }
+.app-frame .planning-cell:nth-child(4n + 3) { --prism-cell-bottom: var(--theme-board-cell-alt-purple); }
+.app-frame .planning-cell:nth-child(4n + 4) { --prism-cell-bottom: var(--theme-board-cell-alt-yellow); }
+.app-frame .planning-board__label { color: var(--theme-board-label); }
 .app-frame .planning-tray { background: var(--theme-board); }
 .app-frame .planning-tray__cat { background: var(--theme-surface-elevated); box-shadow: inset 0 0 0 1px var(--theme-board-line); }
 .app-frame .planning-tray__cat.is-next,

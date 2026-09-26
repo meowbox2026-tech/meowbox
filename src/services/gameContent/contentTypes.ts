@@ -27,10 +27,24 @@ export interface GameTheme {
   focus: string
   board: string
   boardLine: string
+  boardFrameTop: string
+  boardFrameMiddle: string
+  boardFrameBottom: string
+  boardGridMiddle: string
+  boardGridBottom: string
+  boardCellTop: string
+  boardCellBottom: string
+  boardCellAltPink: string
+  boardCellAltPurple: string
+  boardCellAltYellow: string
+  boardFrameBorder: string
+  boardGridBorder: string
+  boardLabel: string
   selection: string
   overlayTop: string
   overlayBottom: string
   modalOverlay: string
+  pauseModalBackground: string
 }
 
 export interface ContentFileReference {

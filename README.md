@@ -24,7 +24,7 @@ npm run build
 遠端 manifest 以 RSA-PSS / SHA-256 簽名，App 內固定公開金鑰並同時驗證簽名、檔案雜湊、關卡格式與每關解答。私鑰只用於建置簽名，不會放進 App。成功下載的內容先作為候選版；App 完成啟動後才確認為穩定版。若下次開啟時候選版未被確認，App 會退回上一份已確認內容並暫時封鎖該版。啟動期間 0.9 秒內完成的更新會立即試用；較慢的下載先快取，在下次開啟時試用。玩家正在玩的棋盤不會被中途替換。
 
 - `src/game/content/levels.json`：正式關卡資料，也是 App 內建備份。保留既有關卡 ID 和順序；調整難度時修改該關盤面、托盤或解答。新增關卡只能接在目前最後一關之後。
-- `src/game/content/theme.json`：介面主題色。可調整頁面底色、文字、卡片、按鈕、關卡選單、棋盤和提示色；`src/styles/theme.css` 定義各色套用位置。修改時保留所有色彩欄位；貓咪插圖和按鈕圖片中的顏色仍由圖片素材決定。
+- `src/game/content/theme.json`：介面主題色。可調整頁面底色、文字、卡片、按鈕、關卡選單、棋盤水藍漸層、格子配色、提示色、彈窗遮罩，以及 `pauseModalBackground` 暫停卡片底色；`src/styles/theme.css` 定義各色套用位置。修改時保留所有色彩欄位；貓咪插圖和按鈕圖片中的顏色仍由圖片素材決定。
 - `src/game/content/manifest.json`：內容版本。每次發布關卡或主題變更，都把 `version` 加 1；回復舊內容時也要以新的、更大的版本號重新發布，不能把版本號倒退。
 
 首次設定時，`npm run content:generate-key` 會產生一組簽名金鑰：公開金鑰放在 `src/services/gameContent/trustedContentPublicKey.txt` 並隨 App 發布；私鑰放在 `.secrets/game-content-private.pem`（已忽略、不提交）。請安全備份私鑰，並只把它設成 Cloudflare Pages 專案 `meowbox` 的 Production secret `GAME_CONTENT_SIGNING_PRIVATE_KEY`；不可改成 `VITE_` 變數或提交進 Git。Cloudflare 不會再顯示 secret 原文。不要未經安全評估就把 Production 私鑰複製到 Preview。每次修改內容後執行 `npm run build` 檢查；建置會產生簽名 manifest 與帶 SHA-256 的版本檔。Cloudflare Pages 已連接 `vvstudiocode/meowbox`，`main` 生產分支自動部署已啟用；審查並提交要發布的改動後，推送到 `main` 才會部署。若遺失私鑰，必須更換 App 內公開金鑰並重新送審新的 iOS binary。

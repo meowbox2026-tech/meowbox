@@ -28,8 +28,11 @@ const themeKeys = [
   'pageBackground', 'textPrimary', 'textStrong', 'textMuted', 'surface', 'surfaceAlt', 'surfaceElevated',
   'surfaceBorder', 'brand', 'brandStrong', 'accent', 'accentStrong', 'buttonText', 'buttonPrimaryStart',
   'buttonPrimaryEnd', 'buttonSecondaryStart', 'buttonSecondaryEnd', 'buttonWarmStart', 'buttonWarmEnd',
-  'positiveStart', 'positiveEnd', 'positiveStrong', 'danger', 'focus', 'board', 'boardLine', 'selection',
-  'overlayTop', 'overlayBottom', 'modalOverlay'
+  'positiveStart', 'positiveEnd', 'positiveStrong', 'danger', 'focus', 'board', 'boardLine',
+  'boardFrameTop', 'boardFrameMiddle', 'boardFrameBottom', 'boardGridMiddle', 'boardGridBottom',
+  'boardCellTop', 'boardCellBottom', 'boardCellAltPink', 'boardCellAltPurple', 'boardCellAltYellow',
+  'boardFrameBorder', 'boardGridBorder', 'boardLabel', 'selection',
+  'overlayTop', 'overlayBottom', 'modalOverlay', 'pauseModalBackground'
 ]
 if (!parsedTheme || themeKeys.some(key => !/^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(parsedTheme[key] ?? ''))) {
   throw new Error('Game theme must provide every supported color as a six- or eight-digit hex value.')
