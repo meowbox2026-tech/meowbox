@@ -1,51 +1,7 @@
+import type themeFields from '../../game/content/themeFields.json'
 import type { PlanningLevel } from '../../game/core/planningEngine'
 
-export interface GameTheme {
-  pageBackground: string
-  textPrimary: string
-  textStrong: string
-  textMuted: string
-  surface: string
-  surfaceAlt: string
-  surfaceElevated: string
-  surfaceBorder: string
-  brand: string
-  brandStrong: string
-  accent: string
-  accentStrong: string
-  buttonText: string
-  buttonPrimaryStart: string
-  buttonPrimaryEnd: string
-  buttonSecondaryStart: string
-  buttonSecondaryEnd: string
-  buttonWarmStart: string
-  buttonWarmEnd: string
-  positiveStart: string
-  positiveEnd: string
-  positiveStrong: string
-  danger: string
-  focus: string
-  board: string
-  boardLine: string
-  boardFrameTop: string
-  boardFrameMiddle: string
-  boardFrameBottom: string
-  boardGridMiddle: string
-  boardGridBottom: string
-  boardCellTop: string
-  boardCellBottom: string
-  boardCellAltPink: string
-  boardCellAltPurple: string
-  boardCellAltYellow: string
-  boardFrameBorder: string
-  boardGridBorder: string
-  boardLabel: string
-  selection: string
-  overlayTop: string
-  overlayBottom: string
-  modalOverlay: string
-  pauseModalBackground: string
-}
+export type GameTheme = Record<keyof typeof themeFields, string>
 
 export interface ContentFileReference {
   file: string

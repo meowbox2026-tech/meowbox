@@ -1,0 +1,33 @@
+.app-frame .settings-card { background: linear-gradient(180deg, var(--theme-settings-background-top), var(--theme-settings-background-bottom)); border-color: var(--theme-settings-border); color: var(--theme-settings-text); }
+
+.app-frame .screen--settings .screen-title h1 { color: var(--theme-settings-title-text); }
+
+.app-frame .settings-toggle-row, .app-frame .settings-toggle + .settings-toggle, .app-frame .settings-language, .app-frame .settings-link { border-color: var(--theme-settings-divider); }
+
+.app-frame .settings-toggle__icon { color: var(--theme-settings-toggle-icon); }
+
+.app-frame .toggle-track { border-color: var(--theme-settings-toggle-on-border); background: var(--theme-settings-toggle-on-background); }
+
+.app-frame .settings-toggle input:not(:checked) + .toggle-track { border-color: var(--theme-settings-toggle-off-border); background: linear-gradient(180deg, var(--theme-settings-toggle-off-top), var(--theme-settings-toggle-off-bottom)); }
+
+.app-frame .toggle-track span { background: var(--theme-settings-toggle-knob); }
+
+.app-frame .settings-toggle input:focus-visible + .toggle-track { outline-color: var(--theme-settings-focus); }
+
+.app-frame .settings-language > span { color: var(--theme-settings-language-icon); }
+
+.app-frame .settings-language strong { color: var(--theme-settings-language-title); }
+
+.app-frame .settings-language div { border-color: var(--theme-settings-language-border); background: var(--theme-settings-language-background); }
+
+.app-frame .settings-language button { color: var(--theme-settings-language-text); border-right-color: var(--theme-settings-language-divider); }
+
+.app-frame .settings-language .is-active { color: var(--theme-settings-language-active-text); background: linear-gradient(180deg, var(--theme-settings-language-active-top), var(--theme-settings-language-active-bottom)); box-shadow: inset 0 -2px 0 var(--theme-settings-language-active-shadow); }
+
+.app-frame .settings-link { color: var(--theme-settings-link-text); }
+
+.app-frame .settings-link span { color: var(--theme-settings-link-icon); }
+
+.app-frame .settings-link b { color: var(--theme-settings-link-arrow); }
+
+.app-frame .screen--settings .settings-home .artwork-button__label { color: var(--theme-settings-home-text); text-shadow: 0 2px 0 var(--theme-settings-home-shadow); }

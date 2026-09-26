@@ -2,23 +2,13 @@ import { validateAuthoredPlanningLevel } from '../../game/core/planningValidatio
 import type { PlanningLevel, PlanningCat, Placement } from '../../game/core/planningEngine'
 import type { DropBoard, DropTile } from '../../game/core/dropEngine'
 import type { CatAsset } from '../../game/types'
-import type { GameTheme, RemoteContentManifest, ContentFileReference } from './contentTypes'
+import type { RemoteContentManifest, ContentFileReference } from './contentTypes'
 
 const LEVEL_COUNT_MINIMUM = 90
 const LEVEL_COUNT_MAXIMUM = 500
 const BOARD_SIZE = 8
 const CAT_ASSETS: readonly CatAsset[] = [
   'arrogant', 'sunny', 'fishLover', 'orange', 'white', 'blue', 'alone', 'sleeping', 'box', 'mischievous', 'boss', 'sticky'
-]
-const THEME_KEYS: readonly (keyof GameTheme)[] = [
-  'pageBackground', 'textPrimary', 'textStrong', 'textMuted', 'surface', 'surfaceAlt', 'surfaceElevated',
-  'surfaceBorder', 'brand', 'brandStrong', 'accent', 'accentStrong', 'buttonText', 'buttonPrimaryStart',
-  'buttonPrimaryEnd', 'buttonSecondaryStart', 'buttonSecondaryEnd', 'buttonWarmStart', 'buttonWarmEnd',
-  'positiveStart', 'positiveEnd', 'positiveStrong', 'danger', 'focus', 'board', 'boardLine',
-  'boardFrameTop', 'boardFrameMiddle', 'boardFrameBottom', 'boardGridMiddle', 'boardGridBottom',
-  'boardCellTop', 'boardCellBottom', 'boardCellAltPink', 'boardCellAltPurple', 'boardCellAltYellow',
-  'boardFrameBorder', 'boardGridBorder', 'boardLabel', 'selection',
-  'overlayTop', 'overlayBottom', 'modalOverlay', 'pauseModalBackground'
 ]
 
 export function parsePlanningLevels(value: unknown): PlanningLevel[] | undefined {
@@ -32,16 +22,7 @@ export function parsePlanningLevels(value: unknown): PlanningLevel[] | undefined
   return levels
 }
 
-export function parseGameTheme(value: unknown): GameTheme | undefined {
-  if (!isRecord(value)) return undefined
-  const theme = {} as GameTheme
-  for (const key of THEME_KEYS) {
-    const color = value[key]
-    if (typeof color !== 'string' || !/^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(color)) return undefined
-    theme[key] = color
-  }
-  return theme
-}
+export { parseGameTheme } from './themeValidation'
 
 export function parseRemoteContentManifest(value: unknown): RemoteContentManifest | undefined {
   if (!isRecord(value) || value.schemaVersion !== 1 || !isPositiveInteger(value.version)) return undefined

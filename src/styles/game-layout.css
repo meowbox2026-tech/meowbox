@@ -170,14 +170,13 @@
 .game-actions__button .artwork-button__badge { top: 1%; right: -2%; min-width: 21px; height: 21px; font-size: 12px; }
 
 .pause-modal { width: min(100%, 336px); justify-self: center; max-height: none; padding: 0; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
-.app-frame .modal-card.pause-modal { background: var(--theme-pause-modal-background); }
 .pause-panel { position: relative; width: 100%; aspect-ratio: 2 / 3; }
 .pause-panel > img { width: 100%; height: 100%; object-fit: contain; }
 .pause-panel button { position: absolute; display: grid; place-items: center; padding: 0; border: 0; color: #70402b; font-family: var(--font-cute); font-size: clamp(13px, 4vw, 18px); font-weight: 900; line-height: 1; text-align: center; text-shadow: 0 1px 0 rgba(255, 248, 228, .9); cursor: pointer; background: transparent; }
 .pause-panel button > span { pointer-events: none; }
 .pause-panel__title { position: absolute; top: 31%; right: 20%; left: 20%; z-index: 1; margin: 0; color: #713c28; font-family: var(--font-cute); font-size: clamp(28px, 8vw, 40px); font-weight: 900; line-height: 1; text-align: center; text-shadow: 0 2px 0 rgba(255, 239, 205, .95); }
 .pause-panel__close { top: 21%; right: 3%; width: 17%; height: 12%; }
-.pause-panel__continue { top: 44%; left: 12%; width: 76%; height: 12%; color: #fffdf4 !important; font-size: clamp(16px, 5vw, 22px) !important; text-shadow: 0 2px 0 rgba(48, 126, 32, .62) !important; }
+.pause-panel__continue { top: 44%; left: 12%; width: 76%; height: 12%; color: var(--theme-pause-continue-text); font-size: clamp(16px, 5vw, 22px) !important; text-shadow: 0 2px 0 var(--theme-pause-continue-shadow); }
 .pause-panel__continue > span { transform: translateX(20px); }
 .pause-panel__restart { top: 59%; left: 12%; width: 76%; height: 11%; font-size: clamp(13px, 4vw, 18px) !important; }
 .pause-panel__restart > span { transform: translateX(19px); }

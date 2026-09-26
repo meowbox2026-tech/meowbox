@@ -1,0 +1,41 @@
+.home-social { position: absolute; top: min(4cqh, 24px); left: 5%; display: flex; align-items: start; gap: 6px; z-index: 3; }
+.home-social button { display: grid; justify-items: center; width: 72px; padding: 0; border: 0; background: none; color: var(--theme-social-text); font: 900 12px var(--font-cute); cursor: pointer; }
+.player-avatar { display: inline-grid; position: relative; place-items: center; flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%; background: var(--theme-social-avatar-background); }
+.player-avatar > img { width: 78%; height: 78%; object-fit: contain; }
+.player-avatar--framed { width: 72px; height: 72px; background: none; }
+.player-avatar--framed > img { width: 54%; height: 54%; transform: translateY(-5%); border-radius: 50%; background: transparent; }
+.player-avatar__frame { position: absolute; inset: 0; pointer-events: none; background: url('/assets/social/avatar-frame.png') center / contain no-repeat; }
+.home-leaderboard__art { display: grid; place-items: center; width: 72px; height: 72px; font-size: 45px; }
+.home-social .home-leaderboard { position: relative; }
+.home-social .home-leaderboard > span:last-child { position: absolute; top: calc(68% - 3px); padding: 0; border: 0; background: none; font-size: 11px; }
+.screen--social { display: flex; flex-direction: column; height: 100%; min-height: 0; padding: 18px 18px 24px; overflow: hidden; gap: 12px; background-image: url('/assets/bg-main.webp'); }
+.app-bleed[data-screen='profile'], .app-bleed[data-screen='leaderboard'] { background-image: url('/assets/bg-main.webp'); }
+.social-header { display: flex; align-items: center; gap: 18px; flex-shrink: 0; color: var(--theme-social-text); }
+.social-header h1 { font-size: 26px; margin: 0; padding: 4px 16px; border-radius: 18px; background: var(--theme-social-background-top); }
+.social-panel { flex: 1; min-height: 0; overflow-y: auto; border: 2px solid var(--theme-social-border); border-radius: 26px; padding: 18px; color: var(--theme-social-text); background: linear-gradient(var(--theme-social-background-top), var(--theme-social-background-bottom)); box-shadow: 0 5px 12px var(--theme-social-shadow); }
+.screen--social button { min-height: 40px; padding: 6px 14px; border: 1px solid var(--theme-social-border); border-radius: 14px; color: var(--theme-social-text); background: var(--theme-social-button-background); font: inherit; cursor: pointer; }
+.screen--social button:disabled { opacity: .55; cursor: default; }
+.screen--social button:focus-visible, .screen--social input:focus-visible { outline: 3px solid var(--theme-social-focus); outline-offset: 2px; }
+.profile-editor { display: flex; flex-direction: column; gap: 10px; }
+.profile-editor > .player-avatar { align-self: center; width: 92px; height: 92px; }
+.profile-editor input { width: 100%; min-height: 42px; padding: 8px 12px; border: 2px solid var(--theme-social-border); border-radius: 12px; background: var(--theme-social-input-background); color: var(--theme-social-text); font: inherit; }
+.profile-editor fieldset { margin: 0; padding: 0; border: 0; }
+.avatar-choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.avatar-choices button { display: grid; place-items: center; padding: 4px; min-width: 0; }
+.avatar-choices button[aria-pressed='true'] { background: var(--theme-social-selected-background); outline: 2px solid var(--theme-social-focus); }
+.avatar-choices .player-avatar { width: 46px; height: 46px; }
+.social-notice, .profile-editor small { font-size: 12px; line-height: 1.5; color: var(--theme-social-muted-text); }
+.social-notice { margin: 6px 0; }
+.screen--social .social-primary { background: var(--theme-social-selected-background); font-weight: 900; }
+.screen--social [role='alert'] { color: var(--theme-social-error-text); }
+.social-toolbar { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.leaderboard-subtitle { text-align: center; font-size: 14px; }
+.leaderboard-list { list-style: none; padding: 0; margin: 0; }
+.leaderboard-list li { display: flex; align-items: center; gap: 8px; padding: 10px 4px; border-bottom: 1px solid var(--theme-social-border); }
+.leaderboard-list li.is-me { background: var(--theme-social-selected-background); border-radius: 12px; }
+.leaderboard-rank { width: 26px; text-align: center; flex-shrink: 0; }
+.leaderboard-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.leaderboard-score { display: grid; text-align: center; }
+.leaderboard-score small { font-size: 10px; }
+.social-confirm { padding: 12px; border: 1px solid var(--theme-social-border); border-radius: 12px; }
+@media (max-height: 600px) { .home-social { top: 8px; } .home-social button { width: 60px; } .home-social .player-avatar, .home-leaderboard__art { width: 58px; height: 58px; } }

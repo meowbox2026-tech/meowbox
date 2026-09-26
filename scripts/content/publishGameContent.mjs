@@ -24,17 +24,8 @@ if (parsedLevels.some((level, index) => level.id !== index + 1)) {
   throw new Error('Game content level IDs must remain sequential and stable.')
 }
 const parsedTheme = JSON.parse(theme.toString('utf8'))
-const themeKeys = [
-  'pageBackground', 'textPrimary', 'textStrong', 'textMuted', 'surface', 'surfaceAlt', 'surfaceElevated',
-  'surfaceBorder', 'brand', 'brandStrong', 'accent', 'accentStrong', 'buttonText', 'buttonPrimaryStart',
-  'buttonPrimaryEnd', 'buttonSecondaryStart', 'buttonSecondaryEnd', 'buttonWarmStart', 'buttonWarmEnd',
-  'positiveStart', 'positiveEnd', 'positiveStrong', 'danger', 'focus', 'board', 'boardLine',
-  'boardFrameTop', 'boardFrameMiddle', 'boardFrameBottom', 'boardGridMiddle', 'boardGridBottom',
-  'boardCellTop', 'boardCellBottom', 'boardCellAltPink', 'boardCellAltPurple', 'boardCellAltYellow',
-  'boardFrameBorder', 'boardGridBorder', 'boardLabel', 'selection',
-  'overlayTop', 'overlayBottom', 'modalOverlay', 'pauseModalBackground'
-]
-if (!parsedTheme || themeKeys.some(key => !/^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(parsedTheme[key] ?? ''))) {
+const themeKeys = Object.keys(JSON.parse(readFileSync(resolve(sourceDirectory, 'themeFields.json'), 'utf8')))
+if (!parsedTheme || themeKeys.some(key => typeof parsedTheme[key] !== 'string' || !/^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(parsedTheme[key]))) {
   throw new Error('Game theme must provide every supported color as a six- or eight-digit hex value.')
 }
 

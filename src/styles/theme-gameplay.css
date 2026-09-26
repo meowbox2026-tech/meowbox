@@ -1,0 +1,59 @@
+.app-frame .planning-top-goal { color: var(--theme-goal-text); }
+
+.app-frame .planning-tray { background: var(--theme-tray-background); border-color: var(--theme-tray-border); }
+
+.app-frame .planning-tray__heading { color: var(--theme-tray-heading-text); }
+
+.app-frame .planning-tray__hint { color: var(--theme-tray-hint-text); }
+
+.app-frame .planning-tray__heading > b { color: var(--theme-tray-count-text); }
+
+.app-frame .planning-tray__cat { background: var(--theme-tray-card-background); box-shadow: inset 0 0 0 1px var(--theme-tray-card-border); }
+
+.app-frame .planning-tray__cat.is-next { background: var(--theme-tray-next-background); box-shadow: inset 0 0 0 1px var(--theme-tray-next-border); }
+
+.app-frame .planning-timer { color: var(--theme-timer-text); border-color: var(--theme-timer-border); background: linear-gradient(180deg, var(--theme-timer-background-top), var(--theme-timer-background-bottom)); box-shadow: inset 0 1px 0 var(--theme-timer-highlight), 0 2px 0 var(--theme-timer-shadow); }
+
+.app-frame .planning-timer__icon { color: var(--theme-timer-icon); }
+
+.app-frame .planning-timer.is-complete { color: var(--theme-timer-complete-text); box-shadow: 0 2px 0 var(--theme-timer-shadow); }
+
+.app-frame .planning-status { color: var(--theme-game-status-text); }
+
+.app-frame .planning-mainline-done { color: var(--theme-game-complete-text); }
+
+.app-frame .planning-undo-confirm p { color: var(--theme-undo-confirm-text); }
+
+.app-frame .planning-diagonal-tutorial { color: var(--theme-tutorial-text); }
+
+.app-frame .game-objective { color: var(--theme-objective-text); background: var(--theme-objective-background); border-color: var(--theme-objective-border); }
+
+.app-frame .planning-board--prism { border-color: var(--theme-board-frame-border); background: linear-gradient(145deg, var(--theme-board-frame-top) 0%, var(--theme-board-frame-middle) 46%, var(--theme-board-frame-bottom) 100%); }
+
+.app-frame .planning-grid { border-color: var(--theme-board-grid-border); background: linear-gradient(155deg, var(--theme-board), var(--theme-board-grid-middle) 53%, var(--theme-board-grid-bottom)); }
+
+.app-frame .planning-cell { --prism-cell-top: var(--theme-board-cell-top); --prism-cell-bottom: var(--theme-board-cell-bottom); border-color: var(--theme-board-line); background: linear-gradient(145deg, var(--prism-cell-top), var(--prism-cell-bottom)); }
+
+.app-frame .planning-cell:nth-child(4n + 2) { --prism-cell-bottom: var(--theme-board-cell-alt-pink); }
+
+.app-frame .planning-cell:nth-child(4n + 3) { --prism-cell-bottom: var(--theme-board-cell-alt-purple); }
+
+.app-frame .planning-cell:nth-child(4n + 4) { --prism-cell-bottom: var(--theme-board-cell-alt-yellow); }
+
+.app-frame .planning-board__label { color: var(--theme-board-label); }
+
+.app-frame .planning-placement-cell:hover:not(:disabled) { background: var(--theme-placement-hover-background); box-shadow: inset 0 0 0 2px var(--theme-placement-hover-border), 0 0 13px var(--theme-placement-hover-glow); }
+
+.app-frame .planning-placement-cell:active:not(:disabled) { background: radial-gradient(circle, var(--theme-placement-press-top), var(--theme-placement-press-bottom) 68%); }
+
+.app-frame .planning-placement-cell.is-hint { background: var(--theme-hint-background); box-shadow: inset 0 0 0 3px var(--theme-hint-border); }
+
+.app-frame .planning-placement-cell.is-hint::after { color: var(--theme-hint-symbol); }
+
+.app-frame .planning-cat b { color: var(--theme-placed-cat-number-text); background: var(--theme-placed-cat-number-background); }
+
+.app-frame .cat-selection-tray { background: var(--theme-cat-selection-background); border-color: var(--theme-cat-selection-border); }
+
+.app-frame .cat-selection-tray__card { background: var(--theme-cat-selection-card-background); border-color: var(--theme-cat-selection-card-border); color: var(--theme-cat-selection-card-text); }
+
+.app-frame .cat-selection-tray__card.is-selected { background: var(--theme-cat-selection-active-background); border-color: var(--theme-cat-selection-active-border); }

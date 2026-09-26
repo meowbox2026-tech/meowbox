@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../supabase/supabaseClient'
+import { getAnonymousUserId, resetAnonymousIdentityForTests } from '../supabase/anonymousIdentity'
 
 export type PlayerEventName =
   | 'session_started'
@@ -38,7 +39,6 @@ const SESSION_ID_KEY = 'meowbox.analytics.session.v1'
 const MAX_PENDING_EVENTS = 100
 const MAX_LEVEL_ID = 90
 
-let anonymousUserPromise: Promise<string | null> | undefined
 
 function makeUuid(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
@@ -106,20 +106,6 @@ function validateEvent(input: PlayerEventInput): boolean {
   return isValidUuid(input.attemptId)
 }
 
-async function getAnonymousUserId(): Promise<string | null> {
-  const client = getSupabaseClient()
-  if (!client) return null
-  if (!anonymousUserPromise) {
-    anonymousUserPromise = (async () => {
-      const sessionResult = await client.auth.getSession()
-      const currentUserId = sessionResult.data.session?.user?.id
-      if (currentUserId) return currentUserId
-      const signInResult = await client.auth.signInAnonymously()
-      return signInResult.data.user?.id ?? null
-    })().catch(() => null)
-  }
-  return anonymousUserPromise
-}
 
 function toInsertRow(event: PendingPlayerEvent, playerId: string) {
   return {
@@ -176,5 +162,5 @@ export async function recordPlayerEvent(input: PlayerEventInput): Promise<Analyt
 }
 
 export function resetAnalyticsSessionForTests(): void {
-  anonymousUserPromise = undefined
+  resetAnonymousIdentityForTests()
 }

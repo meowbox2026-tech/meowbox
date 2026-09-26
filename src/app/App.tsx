@@ -17,8 +17,10 @@ import { shouldRenderDemoAd } from '../services/ads/adPresentation'
 import { recordPlayerEvent } from '../services/analytics/analytics'
 import { initializeNativeAdMob, showNativePrivacyOptions } from '../services/ads/nativeAdMob'
 import { PlayerStatusScreen } from './player-status/PlayerStatusScreen'
+import { ProfileScreen } from './leaderboard/ProfileScreen'
+import { LeaderboardScreen } from './leaderboard/LeaderboardScreen'
 
-type Screen = 'home' | 'levels' | 'game' | 'settings' | 'legal'
+type Screen = 'home' | 'levels' | 'game' | 'settings' | 'legal' | 'profile' | 'leaderboard'
 
 function isPlayerStatusRoute() {
   return typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/player-status'
@@ -140,6 +142,8 @@ export function App() {
       <div className="app-stage">
       {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={(destination) => destination === 'settings' ? openSettings('home') : setScreen(destination)} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
+      {screen === 'profile' && <ProfileScreen onBack={() => setScreen('home')} onSaved={() => undefined} />}
+      {screen === 'leaderboard' && <LeaderboardScreen onBack={() => setScreen('home')} onProfile={() => setScreen('profile')} />}
       {gameMounted && <div className="app-screen-layer" hidden={screen !== 'game'}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => leaveGame('home')} onSettings={() => openSettings('game')} onLevelSelect={() => leaveGame('levels')} onNextLevel={openGame} onToast={setToast} onPlayAction={maybeShowPlayAd} onWatchUndoAd={maybeGrantRewardAd} onWatchHintAd={maybeGrantRewardAd} /></div>}
       {screen === 'settings' && <SettingsScreen onBack={() => setScreen(settingsReturnScreen)} onToast={setToast} onLegal={openLegal} onPrivacyOptions={Capacitor.isNativePlatform() ? openPrivacyOptions : undefined} />}
       {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}

@@ -1,0 +1,59 @@
+.app-frame { background: var(--theme-page-background); color: var(--theme-text-primary); }
+
+.app-bleed { background-color: var(--theme-page-background); }
+
+.app-bleed::after { background: linear-gradient(180deg, var(--theme-overlay-top), var(--theme-overlay-bottom)); }
+
+.app-frame :focus-visible { outline-color: var(--theme-focus); }
+
+.app-frame .app-toast { background: var(--theme-toast-background); color: var(--theme-toast-text); border-color: var(--theme-toast-border); }
+
+.app-frame .artwork-button__label { color: var(--theme-brand); text-shadow: 0 2px 0 var(--theme-surface); }
+
+.app-frame .artwork-button__badge, .app-frame .app-button__badge { background: var(--theme-badge-background); color: var(--theme-badge-text); }
+
+.app-frame .app-button { border-color: var(--theme-surface-border); color: var(--theme-button-text); background: linear-gradient(180deg, var(--theme-button-primary-start), var(--theme-button-primary-end)); }
+
+.app-frame .app-button--blue { background: linear-gradient(180deg, var(--theme-button-secondary-start), var(--theme-button-secondary-end)); }
+
+.app-frame .app-button--purple { background: linear-gradient(180deg, var(--theme-accent), var(--theme-brand)); }
+
+.app-frame .app-button--cream, .app-frame .app-button--icon { color: var(--theme-text-strong); background: linear-gradient(180deg, var(--theme-button-warm-start), var(--theme-button-warm-end)); }
+
+.app-frame .app-button--pink { background: linear-gradient(180deg, var(--theme-danger), var(--theme-brand-strong)); }
+
+.app-frame .screen-title h1 { color: var(--theme-screen-title-text); }
+
+.app-frame .screen-title h1 { text-shadow: 0 1px 0 var(--theme-screen-title-shadow); }
+
+.app-frame .screen-title p { color: var(--theme-screen-subtitle-text); }
+
+.app-frame .level-pill, .app-frame .level-pill strong { color: var(--theme-level-number-text); }
+
+.app-frame .screen--home .home-start .artwork-button__label { color: var(--theme-home-start-text); }
+
+.app-frame .screen--home .home-nav .artwork-button__label { color: var(--theme-home-navigation-text); }
+
+.app-frame .screen--planning .planning-start .artwork-button__label { color: var(--theme-game-action-text); }
+
+.app-frame .modal-backdrop { background: var(--theme-modal-overlay); }
+
+.app-frame .modal-card { border-color: var(--theme-modal-border); color: var(--theme-modal-text); background: linear-gradient(180deg, var(--theme-modal-background-top), var(--theme-modal-background-bottom)); }
+
+.app-frame .modal-card.pause-modal { background: var(--theme-pause-modal-background); }
+
+.app-frame .pause-panel__title { color: var(--theme-pause-title-text); }
+
+.app-frame .pause-panel__continue { color: var(--theme-pause-continue-text); }
+
+.app-frame .pause-panel__restart { color: var(--theme-pause-restart-text); }
+
+.app-frame .pause-panel__home { color: var(--theme-pause-home-text); }
+
+.app-frame .pause-panel__settings { color: var(--theme-pause-settings-text); }
+
+.app-frame .pause-panel button { text-shadow: 0 1px 0 var(--theme-pause-button-shadow); }
+
+.app-frame .screen--planning button:focus-visible, .app-frame .level-board:focus-visible, .app-frame .level-tile:focus-visible { outline-color: var(--theme-focus); }
+
+.app-frame .pause-panel .pause-panel__continue { text-shadow: 0 2px 0 var(--theme-pause-continue-shadow); }
