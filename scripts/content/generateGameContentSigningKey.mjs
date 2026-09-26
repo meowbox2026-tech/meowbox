@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const privateKeyPath = resolve(projectRoot, '.secrets/game-content-private.pem')
-const publicKeyPath = resolve(projectRoot, 'src/services/gameContent/trustedContentPublicKey.pem')
+const publicKeyPath = resolve(projectRoot, 'src/services/gameContent/trustedContentPublicKey.txt')
 
 if (existsSync(privateKeyPath) || existsSync(publicKeyPath)) {
   throw new Error('A game-content signing key already exists. Refusing to overwrite either key.')

@@ -23,7 +23,7 @@ import {
 } from './contentRollback'
 import type { CachedContentBundle, ContentCache } from './contentRollback'
 import type { GameContentSnapshot, RemoteContentManifest } from './contentTypes'
-import trustedPublicKey from './trustedContentPublicKey.pem?raw'
+import trustedPublicKey from './trustedContentPublicKey.txt?raw'
 
 const CACHE_KEY = 'meow-box-game-content-v2'
 const FETCH_TIMEOUT_MS = 5000
