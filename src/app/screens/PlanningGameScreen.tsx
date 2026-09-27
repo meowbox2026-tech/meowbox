@@ -181,9 +181,8 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     setRewardAdConfirm('hint')
   }
   const requestFailureHint = () => {
-    const restartAfterReward = state.failureReason === 'no-solution'
     setFailureModalOpen(false)
-    void watchRewardAd('hint', true, restartAfterReward)
+    void watchRewardAd('hint', true, true)
   }
   const confirmRewardAd = () => {
     if (!rewardAdConfirm) return
@@ -277,7 +276,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         onClick={() => requestHint()}
       />
     </div>
-    {rewardAdStatus && <p className="planning-ad-status" role="status">{rewardAdStatus}</p>}
+    {rewardAdStatus && !failureModalOpen && <p className="planning-ad-status" role="status">{rewardAdStatus}</p>}
     <ArtworkButton asset="start" className="planning-start" disabled={locked || left > 0} onClick={() => { triggerBoardEffect({ kind: 'start' }); dispatch({ type: 'start' }) }}>{text.start}</ArtworkButton>
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
     <PlanningDiagonalTutorial open={tutorial.open} onClose={tutorial.close} />
@@ -315,12 +314,11 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         <p className="drop-result__encouragement">{state.failureReason === 'no-solution' ? text.noSolutionEncouragement : text.failureEncouragement}</p>
       </div>
       {state.failureReason === 'resolution' && <div className="drop-result__score-panel drop-result__failure-summary"><p className="drop-result__summary"><span>{text.failures}</span><strong>{state.failures}</strong><span>{text.times}</span></p></div>}
+      {rewardAdStatus && failureModalOpen && <p className="planning-ad-status" role="status">{rewardAdStatus}</p>}
       <div className="drop-result__actions">
         <AppButton onClick={restart}>{text.restart}</AppButton>
         <AppButton variant="blue" onClick={requestFailureHint}>{state.failureReason === 'no-solution' ? text.noSolutionHintAd : text.failureHintAd}</AppButton>
-        {state.failureReason === 'resolution'
-          ? <AppButton variant="cream" onClick={() => setFailureModalOpen(false)}>{text.keepTrying}</AppButton>
-          : <AppButton variant="cream" onClick={() => setFailureModalOpen(false)}>{text.continueAction}</AppButton>}
+        {state.failureReason === 'no-solution' && <AppButton variant="cream" onClick={() => setFailureModalOpen(false)}>{text.continueAction}</AppButton>}
       </div>
     </Modal>
     <Modal open={state.phase === 'completed' && !paused} ariaLabel={text.completed} className="drop-result drop-result--success">

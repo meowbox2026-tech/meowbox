@@ -256,9 +256,9 @@ describe('8x8 planning level through the game entry point', () => {
     expect(screen.getByRole('dialog', { name: '目前配置無法完成' })).toBeInTheDocument()
     expect(screen.getByText('剛才的放置方式已經沒有可行解，請重新開始本關。')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '重新開始本關' })).toBeEnabled()
-    expect(screen.getByRole('button', { name: '觀看廣告取得提示並重新開始' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '觀看廣告獲得 3 次提示並重新開始本關' })).toBeEnabled()
 
-    fireEvent.click(screen.getByRole('button', { name: '觀看廣告取得提示並重新開始' }))
+    fireEvent.click(screen.getByRole('button', { name: '觀看廣告獲得 3 次提示並重新開始本關' }))
     await flushAsyncState()
 
     expect(watchHintAd).toHaveBeenCalledOnce()
@@ -348,7 +348,7 @@ describe('8x8 planning level through the game entry point', () => {
     fireEvent.click(screen.getByRole('button', { name: '前往第 2 關' }))
     expect(next).toHaveBeenCalledWith(2)
   })
-  it('opens an encouraging failure modal with retry and direct rewarded hint action', async () => {
+  it('restarts the level and grants rewarded hints from the failure modal', async () => {
     watchHintAd.mockResolvedValue(true)
     mount()
     await place(1, 1, 1)
@@ -366,13 +366,16 @@ describe('8x8 planning level through the game entry point', () => {
     expect(recordPlayerEvent).toHaveBeenCalledWith(expect.objectContaining({ eventName: 'level_failed', levelId: 1 }))
     expect(screen.getByText('沒關係！換個順序再試一次，貓咪還在等你帶回家 ♡')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '重新開始本關' })).toBeEnabled()
-    expect(screen.getByRole('button', { name: '觀看廣告獲得 3 次提示' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '觀看廣告獲得 3 次提示並重新開始本關' })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: '繼續挑戰' })).toBeNull()
 
-    fireEvent.click(screen.getByRole('button', { name: '觀看廣告獲得 3 次提示' }))
+    fireEvent.click(screen.getByRole('button', { name: '觀看廣告獲得 3 次提示並重新開始本關' }))
     await flushAsyncState()
     expect(watchHintAd).toHaveBeenCalledOnce()
     expect(screen.getByText('本關已獲得 3 次提示')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '提示 4' })).toBeEnabled()
+    expect(screen.getByText('已安排 0 / 3')).toBeInTheDocument()
+    expect(screen.getByRole('timer', { name: '關卡時間 00:00.0' })).toBeInTheDocument()
     expect(screen.queryByRole('dialog', { name: '挑戰失敗' })).toBeNull()
   })
   it('resets the timer when restarting from the failure modal', async () => {
@@ -403,12 +406,13 @@ describe('8x8 planning level through the game entry point', () => {
     finish()
 
     expect(screen.getByRole('dialog', { name: '挑戰失敗' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '觀看廣告獲得 3 次提示' }))
+    fireEvent.click(screen.getByRole('button', { name: '觀看廣告獲得 3 次提示並重新開始本關' }))
     await flushAsyncState()
 
     expect(watchHintAd).toHaveBeenCalledOnce()
     expect(screen.getByText('廣告尚未完成，沒有增加提示')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '提示 1' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '提示 1' })).toBeDisabled()
+    expect(screen.getByRole('dialog', { name: '挑戰失敗' })).toBeInTheDocument()
   })
   it('keeps the success result card styled with the same visual system', async () => {
     mount()
