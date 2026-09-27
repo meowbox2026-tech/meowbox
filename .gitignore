@@ -24,4 +24,5 @@ Codex 圖像 *.png
 
 # Local release artifacts
 release/
+build/
 supabase/.temp/

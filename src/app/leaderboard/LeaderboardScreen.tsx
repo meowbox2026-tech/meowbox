@@ -54,7 +54,7 @@ export function LeaderboardScreen({ onBack, onProfile }: { onBack: () => void; o
         <ol className="leaderboard-list">{rows.map(row => <li key={row.publicId} className={row.isMe ? 'is-me' : ''}>
           <strong className="leaderboard-rank">{row.rank}</strong><CatAvatar avatar={row.avatar} />
           <span className="leaderboard-name">{row.name}{row.isMe && <small> · {t.me}</small>}</span>
-          <span className="leaderboard-score"><b>{row.completed}</b><small>{t.clears}</small></span>
+          <span className="leaderboard-score"><b>{row.highestLevel}</b><small>{t.highestLevel}</small></span>
           {!row.isMe && <span className="leaderboard-actions">
             <a href={reportLink(row)} aria-label={`${t.report} ${row.name}`}>{t.report}</a>
             <button disabled={busy} onClick={() => setPendingBlock(row)}>{t.block} {row.name}</button>

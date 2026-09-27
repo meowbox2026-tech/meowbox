@@ -85,13 +85,15 @@ it('lets the player unblock someone from profile settings', async () => {
 
 it('shows tied rankings and highlights the current player', async () => {
   api.loadLeaderboard.mockResolvedValue([
-    { rank: 1, name: '小花', avatar: 'orange', publicId: '11111111-1111-4111-8111-111111111111', completed: 12, isMe: false },
-    { rank: 1, name: '小白', avatar: 'white', publicId: '22222222-2222-4222-8222-222222222222', completed: 12, isMe: true },
+    { rank: 1, name: '小花', avatar: 'orange', publicId: '11111111-1111-4111-8111-111111111111', highestLevel: 12, isMe: false },
+    { rank: 1, name: '小白', avatar: 'white', publicId: '22222222-2222-4222-8222-222222222222', highestLevel: 12, isMe: true },
   ])
   render(<LeaderboardScreen onBack={vi.fn()} onProfile={vi.fn()} />)
   await screen.findByText('小花')
   expect(screen.getByRole('button', { name: '關閉' })).toBeInTheDocument()
   expect(screen.getAllByText('1')).toHaveLength(2)
+  expect(screen.getAllByText('12')).toHaveLength(2)
+  expect(screen.getAllByText('最高關卡', { exact: true })).toHaveLength(2)
   expect(document.querySelector('.is-me')).toHaveTextContent('小白')
   expect(screen.getByRole('link', { name: '檢舉 小花' })).toHaveAttribute('href', expect.stringContaining('mailto:'))
   fireEvent.click(screen.getByRole('button', { name: '封鎖 小花' }))

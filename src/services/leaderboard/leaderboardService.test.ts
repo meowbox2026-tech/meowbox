@@ -75,9 +75,9 @@ describe('leaderboard service', () => {
     await expect(saveProfile({ name: 'Meow', avatar: 'orange' })).rejects.toThrow('invalid-response')
   })
 
-  it('loads rankings and blocked players and removes a public profile', async () => {
-    response([{ ...profile, rank: 1, completed: 4, isMe: true }])
-    await expect(loadLeaderboard()).resolves.toMatchObject([{ rank: 1, completed: 4, isMe: true }])
+  it('loads highest-level rankings and blocked players and removes a public profile', async () => {
+    response([{ ...profile, rank: 1, highestLevel: 4, isMe: true }])
+    await expect(loadLeaderboard()).resolves.toMatchObject([{ rank: 1, highestLevel: 4, isMe: true }])
     response([profile])
     await expect(loadBlockedPlayers()).resolves.toEqual([profile])
     response([])
