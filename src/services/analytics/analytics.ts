@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '../supabase/supabaseClient'
-import { getAnonymousUserId, resetAnonymousIdentityForTests } from '../supabase/anonymousIdentity'
+import { getAnonymousUserId, resetAnonymousIdentity } from '../supabase/anonymousIdentity'
 
 export type PlayerEventName =
   | 'session_started'
@@ -162,5 +162,5 @@ export async function recordPlayerEvent(input: PlayerEventInput): Promise<Analyt
 }
 
 export function resetAnalyticsSessionForTests(): void {
-  resetAnonymousIdentityForTests()
+  resetAnonymousIdentity()
 }

@@ -17,4 +17,5 @@ export function getAnonymousUserId(): Promise<string | null> {
   return pending
 }
 
-export function resetAnonymousIdentityForTests(): void { pending = undefined }
+export function resetAnonymousIdentity(): void { pending = undefined }
+export const resetAnonymousIdentityForTests = resetAnonymousIdentity

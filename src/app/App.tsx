@@ -31,6 +31,7 @@ export function App() {
   useDocumentLanguage()
   const strings = useStrings()
   const [screen, setScreen] = useState<Screen>('home')
+  const [profileReturnScreen, setProfileReturnScreen] = useState<'home' | 'leaderboard'>('home')
   const [selectedLevel, setSelectedLevel] = useState(player.currentLevel)
   const [gameMounted, setGameMounted] = useState(false)
   const [settingsReturnScreen, setSettingsReturnScreen] = useState<'home' | 'game'>('home')
@@ -114,6 +115,11 @@ export function App() {
     setScreen('settings')
   }
 
+  const openProfile = (returnScreen: 'home' | 'leaderboard') => {
+    setProfileReturnScreen(returnScreen)
+    setScreen('profile')
+  }
+
   const leaveGame = (nextScreen: 'home' | 'levels') => {
     setGameMounted(false)
     setScreen(nextScreen)
@@ -140,10 +146,14 @@ export function App() {
     <div className="app-frame">
       <div className="app-bleed" data-screen={screen} aria-hidden="true" />
       <div className="app-stage">
-      {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={(destination) => destination === 'settings' ? openSettings('home') : setScreen(destination)} />}
+      {screen === 'home' && <HomeScreen onStart={() => openGame(player.currentLevel)} onNavigate={(destination) => {
+        if (destination === 'settings') openSettings('home')
+        else if (destination === 'profile') openProfile('home')
+        else setScreen(destination)
+      }} />}
       {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
-      {screen === 'profile' && <ProfileScreen onBack={() => setScreen('home')} onSaved={() => undefined} />}
-      {screen === 'leaderboard' && <LeaderboardScreen onBack={() => setScreen('home')} onProfile={() => setScreen('profile')} />}
+      {screen === 'profile' && <ProfileScreen onBack={() => setScreen(profileReturnScreen)} onSaved={() => undefined} />}
+      {screen === 'leaderboard' && <LeaderboardScreen onBack={() => setScreen('home')} onProfile={() => openProfile('leaderboard')} />}
       {gameMounted && <div className="app-screen-layer" hidden={screen !== 'game'}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => leaveGame('home')} onSettings={() => openSettings('game')} onLevelSelect={() => leaveGame('levels')} onNextLevel={openGame} onToast={setToast} onPlayAction={maybeShowPlayAd} onWatchUndoAd={maybeGrantRewardAd} onWatchHintAd={maybeGrantRewardAd} /></div>}
       {screen === 'settings' && <SettingsScreen onBack={() => setScreen(settingsReturnScreen)} onToast={setToast} onLegal={openLegal} onPrivacyOptions={Capacitor.isNativePlatform() ? openPrivacyOptions : undefined} />}
       {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}

@@ -3,7 +3,7 @@
 ## Cloudflare deployment facts
 
 - The user identifies the Cloudflare setup as `cloudflare2k7`; do not confuse it with Supabase or Vercel.
-- On 2026-09-26, the supplied Cloudflare dashboard URL opened Pages project `meowbox`, the only Pages project listed in that account. Its public URL is `https://meowbox.pages.dev`, and its GitHub repository is `vvstudiocode/meowbox`.
+- On 2026-09-27, the supplied Cloudflare dashboard URL opened Pages project `meowbox`, the only Pages project listed in that account. Its public URL is `https://meowbox.pages.dev`, and its GitHub repository is `meowbox2026-tech/meowbox`.
 - Keep `cloudflare2k7` and the dashboard project name `meowbox` distinct. Before changing Cloudflare settings, verify the exact project in the supplied dashboard instead of guessing from either name.
 - Git deployment is already connected. Production branch `main` has automatic deployments enabled.
 - Production signing was repaired and verified on 2026-09-26. The full existing PEM (including BEGIN/END markers) was saved as a single-line literal `\n`-escaped value in `meowbox` Production secret `GAME_CONTENT_SIGNING_PRIVATE_KEY`; the publisher already normalizes that representation.
