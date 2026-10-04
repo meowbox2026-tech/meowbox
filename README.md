@@ -112,3 +112,7 @@ npx cap sync ios
 ```
 
 正式原生插頁／獎勵廣告與同平台 Cloud Save 需要上述平台帳號、廣告單位 ID，以及 AdMob 後台的付款、稅務與身分驗證資料；這些私人識別資料不會寫入專案原始碼。正式廣告 SDK 接入後，顯示時間、曝光、獎勵完成與關閉時機以供應商回呼為準，不能用前端自製倒數取代，也不能要求玩家點擊廣告、開啟商店或以點擊換取獎勵。
+
+## 插頁廣告遠端設定
+
+Supabase 的 `public.interstitial_ad_settings` 表只允許 App 讀取，請在 Supabase Dashboard 的 Table Editor 修改 `id = 1` 這筆資料：`enabled` 控制插頁廣告，`plays_per_ad` 設定觸發間隔（1–100 次，預設 5）。Migration 的初始值是 `enabled = false`、`plays_per_ad = 5`。獎勵式廣告不受這兩個欄位影響。新版 App 啟動或回到前景時重新讀取；讀取失敗時預設關閉插頁廣告。停用時會清除裝置上的插頁廣告累計次數，之後重新啟用會從零開始計算。

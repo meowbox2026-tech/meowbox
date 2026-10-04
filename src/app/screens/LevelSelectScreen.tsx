@@ -7,6 +7,7 @@ import { GameImage } from '../components/GameImage'
 import { TopBar } from '../components/TopBar'
 
 interface LevelSelectScreenProps {
+  allowAllLevels?: boolean
   onBack: () => void
   onSelectLevel: (levelId: number) => void
 }
@@ -32,7 +33,7 @@ function getWorldIdForLevel(levelId: number): number {
   return Math.floor((levelId - 1) / LEVELS_PER_WORLD) + 1
 }
 
-export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenProps) {
+export function LevelSelectScreen({ allowAllLevels = false, onBack, onSelectLevel }: LevelSelectScreenProps) {
   const { player } = usePlayer()
   const strings = useStrings()
   const locale = useLocale()
@@ -48,7 +49,7 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
       <ScreenTitle title={strings.levels.title} />
       <nav className="world-tabs" aria-label={strings.levels.worldsLabel} role="tablist">
         {worlds.map((world) => {
-          const unlocked = world.start <= currentLevel
+          const unlocked = allowAllLevels || world.start <= currentLevel
           const active = world.id === selectedWorld.id
           const worldName = format(strings.levels.worldLabel, { world: world.id })
           const range = format(strings.levels.worldRange, { start: world.start, end: world.end })
@@ -77,7 +78,7 @@ export function LevelSelectScreen({ onBack, onSelectLevel }: LevelSelectScreenPr
       <p className="world-tabs__hint" aria-live="polite">{format(strings.levels.worldHint, { world: selectedWorld.id, start: selectedWorld.start, end: selectedWorld.end })}</p>
       <section className="level-board" id={`world-${selectedWorld.id}-levels`} aria-label={strings.levels.board} tabIndex={0}>
         {visibleLevels.map((level) => {
-          const unlocked = level.id <= currentLevel
+          const unlocked = allowAllLevels || level.id <= currentLevel
           const stars = player.stars[level.id] ?? 0
           return (
             <button

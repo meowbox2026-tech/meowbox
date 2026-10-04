@@ -10,7 +10,13 @@ import { LegalScreen } from './screens/LegalScreen'
 import { GameScreen } from './screens/GameScreen'
 import type { LegalDocumentId } from './legal/legalContent'
 import { usePlayer } from '../state/PlayerContext'
-import { recordPlay } from '../services/ads/playCadence'
+import { isLocalDevelopment } from './devEnvironment'
+import { recordPlay, resetPlayCadence } from '../services/ads/playCadence'
+import {
+  DEFAULT_INTERSTITIAL_AD_SETTINGS,
+  loadInterstitialAdSettings,
+  type InterstitialAdSettings
+} from '../services/ads/interstitialAdSettings'
 import { DEMO_INTERSTITIAL_DURATION_MS, showInterstitialAd } from '../services/ads/interstitialAds'
 import { DEMO_UNDO_AD_DURATION_MS, showUndoRewardAd } from '../services/ads/undoRewardAd'
 import { shouldRenderDemoAd } from '../services/ads/adPresentation'
@@ -28,15 +34,18 @@ function isPlayerStatusRoute() {
 
 export function App() {
   const { player, isReady } = usePlayer()
+  const allowAllLevels = isLocalDevelopment()
   useDocumentLanguage()
   const strings = useStrings()
   const [screen, setScreen] = useState<Screen>('home')
   const [profileReturnScreen, setProfileReturnScreen] = useState<'home' | 'leaderboard'>('home')
   const [selectedLevel, setSelectedLevel] = useState(player.currentLevel)
+  const [devPreviewMode, setDevPreviewMode] = useState(false)
   const [gameMounted, setGameMounted] = useState(false)
   const [settingsReturnScreen, setSettingsReturnScreen] = useState<'home' | 'game'>('home')
   const [isAdOpen, setIsAdOpen] = useState(false)
   const [adDurationMs, setAdDurationMs] = useState(DEMO_INTERSTITIAL_DURATION_MS)
+  const [interstitialAdSettings, setInterstitialAdSettings] = useState<InterstitialAdSettings>(DEFAULT_INTERSTITIAL_AD_SETTINGS)
   const [toast, setToast] = useState<string>()
   const [legalDocument, setLegalDocument] = useState<LegalDocumentId>('privacy')
   const adInFlight = useRef(false)
@@ -50,13 +59,34 @@ export function App() {
   }, [isReady])
 
   useEffect(() => {
-    if (isPlayerStatusRoute() || analyticsSessionStarted.current) return undefined
+    if (!isReady || isPlayerStatusRoute()) return undefined
+    let active = true
+    const refreshSettings = async () => {
+      const settings = await loadInterstitialAdSettings()
+      if (!active) return
+      setInterstitialAdSettings(settings)
+      if (!settings.enabled) resetPlayCadence()
+    }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') void refreshSettings()
+    }
+
+    void refreshSettings()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      active = false
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [isReady])
+
+  useEffect(() => {
+    if (allowAllLevels || isPlayerStatusRoute() || analyticsSessionStarted.current) return undefined
     analyticsSessionStarted.current = true
     void recordPlayerEvent({ eventName: 'session_started' })
     const handlePageHide = () => { void recordPlayerEvent({ eventName: 'session_ended' }) }
     window.addEventListener('pagehide', handlePageHide)
     return () => window.removeEventListener('pagehide', handlePageHide)
-  }, [])
+  }, [allowAllLevels])
 
   useEffect(() => {
     if (!toast) return undefined
@@ -71,7 +101,7 @@ export function App() {
   }, [])
 
   const maybeShowPlayAd = useCallback(async () => {
-    if (adInFlight.current || !recordPlay().shouldShowAd) return
+    if (adInFlight.current || !interstitialAdSettings.enabled || !recordPlay(interstitialAdSettings.playsPerAd).shouldShowAd) return
     adInFlight.current = true
     openDemoAdSurface(DEMO_INTERSTITIAL_DURATION_MS)
     try {
@@ -82,7 +112,7 @@ export function App() {
       adInFlight.current = false
       setIsAdOpen(false)
     }
-  }, [openDemoAdSurface])
+  }, [interstitialAdSettings, openDemoAdSurface])
 
   const maybeGrantRewardAd = useCallback(async (): Promise<boolean> => {
     if (adInFlight.current) return false
@@ -99,7 +129,9 @@ export function App() {
     }
   }, [openDemoAdSurface])
 
-  const openGame = (levelId: number) => {
+  const openGame = (levelId: number, previewMode = false) => {
+    const isPreview = allowAllLevels && previewMode
+    setDevPreviewMode(isPreview)
     setSelectedLevel(levelId)
     setGameMounted(true)
     setScreen('game')
@@ -107,6 +139,7 @@ export function App() {
       hasEnteredGame.current = true
       return
     }
+    if (isPreview) return
     void maybeShowPlayAd()
   }
 
@@ -151,10 +184,10 @@ export function App() {
         else if (destination === 'profile') openProfile('home')
         else setScreen(destination)
       }} />}
-      {screen === 'levels' && <LevelSelectScreen onBack={() => setScreen('home')} onSelectLevel={openGame} />}
+      {screen === 'levels' && <LevelSelectScreen allowAllLevels={allowAllLevels} onBack={() => setScreen('home')} onSelectLevel={(levelId) => openGame(levelId, allowAllLevels)} />}
       {screen === 'profile' && <ProfileScreen onBack={() => setScreen(profileReturnScreen)} onSaved={() => undefined} />}
       {screen === 'leaderboard' && <LeaderboardScreen onBack={() => setScreen('home')} onProfile={() => openProfile('leaderboard')} />}
-      {gameMounted && <div className="app-screen-layer" hidden={screen !== 'game'}><GameScreen key={selectedLevel} levelId={selectedLevel} onHome={() => leaveGame('home')} onSettings={() => openSettings('game')} onLevelSelect={() => leaveGame('levels')} onNextLevel={openGame} onToast={setToast} onPlayAction={maybeShowPlayAd} onWatchUndoAd={maybeGrantRewardAd} onWatchHintAd={maybeGrantRewardAd} /></div>}
+      {gameMounted && <div className="app-screen-layer" hidden={screen !== 'game'}><GameScreen key={selectedLevel} levelId={selectedLevel} previewMode={devPreviewMode} onHome={() => leaveGame('home')} onSettings={() => openSettings('game')} onLevelSelect={() => leaveGame('levels')} onNextLevel={(levelId) => openGame(levelId, devPreviewMode)} onToast={setToast} onPlayAction={devPreviewMode ? () => undefined : maybeShowPlayAd} onWatchUndoAd={devPreviewMode ? async () => true : maybeGrantRewardAd} onWatchHintAd={devPreviewMode ? async () => true : maybeGrantRewardAd} /></div>}
       {screen === 'settings' && <SettingsScreen onBack={() => setScreen(settingsReturnScreen)} onToast={setToast} onLegal={openLegal} onPrivacyOptions={Capacitor.isNativePlatform() ? openPrivacyOptions : undefined} />}
       {screen === 'legal' && <LegalScreen documentId={legalDocument} onBack={() => setScreen('settings')} />}
       </div>

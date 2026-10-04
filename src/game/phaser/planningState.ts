@@ -116,7 +116,7 @@ export function planningReducer(state: PlanningState, action: PlanningAction, or
       if (state.placements.length !== level.cats.length) return state
       const board = arrangeCats(level, state.placements)
       if (!board) return state
-      const next: PlanningState = { ...state, phase: 'running', frame: 0, hintCell: undefined, failureReason: undefined, result: resolvePlanning(board) }
+      const next: PlanningState = { ...state, phase: 'running', frame: 0, hintCell: undefined, failureReason: undefined, result: resolvePlanning(board, level.dualBox, level.gravityFlip, level.divider) }
       return next.result!.frames.length ? next : finish(next)
     }
     default: return state

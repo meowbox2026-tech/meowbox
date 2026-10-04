@@ -8,6 +8,8 @@ const player = vi.hoisted(() => ({
   isReady: true
 }))
 const recordPlay = vi.hoisted(() => vi.fn())
+const resetPlayCadence = vi.hoisted(() => vi.fn())
+const loadInterstitialAdSettings = vi.hoisted(() => vi.fn())
 const showInterstitialAd = vi.hoisted(() => vi.fn())
 const showUndoRewardAd = vi.hoisted(() => vi.fn())
 const shouldRenderDemoAd = vi.hoisted(() => vi.fn())
@@ -18,7 +20,11 @@ const showNativePrivacyOptions = vi.hoisted(() => vi.fn())
 vi.mock('../state/PlayerContext', () => ({
   usePlayer: () => ({ player, isReady: player.isReady })
 }))
-vi.mock('../services/ads/playCadence', () => ({ recordPlay }))
+vi.mock('../services/ads/playCadence', () => ({ recordPlay, resetPlayCadence }))
+vi.mock('../services/ads/interstitialAdSettings', () => ({
+  DEFAULT_INTERSTITIAL_AD_SETTINGS: { enabled: false, playsPerAd: 5 },
+  loadInterstitialAdSettings
+}))
 vi.mock('../services/ads/interstitialAds', () => ({
   DEMO_INTERSTITIAL_DURATION_MS: 30000,
   showInterstitialAd
@@ -42,6 +48,7 @@ vi.mock('./screens/GameScreen', () => ({
 
 beforeEach(() => {
   recordPlay.mockReturnValue({ playsSinceAd: 0, shouldShowAd: true })
+  loadInterstitialAdSettings.mockResolvedValue({ enabled: true, playsPerAd: 5 })
   showInterstitialAd.mockResolvedValue({ shown: true })
   showUndoRewardAd.mockResolvedValue({ completed: true })
   shouldRenderDemoAd.mockReturnValue(false)
@@ -53,6 +60,8 @@ afterEach(() => {
   cleanup()
   window.history.replaceState({}, '', '/')
   recordPlay.mockReset()
+  resetPlayCadence.mockReset()
+  loadInterstitialAdSettings.mockReset()
   showInterstitialAd.mockReset()
   showUndoRewardAd.mockReset()
   shouldRenderDemoAd.mockReset()
@@ -65,6 +74,7 @@ describe('App ad presentation', () => {
     showInterstitialAd.mockReturnValue(new Promise((resolve) => { resolveAd = resolve }))
 
     render(<App />)
+    await act(async () => { await Promise.resolve() })
     fireEvent.click(screen.getByRole('button', { name: '開始遊戲' }))
     fireEvent.click(screen.getByRole('button', { name: '測試插頁廣告' }))
     await act(async () => { await Promise.resolve() })

@@ -3,6 +3,7 @@ import {
   blockPlayer, deleteAnonymousAccount, leaveLeaderboard, loadBlockedPlayers, loadLeaderboard,
   loadProfile, saveProfile, unblockPlayer,
 } from './leaderboardService'
+import { resetProfileCacheForTests } from './profileCache'
 
 const mocks = vi.hoisted(() => ({
   clientAvailable: true,
@@ -35,6 +36,8 @@ function response(data: unknown, error: unknown = null) {
 describe('leaderboard service', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    window.localStorage.clear()
+    resetProfileCacheForTests()
     mocks.clientAvailable = true
     mocks.getAnonymousUserId.mockResolvedValue(playerId)
     mocks.client.auth.signOut.mockResolvedValue({ error: null })
@@ -59,10 +62,30 @@ describe('leaderboard service', () => {
   it('loads a missing or valid profile and rejects malformed server data', async () => {
     response(null)
     await expect(loadProfile()).resolves.toBeNull()
+    resetProfileCacheForTests()
+    window.localStorage.clear()
     response(profile)
     await expect(loadProfile()).resolves.toEqual(profile)
     response({ ...profile, publicId: 'auth-user-id' })
-    await expect(loadProfile()).rejects.toThrow('invalid-response')
+    await expect(loadProfile({ force: true })).rejects.toThrow('invalid-response')
+  })
+
+  it('reuses a fresh local profile cache instead of repeating the profile RPC', async () => {
+    response(profile)
+    await expect(loadProfile()).resolves.toEqual(profile)
+
+    response({ ...profile, avatar: 'white' })
+    await expect(loadProfile()).resolves.toEqual(profile)
+    expect(mocks.client.rpc).toHaveBeenCalledTimes(1)
+  })
+
+  it('caches an empty profile so an unjoined player is not queried on every screen change', async () => {
+    response(null)
+    await expect(loadProfile()).resolves.toBeNull()
+
+    response(profile)
+    await expect(loadProfile()).resolves.toBeNull()
+    expect(mocks.client.rpc).toHaveBeenCalledTimes(1)
   })
 
   it('validates and normalizes a profile before saving', async () => {
@@ -72,6 +95,8 @@ describe('leaderboard service', () => {
     await expect(saveProfile({ name: '  Meow  ', avatar: 'orange' })).resolves.toEqual({ ...profile, name: 'Meow' })
     expect(mocks.client.rpc).toHaveBeenCalledWith('save_leaderboard_profile', { p_name: 'Meow', p_avatar: 'orange' })
     response(null)
+    await expect(loadProfile()).resolves.toEqual({ ...profile, name: 'Meow' })
+    expect(mocks.client.rpc).toHaveBeenCalledTimes(1)
     await expect(saveProfile({ name: 'Meow', avatar: 'orange' })).rejects.toThrow('invalid-response')
   })
 

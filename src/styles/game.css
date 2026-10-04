@@ -9,3 +9,8 @@
 @import './game-board-effects.css';
 @import './game-timing.css';
 @import './game-result.css';
+@import './game-dual-box.css';
+
+@import './game-gravity-flip.css';
+
+@import './game-divider.css';

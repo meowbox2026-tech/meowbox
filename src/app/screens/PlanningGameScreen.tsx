@@ -1,3 +1,6 @@
+import { PlanningDividerGuide, PlanningDividerOverlay } from '../components/PlanningDividerGuide'
+import { usePlanningDemo } from '../../game/phaser/usePlanningDemo'
+import { PlanningDualBoxBoard } from '../components/PlanningDualBoxBoard'
 import { useEffect, useRef, useState } from 'react'
 import { getLevelTimeTargets, getStarsForTime } from '../../game/core/levelTiming'
 import { getCatAssetPath } from '../../game/data/catAssets'
@@ -24,6 +27,7 @@ import { PlanningDiagonalTutorial, useDiagonalTutorial } from '../components/Pla
 
 interface Props {
   levelId: number
+  previewMode?: boolean
   onHome: () => void
   onSettings: () => void
   onLevelSelect: () => void
@@ -35,7 +39,7 @@ interface Props {
 
 type RewardAdKind = 'undo' | 'hint'
 
-export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction, onWatchUndoAd, onWatchHintAd = onWatchUndoAd }: Props) {
+export function PlanningGameScreen({ levelId, previewMode = false, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction, onWatchUndoAd, onWatchHintAd = onWatchUndoAd }: Props) {
   const activeLevelId = Math.min(MAX_PLANNING_LEVEL, Math.max(1, levelId))
   const { player, completeLevel } = usePlayer()
   const locale = useLocale()
@@ -46,7 +50,8 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const [rewardAdPending, setRewardAdPending] = useState(false)
   const [rewardAdStatus, setRewardAdStatus] = useState<string>()
   const tutorial = useDiagonalTutorial(activeLevelId)
-  const { level, state, dispatch, board, cats, clearing, wave, hidden } = usePlanningGame(paused || tutorial.open, activeLevelId)
+  const { level, state, dispatch, board, cats, clearing, transfers, wave, hidden, dividerClosed, dividerOpened } = usePlanningGame(paused || tutorial.open, activeLevelId, previewMode)
+  const demo = usePlanningDemo(level, state.placements.length, paused || hidden || tutorial.open, dispatch)
   const completionRecorded = useRef(false)
   const attemptId = useRef(createAnalyticsId())
   const failureRecorded = useRef(false)
@@ -56,7 +61,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   const lastHintEffect = useRef<string | undefined>(undefined)
   const [boardEffect, setBoardEffect] = useState<PlanningBoardEffect>()
   const editing = state.phase === 'editing'
-  const locked = paused || tutorial.open || hidden || !editing || state.pendingHint || rewardAdPending || failureModalOpen
+  const locked = demo.active || paused || tutorial.open || hidden || !editing || state.pendingHint || rewardAdPending || failureModalOpen
   const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
@@ -70,8 +75,8 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
   useEffect(() => {
     attemptId.current = createAnalyticsId()
     failureRecorded.current = false
-    void recordPlayerEvent({ eventName: 'level_started', levelId: activeLevelId, attemptId: attemptId.current })
-  }, [activeLevelId])
+    if (!previewMode) void recordPlayerEvent({ eventName: 'level_started', levelId: activeLevelId, attemptId: attemptId.current })
+  }, [activeLevelId, previewMode])
   const triggerBoardEffect = (effect: Omit<PlanningBoardEffect, 'id'>) => {
     boardEffectId.current += 1
     setBoardEffect({ ...effect, id: boardEffectId.current })
@@ -103,16 +108,18 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     const earnedStars = getStarsForTime(finalElapsedMs, timeTargets)
     setCompletionTimeMs(finalElapsedMs)
     setCompletionStars(earnedStars)
-    completeLevel(activeLevelId, earnedStars)
-    void recordPlayerEvent({ eventName: 'level_completed', levelId: activeLevelId, attemptId: attemptId.current, clearTimeMs: finalElapsedMs, starsEarned: earnedStars })
-  }, [state.phase, completeLevel, activeLevelId, read, timeTargets.threeStarMs, timeTargets.twoStarMs])
+    if (!previewMode) {
+      completeLevel(activeLevelId, earnedStars)
+      void recordPlayerEvent({ eventName: 'level_completed', levelId: activeLevelId, attemptId: attemptId.current, clearTimeMs: finalElapsedMs, starsEarned: earnedStars })
+    }
+  }, [state.phase, completeLevel, activeLevelId, previewMode, read, timeTargets.threeStarMs, timeTargets.twoStarMs])
   useEffect(() => {
     if (!state.failureReason) return
     setFailureModalOpen(true)
     if (failureRecorded.current) return
     failureRecorded.current = true
-    void recordPlayerEvent({ eventName: 'level_failed', levelId: activeLevelId, attemptId: attemptId.current })
-  }, [state.failureReason, activeLevelId])
+    if (!previewMode) void recordPlayerEvent({ eventName: 'level_failed', levelId: activeLevelId, attemptId: attemptId.current })
+  }, [state.failureReason, activeLevelId, previewMode])
   useEffect(() => {
     const hint = state.hintCell
     if (!hint) {
@@ -125,11 +132,12 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     triggerBoardEffect({ kind: 'place', x: hint.x, y: hint.y })
   }, [state.hintCell])
   const restart = () => {
+    demo.cancel()
     completionRecorded.current = false
     failureRecorded.current = false
     resultSoundPlayed.current = undefined
     attemptId.current = createAnalyticsId()
-    void recordPlayerEvent({ eventName: 'level_started', levelId: activeLevelId, attemptId: attemptId.current })
+    if (!previewMode) void recordPlayerEvent({ eventName: 'level_started', levelId: activeLevelId, attemptId: attemptId.current })
     reset()
     setCompletionTimeMs(undefined)
     setCompletionStars(3)
@@ -175,7 +183,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
     if (locked || rewardAdPending || state.selected === undefined) return
     if (state.hintUses > 0) {
       dispatch({ type: 'hint' })
-      void recordPlayerEvent({ eventName: 'hint_used', levelId: activeLevelId, attemptId: attemptId.current })
+      if (!previewMode) void recordPlayerEvent({ eventName: 'hint_used', levelId: activeLevelId, attemptId: attemptId.current })
       return
     }
     setRewardAdConfirm('hint')
@@ -217,11 +225,17 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         <div key={cat.id} role="listitem" className={`planning-tray__cat${index === 0 ? ' is-next' : ''}`}
           aria-label={text.cardLabel(index + 1, catName(cat.type))}>
           <img src={getCatAssetPath(cat.type)} alt="" />
+          {cat.homeBox && <small className="dual-box__tray-label">{({ 'zh-TW': { left: '左箱', right: '右箱' }, en: { left: 'Left', right: 'Right' }, ja: { left: '左箱', right: '右箱' } })[locale][cat.homeBox]}</small>}
         </div>
       )}{remainingCats.length === 0 && <span className="planning-tray__empty-slot" aria-hidden="true" />}</div>
     </section>
-    <div
-      className={`planning-board planning-board--prism${paused || hidden ? ' is-paused' : ''}`}
+    {level.divider && <PlanningDividerGuide locale={locale} closed={dividerClosed} />}
+    {level.dualBox ? <PlanningDualBoxBoard showIntro={activeLevelId === 31} config={level.dualBox} board={board} placements={state.placements}
+      clearing={clearing} transfers={transfers} paused={paused || hidden || tutorial.open} locked={locked} selected={state.selected} undoUses={state.undoUses}
+      homeBox={cats.find(cat => cat.id === state.selected)?.homeBox}
+      hintCell={state.hintCell} locale={locale} onPlace={place} onRemove={removePlacedCat}
+      onDemo={activeLevelId === 31 ? demo.start : undefined} /> : <div
+      className={`planning-board planning-board--prism${level.divider ? ' planning-board--divider' : ''}${paused || hidden ? ' is-paused' : ''}`}
       data-board-size="8x8"
     >
       <div className="planning-grid" data-board-skin="liquid-crystal" aria-label={text.board}>
@@ -245,6 +259,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
             : <div key={cat.id} className={className} style={style}
               aria-label={order >= 0 ? `${text.placed} ${order + 1} ${catName(cat.type)}` : `${text.fixed} ${catName(cat.type)}`}>{content}</div>
         }))}
+        {level.divider && <PlanningDividerOverlay config={level.divider} initialBoard={level.board} closed={dividerClosed} opening={dividerOpened} paused={paused || hidden} locale={locale} />}
       </div>
       <PlanningBoardEffects
         board={board}
@@ -256,7 +271,7 @@ export function PlanningGameScreen({ levelId, onHome, onSettings, onLevelSelect,
         comboLabel={text.combo}
       />
       <div className="planning-board__label">MEOW LINE <span>8 × 8</span></div>
-    </div>
+    </div>}
     {editing && !failureModalOpen && state.failureReason === 'resolution' && state.placements.length === 0 && <p className="planning-status" role="status">{text.retryNotice}</p>}
     <div className="planning-edit-actions">
       <ArtworkButton

@@ -2,17 +2,22 @@ import { useEffect, useState } from 'react'
 import { useLeaderboardCopy } from '../../i18n/leaderboard'
 import { AVATARS, validName, type BlockedPlayer, type ProfileDraft, type PublicProfile } from '../../services/leaderboard/profile'
 import { deleteAnonymousAccount, loadBlockedPlayers, loadProfile, leaveLeaderboard, saveProfile, unblockPlayer } from '../../services/leaderboard/leaderboardService'
+import { getCachedProfile } from '../../services/leaderboard/profileCache'
 import { CatAvatar } from './CatAvatar'
 
 type ConfirmAction = 'leave' | 'delete' | null
 
 export function ProfileScreen({ onBack, onSaved }: { onBack: () => void; onSaved: (profile: PublicProfile | null) => void }) {
   const t = useLeaderboardCopy()
-  const [profile, setProfile] = useState<ProfileDraft>({ name: '', avatar: 'orange' })
-  const [storedProfile, setStoredProfile] = useState<ProfileDraft | null>(null)
+  const initialCachedProfile = getCachedProfile()
+  const initialDraft: ProfileDraft = initialCachedProfile
+    ? { name: initialCachedProfile.name, avatar: initialCachedProfile.avatar }
+    : { name: '', avatar: 'orange' }
+  const [profile, setProfile] = useState<ProfileDraft>(initialDraft)
+  const [storedProfile, setStoredProfile] = useState<ProfileDraft | null>(initialCachedProfile ? initialDraft : null)
   const [blocked, setBlocked] = useState<BlockedPlayer[]>([])
-  const [joined, setJoined] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [joined, setJoined] = useState(Boolean(initialCachedProfile))
+  const [loading, setLoading] = useState(initialCachedProfile === undefined)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
   const [invalid, setInvalid] = useState(false)
@@ -23,7 +28,7 @@ export function ProfileScreen({ onBack, onSaved }: { onBack: () => void; onSaved
 
   useEffect(() => {
     let active = true
-    setLoading(true); setFailed(false)
+    setLoading(getCachedProfile() === undefined); setFailed(false)
     void Promise.all([loadProfile(), loadBlockedPlayers()]).then(([value, blockedPlayers]) => {
       if (!active) return
       setJoined(Boolean(value))

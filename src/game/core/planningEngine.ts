@@ -1,9 +1,12 @@
+import type { PlanningDivider } from './planningDivider'
+import { clearPlanningUp, settlePlanningUp, type PlanningGravityFlip, type PlanningGravityDirection } from './planningGravityFlip'
+import { canPlaceInDualBox, isDualBoxPortal, transferDualBoxCats, type PlanningDualBox, type PlanningTransfer } from './planningDualBox'
 import { findDropMatches, type DropBoard, type DropCell } from './dropEngine'
 import { clearPlanningSupport } from './planningGravity'
 import type { CatAsset } from '../types'
 import type { PlanningObjective } from './planningObjective'
 
-export interface PlanningCat { id: number; type: CatAsset }
+export interface PlanningCat { id: number; type: CatAsset; homeBox?: 'left' | 'right' }
 export interface Placement { catId: number; x: number; y: number }
 export interface PlanningLevel {
   id: number
@@ -13,8 +16,11 @@ export interface PlanningLevel {
   cats: PlanningCat[]
   solution: Placement[]
   objective?: PlanningObjective
+  divider?: PlanningDivider
+  gravityFlip?: PlanningGravityFlip
+  dualBox?: PlanningDualBox
 }
-export interface PlanningFrame { board: DropBoard; clearing: number[]; wave: number }
+export interface PlanningFrame { board: DropBoard; clearing: number[]; wave: number; transfers?: PlanningTransfer[]; gravity?: PlanningGravityDirection; flipped?: boolean; dividerClosed?: boolean; dividerOpened?: boolean }
 export interface PlanningResult { frames: PlanningFrame[]; remaining: number; waves: number }
 export interface PlanningMatchGroup { cells: DropCell[] }
 
@@ -29,7 +35,8 @@ export function arrangeCats(level: PlanningLevel, placements: Placement[]): Drop
     if (!cat || used.has(cat.id)) return undefined
     if (!Number.isInteger(placement.x) || !Number.isInteger(placement.y)) return undefined
     if (placement.x < 0 || placement.x >= level.width || placement.y < 0 || placement.y >= level.height) return undefined
-    if (board[placement.y][placement.x]) return undefined
+    if (!canPlaceInDualBox(level.dualBox, cat.homeBox, placement.x)) return undefined
+    if (board[placement.y][placement.x] || isDualBoxPortal(level.dualBox, placement.x, placement.y)) return undefined
     board[placement.y][placement.x] = { ...cat, placementOrder: index + 1 }
     used.add(cat.id)
   }
@@ -37,15 +44,18 @@ export function arrangeCats(level: PlanningLevel, placements: Placement[]): Drop
 }
 
 /** Each step clears one selected group, then drops cats that lost their support. */
-export function resolvePlanning(board: DropBoard): PlanningResult {
+export function resolvePlanning(board: DropBoard, dualBox?: PlanningDualBox, gravityFlip?: PlanningGravityFlip, divider?: PlanningDivider): PlanningResult {
   let current = copy(board)
   const frames: PlanningFrame[] = []
   // A gravity-created group outranks any group that was already waiting.
   const cascadeGroups = new Set<string>()
   let movedCats = new Set<number>()
   let waves = 0
+  let dividerClosed = Boolean(divider)
+  let gravity: PlanningGravityDirection = 'down'
+  const unusedSwitches = new Set(gravityFlip?.switchCatIds)
   while (true) {
-    const groups = findPlanningMatchGroups(current)
+    const groups = findPlanningMatchGroups(current, dualBox, dividerClosed ? divider : undefined)
     if (!groups.length) break
     const prioritizedCascades = groups.filter(group => {
       const key = matchGroupKey(group, current)
@@ -56,22 +66,36 @@ export function resolvePlanning(board: DropBoard): PlanningResult {
     const matches = selected.cells
     waves += 1
     const clearedIds = matches.map(({ x, y }) => current[y][x]!.id)
-    frames.push({ board: copy(current), clearing: clearedIds, wave: waves })
-    const next = clearPlanningSupport(current, matches)
+    frames.push({ board: copy(current), clearing: clearedIds, wave: waves, ...(gravityFlip ? { gravity } : {}), ...(divider ? { dividerClosed } : {}) })
+    const dividerOpened = dividerClosed && clearedIds.some(id => divider?.keyCatIds.includes(id))
+    if (dividerOpened) dividerClosed = false
+    const flipped = clearedIds.some(id => unusedSwitches.has(id))
+    clearedIds.forEach(id => unusedSwitches.delete(id))
+    const cleared = gravity === 'up' ? clearPlanningUp(current, matches) : clearPlanningSupport(current, matches)
+    if (flipped) gravity = gravity === 'down' ? 'up' : 'down'
+    const dropped = !flipped ? cleared : gravity === 'up'
+      ? settlePlanningUp(cleared) : settlePlanningUp([...cleared].reverse()).reverse()
+    const transported = dualBox ? transferDualBoxCats(dropped, dualBox) : undefined
+    const next = transported?.board ?? dropped
     movedCats = findMovedCats(current, next, new Set(clearedIds))
-    for (const group of findPlanningMatchGroups(next)) {
+    for (const group of findPlanningMatchGroups(next, dualBox, dividerClosed ? divider : undefined)) {
       if (group.cells.some(({ x, y }) => movedCats.has(next[y][x]!.id))) {
         cascadeGroups.add(matchGroupKey(group, next))
       }
     }
     current = next
-    frames.push({ board: copy(current), clearing: [], wave: waves })
+    frames.push({ board: copy(current), clearing: [], wave: waves, ...(transported ? { transfers: transported.transfers } : {}), ...(gravityFlip ? { gravity, flipped } : {}), ...(divider ? { dividerClosed, dividerOpened } : {}) })
   }
   return { frames, remaining: current.flat().filter(Boolean).length, waves }
 }
 
-export function findPlanningMatchGroups(board: DropBoard): PlanningMatchGroup[] {
-  const matches = findDropMatches(board)
+export function findPlanningMatchGroups(board: DropBoard, dualBox?: PlanningDualBox, divider?: PlanningDivider): PlanningMatchGroup[] {
+  const splitAt = dualBox?.splitAt ?? divider?.splitAt
+  const matches = splitAt !== undefined
+    ? [0, splitAt].flatMap((start, index) => findDropMatches(board.map(row =>
+      row.slice(start, index === 0 ? splitAt : row.length)))
+      .map(cell => ({ ...cell, x: cell.x + start })))
+    : findDropMatches(board)
   const remaining = new Map(matches.map(cell => [`${cell.x}:${cell.y}`, cell]))
   const groups: PlanningMatchGroup[] = []
 
@@ -86,6 +110,7 @@ export function findPlanningMatchGroups(board: DropBoard): PlanningMatchGroup[] 
       cells.push(cell)
       for (const neighbor of remaining.values()) {
         if (board[neighbor.y][neighbor.x]?.type !== type) continue
+        if (splitAt !== undefined && (cell.x < splitAt) !== (neighbor.x < splitAt)) continue
         if (Math.abs(cell.x - neighbor.x) <= 1 && Math.abs(cell.y - neighbor.y) <= 1) pending.push(neighbor)
       }
     }

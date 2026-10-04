@@ -1,3 +1,4 @@
+import { canPlaceInDualBox, isDualBoxPortal } from './planningDualBox'
 import { arrangeCats, resolvePlanning, type Placement, type PlanningLevel } from './planningEngine'
 import type { DropBoard } from './dropEngine'
 
@@ -23,9 +24,9 @@ const isAuthoredPrefix = (level: PlanningLevel, placements: Placement[]): boolea
 })
 
 function placeNext(board: DropBoard, level: PlanningLevel, placements: Placement[], x: number, y: number): DropBoard | undefined {
-  if (board[y]?.[x]) return undefined
+  if (board[y]?.[x] || isDualBoxPortal(level.dualBox, x, y)) return undefined
   const cat = level.cats[placements.length]
-  if (!cat) return undefined
+  if (!cat || !canPlaceInDualBox(level.dualBox, cat.homeBox, x)) return undefined
   const next = copyBoard(board)
   next[y][x] = { ...cat, placementOrder: placements.length + 1 }
   return next
@@ -36,7 +37,7 @@ function canComplete(board: DropBoard, placements: Placement[], context: SearchC
   const cached = context.memo.get(key)
   if (cached !== undefined) return cached
   if (placements.length === context.level.cats.length) {
-    const solved = resolvePlanning(board).remaining === 0
+    const solved = resolvePlanning(board, context.level.dualBox, context.level.gravityFlip, context.level.divider).remaining === 0
     context.memo.set(key, solved)
     return solved
   }
@@ -44,7 +45,7 @@ function canComplete(board: DropBoard, placements: Placement[], context: SearchC
   // The authored route is a fast path, but not the only accepted route.
   if (isAuthoredPrefix(context.level, placements)) {
     const authoredBoard = arrangeCats(context.level, context.level.solution)
-    if (authoredBoard && resolvePlanning(authoredBoard).remaining === 0) {
+    if (authoredBoard && resolvePlanning(authoredBoard, context.level.dualBox, context.level.gravityFlip, context.level.divider).remaining === 0) {
       context.memo.set(key, true)
       return true
     }
@@ -134,5 +135,5 @@ export async function findSafePlacementAsync(level: PlanningLevel, placements: P
 function knownCompletion(level: PlanningLevel, placements: Placement[]): boolean {
   const completion = [...placements, ...level.solution.slice(placements.length)]
   const board = arrangeCats(level, completion)
-  return Boolean(board && resolvePlanning(board).remaining === 0)
+  return Boolean(board && resolvePlanning(board, level.dualBox, level.gravityFlip, level.divider).remaining === 0)
 }

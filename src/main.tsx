@@ -2,6 +2,7 @@ import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Capacitor } from '@capacitor/core'
 import { App } from './app/App'
+import { isLocalDevelopment } from './app/devEnvironment'
 import { PlayerProvider } from './state/PlayerContext'
 import bundledTheme from './game/content/theme.json'
 import { applyGameTheme } from './services/gameContent/theme'
@@ -21,8 +22,7 @@ applyGameTheme(bundledTheme)
 
 document.documentElement.classList.toggle('native-platform', Capacitor.isNativePlatform())
 
-const isLocalDev = import.meta.env.DEV
-  && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)
+const isLocalDev = isLocalDevelopment()
 
 const DevInspector = isLocalDev
   ? lazy(() => import('./devtools/InspectorOverlay').then(({ InspectorOverlay }) => ({ default: InspectorOverlay })))

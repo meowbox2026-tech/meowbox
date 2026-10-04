@@ -4,11 +4,14 @@ import { ProfileScreen } from './ProfileScreen'
 import { LeaderboardScreen } from './LeaderboardScreen'
 const api = vi.hoisted(() => ({ loadProfile: vi.fn(), saveProfile: vi.fn(), leaveLeaderboard: vi.fn(), deleteAnonymousAccount: vi.fn(),
   loadBlockedPlayers: vi.fn(), unblockPlayer: vi.fn(), blockPlayer: vi.fn(), loadLeaderboard: vi.fn() }))
+const cache = vi.hoisted(() => ({ getCachedProfile: vi.fn() }))
 vi.mock('../../services/leaderboard/leaderboardService', () => api)
+vi.mock('../../services/leaderboard/profileCache', () => cache)
 afterEach(cleanup)
 
 beforeEach(() => {
   vi.clearAllMocks()
+  cache.getCachedProfile.mockReturnValue(undefined)
   api.loadProfile.mockResolvedValue(null)
   api.saveProfile.mockImplementation(async value => value)
   api.leaveLeaderboard.mockResolvedValue(undefined)
@@ -17,6 +20,15 @@ beforeEach(() => {
   api.unblockPlayer.mockResolvedValue(undefined)
   api.blockPlayer.mockResolvedValue(undefined)
   api.loadLeaderboard.mockResolvedValue([])
+})
+
+it('shows a cached profile immediately while the profile page refreshes in the background', () => {
+  cache.getCachedProfile.mockReturnValue({ name: '小花', avatar: 'white', publicId: '11111111-1111-4111-8111-111111111111' })
+  api.loadProfile.mockImplementation(() => new Promise(() => undefined))
+
+  render(<ProfileScreen onBack={vi.fn()} onSaved={vi.fn()} />)
+
+  expect(screen.getByLabelText('玩家名稱')).toHaveValue('小花')
 })
 
 it('lets an anonymous player choose a built-in avatar and name with explicit join', async () => {

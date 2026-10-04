@@ -1,0 +1,14 @@
+.gravity-flip-guide { width: min(100%, 360px); padding: 6px 12px; flex-shrink: 0; box-sizing: border-box; border-radius: 16px; background: #edf0ff; color: #4e4274; border: 1px solid #cfc2ed; }
+.gravity-flip-guide > div { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.gravity-flip-guide b { font-size: 12px; color: #7651ad; }
+.gravity-flip-guide p { margin: 3px 0 1px; font-size: 12px; line-height: 1.3; }
+.gravity-flip-guide small { font-size: 11px; }
+.gravity-switches { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+.gravity-switches__target { position: absolute; top: -20px; left: 0; width: 100%; text-align: center; color: #7651ad; font-size: 10px; }
+.gravity-switch { position: absolute; width: 12.5%; height: 12.5%; border: 2px solid #ae76e4; border-radius: 9px; color: #fff; text-align: right; font-size: 16px; font-weight: bold; text-shadow: 0 1px 3px #674085; box-shadow: 0 0 8px #b986e4; }
+.gravity-switch.is-used { opacity: .25; border-style: dashed; box-shadow: none; }
+.planning-board--gravity { margin-top: 0; width: min(100%, 360px, max(190px, calc(100cqh - 370px))); }
+.planning-board--gravity.is-flipping .planning-cat { transition: top 1s cubic-bezier(.2, .65, .3, 1); }
+@media (prefers-reduced-motion: reduce) { .planning-board--gravity.is-flipping .planning-cat { transition: none; } }
+
+.screen--planning:has(.gravity-flip-guide) .planning-start { top: -10px; }

@@ -1,0 +1,21 @@
+.divider-guide { width: min(100%, 360px); box-sizing: border-box; flex-shrink: 0; padding: 6px 12px; border-radius: 16px; background: #fff3df; color: #775131; border: 1px solid #dcbc86; }
+.divider-guide > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.divider-guide b { font-size: 12px; }
+.divider-guide p { margin: 3px 0 1px; font-size: 12px; line-height: 1.3; }
+.divider-guide small { font-size: 11px; }
+.planning-board--divider { width: min(100%, 360px, max(190px, calc(100cqh - 370px))); }
+.screen--planning:has(.divider-guide) .planning-start { top: -10px; }
+.divider-overlay { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.divider-wall { position: absolute; top: 0; height: 100%; width: 12px; transform: translateX(-50%); filter: drop-shadow(0 1px 3px #754a30); }
+.divider-wall > span { position: absolute; left: 0; width: 100%; height: 50%; border: 1px solid #99663b; border-radius: 3px; background: repeating-linear-gradient(0deg, #d5a46b 0 12px, #b9814e 12px 15px); }
+.divider-wall > span:nth-child(2) { top: 50%; }
+.divider-wall b { position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; border-radius: 50%; background: #fff5da; text-align: center; color: #79503a; }
+.divider-key { position: absolute; width: 12.5%; height: 12.5%; text-align: right; border: 2px dashed #dba448; border-radius: 9px; color: #7c481e; font-size: 18px; text-shadow: 0 1px white; }
+.divider-wall.is-opening > span:first-child { animation: divider-cut-top 1.1s ease-in forwards; }
+.divider-wall.is-opening > span:nth-child(2) { animation: divider-cut-bottom 1.1s ease-in forwards; }
+.divider-wall.is-opening b { animation: divider-scissors .5s ease-out forwards; }
+.divider-overlay[data-paused] * { animation-play-state: paused; }
+@keyframes divider-cut-top { to { transform: translateY(-110%) rotate(-12deg); opacity: 0; } }
+@keyframes divider-cut-bottom { to { transform: translateY(110%) rotate(12deg); opacity: 0; } }
+@keyframes divider-scissors { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .divider-wall.is-opening { display: none; } }
