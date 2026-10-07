@@ -20,7 +20,6 @@ describe('planning screen layout', () => {
     const compactLayout = planningCss.match(/@container \(max-height: 700px\) \{([\s\S]*)$/)?.[1] ?? ''
     expect(compactLayout).toMatch(/\.planning-edit-actions \{[^}]*min-height:\s*68px/)
     expect(compactLayout).toMatch(/\.planning-edit-actions \.artwork-button \{ width:\s*68px; height:\s*68px; flex-basis:\s*68px;/)
-    expect(compactLayout).toMatch(/\.screen--planning \.planning-start \{ height: min\(9\.9cqh, 70px\); min-height: min\(9\.9cqh, 70px\);/)
   })
 
   it('does not include animated background effects on the planning board', () => {

@@ -1,3 +1,4 @@
+import { GameBannerAd } from '../components/GameBannerAd'
 import { PlanningDividerGuide, PlanningDividerOverlay } from '../components/PlanningDividerGuide'
 import { usePlanningDemo } from '../../game/phaser/usePlanningDemo'
 import { PlanningDualBoxBoard } from '../components/PlanningDualBoxBoard'
@@ -28,6 +29,7 @@ import { PlanningDiagonalTutorial, useDiagonalTutorial } from '../components/Pla
 interface Props {
   levelId: number
   previewMode?: boolean
+  active?: boolean
   onHome: () => void
   onSettings: () => void
   onLevelSelect: () => void
@@ -39,7 +41,7 @@ interface Props {
 
 type RewardAdKind = 'undo' | 'hint'
 
-export function PlanningGameScreen({ levelId, previewMode = false, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction, onWatchUndoAd, onWatchHintAd = onWatchUndoAd }: Props) {
+export function PlanningGameScreen({ levelId, previewMode = false, active = true, onHome, onSettings, onLevelSelect, onNextLevel, onPlayAction, onWatchUndoAd, onWatchHintAd = onWatchUndoAd }: Props) {
   const activeLevelId = Math.min(MAX_PLANNING_LEVEL, Math.max(1, levelId))
   const { player, completeLevel } = usePlayer()
   const locale = useLocale()
@@ -50,7 +52,7 @@ export function PlanningGameScreen({ levelId, previewMode = false, onHome, onSet
   const [rewardAdPending, setRewardAdPending] = useState(false)
   const [rewardAdStatus, setRewardAdStatus] = useState<string>()
   const tutorial = useDiagonalTutorial(activeLevelId)
-  const { level, state, dispatch, board, cats, clearing, transfers, wave, hidden, dividerClosed, dividerOpened } = usePlanningGame(paused || tutorial.open, activeLevelId, previewMode)
+  const { level, state, dispatch, board, cats, clearing, transfers, wave, hidden, dividerClosed, dividerOpened } = usePlanningGame(paused || tutorial.open, activeLevelId)
   const demo = usePlanningDemo(level, state.placements.length, paused || hidden || tutorial.open, dispatch)
   const completionRecorded = useRef(false)
   const attemptId = useRef(createAnalyticsId())
@@ -62,7 +64,6 @@ export function PlanningGameScreen({ levelId, previewMode = false, onHome, onSet
   const [boardEffect, setBoardEffect] = useState<PlanningBoardEffect>()
   const editing = state.phase === 'editing'
   const locked = demo.active || paused || tutorial.open || hidden || !editing || state.pendingHint || rewardAdPending || failureModalOpen
-  const left = cats.length - state.placements.length
   const remainingCats = cats.slice(state.placements.length)
   const totalCats = level.board.flat().filter(Boolean).length + level.cats.length
   const timeTargets = getLevelTimeTargets(activeLevelId, cats.length)
@@ -131,6 +132,11 @@ export function PlanningGameScreen({ levelId, previewMode = false, onHome, onSet
     lastHintEffect.current = hintKey
     triggerBoardEffect({ kind: 'place', x: hint.x, y: hint.y })
   }, [state.hintCell])
+  useEffect(() => {
+    if (locked || rewardAdConfirm !== undefined || cats.length === 0 || state.placements.length !== cats.length) return
+    triggerBoardEffect({ kind: 'start' })
+    dispatch({ type: 'start' })
+  }, [locked, rewardAdConfirm, cats.length, state.placements.length, dispatch])
   const restart = () => {
     demo.cancel()
     completionRecorded.current = false
@@ -292,7 +298,7 @@ export function PlanningGameScreen({ levelId, previewMode = false, onHome, onSet
       />
     </div>
     {rewardAdStatus && !failureModalOpen && <p className="planning-ad-status" role="status">{rewardAdStatus}</p>}
-    <ArtworkButton asset="start" className="planning-start" disabled={locked || left > 0} onClick={() => { triggerBoardEffect({ kind: 'start' }); dispatch({ type: 'start' }) }}>{text.start}</ArtworkButton>
+    <GameBannerAd visible={active && !paused && !hidden && !tutorial.open && !failureModalOpen && !rewardAdPending && rewardAdConfirm === undefined && state.phase !== 'completed'} />
     <PauseModal open={paused} onContinue={() => setPaused(false)} onRestart={restart} onHome={onHome} onSettings={onSettings} />
     <PlanningDiagonalTutorial open={tutorial.open} onClose={tutorial.close} />
     <Modal

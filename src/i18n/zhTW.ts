@@ -25,7 +25,6 @@ export const zhTW: Strings = {
     title: '設定',
     musicLabel: '音樂', soundLabel: '音效', hapticsLabel: '震動',
     language: '語言',
-    about: '關於遊戲', aboutToast: 'Meow Line 喵序｜貓咪落下連線解謎，目前版本 1.0.0。',
     backHome: '回到主頁', privacy: '隱私權政策', privacyOptions: '隱私權選項',
     privacyOptionsOpened: '已開啟隱私權選項', privacyOptionsUnavailable: '目前無法開啟隱私權選項',
     terms: '服務條款', support: '客服支援'

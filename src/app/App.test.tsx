@@ -20,6 +20,10 @@ vi.mock('../state/PlayerContext', () => ({
 }))
 
 vi.mock('../services/ads/playCadence', () => ({ recordPlay }))
+vi.mock('../services/ads/interstitialAdSettings', () => ({
+  DEFAULT_INTERSTITIAL_AD_SETTINGS: { enabled: true, playsPerAd: 5 },
+  loadInterstitialAdSettings: async () => ({ enabled: true, playsPerAd: 5 })
+}))
 vi.mock('../services/ads/interstitialAds', () => ({
   DEMO_INTERSTITIAL_DURATION_MS: 30000,
   showInterstitialAd

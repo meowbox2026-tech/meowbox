@@ -25,7 +25,6 @@ export const ja: Strings = {
     title: '設定',
     musicLabel: '音楽', soundLabel: '効果音', hapticsLabel: '振動',
     language: '言語',
-    about: 'このゲームについて', aboutToast: 'Meow Line｜猫を落としてつなぐパズル、バージョン 1.0.0。',
     backHome: 'ホームへ戻る', privacy: 'プライバシーポリシー', privacyOptions: 'プライバシー設定',
     privacyOptionsOpened: 'プライバシー設定を開きました', privacyOptionsUnavailable: '現在プライバシー設定を開けません',
     terms: '利用規約', support: 'サポート'

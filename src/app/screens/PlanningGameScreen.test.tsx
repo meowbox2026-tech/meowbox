@@ -34,7 +34,6 @@ function mountLevel(levelId: number) {
   return view
 }
 function cell(row: number, column: number) { return screen.getByRole('button', { name: `放在第 ${row} 排、第 ${column} 欄` }) }
-function start() { fireEvent.click(screen.getByRole('button', { name: '開始救援' })) }
 function finish() { for (let i = 0; i < 9; i++) act(() => vi.advanceTimersByTime(700)) }
 async function flushAsyncState() {
   await act(async () => {
@@ -66,14 +65,16 @@ describe('8x8 planning level through the game entry point', () => {
     expect(container.querySelectorAll('.planning-cell')).toHaveLength(64)
   })
 
-  it('routes levels two through ninety into the same 8x8 planning rules and scrollable tray', () => {
+  it('routes levels two through thirty to 8x8 boards and 31-90 to dual boxes with the scrollable tray', () => {
     for (const levelId of Array.from({ length: 89 }, (_, index) => index + 2)) {
       cleanup()
       mountLevel(levelId)
-      expect(document.querySelectorAll('.planning-cell')).toHaveLength(64)
+      if (levelId <= 30) expect(document.querySelectorAll('.planning-cell')).toHaveLength(64)
+      else expect(document.querySelectorAll('.dual-box__case')).toHaveLength(2)
       expect(document.querySelector('.planning-tray__cats')).toBeInTheDocument()
       expect(document.querySelector('[data-testid="planning-objective"]')).toBeNull()
-      if (levelId >= 7) expect(document.querySelector('.planning-tray__hint')).toBeInTheDocument()
+      const queued = document.querySelectorAll('.planning-tray__cat').length
+      if (queued > 8) expect(document.querySelector('.planning-tray__hint')).toBeInTheDocument()
       else expect(document.querySelector('.planning-tray__hint')).toBeNull()
       for (const card of document.querySelectorAll('.planning-tray__cat')) {
         expect(card.querySelector('img')).not.toBeNull()
@@ -83,7 +84,7 @@ describe('8x8 planning level through the game entry point', () => {
     }
   })
 
-  it('shows all cats, a running timer, editable numbered placements and gated start', async () => {
+  it('shows all cats, a running timer, editable placements and automatic rescue', async () => {
     const { container } = mount()
     expect(recordPlayerEvent).toHaveBeenCalledWith(expect.objectContaining({ eventName: 'level_started', levelId: 1, attemptId: expect.any(String) }))
     expect(screen.queryByTestId('planning-objective')).toBeNull()
@@ -106,9 +107,8 @@ describe('8x8 planning level through the game entry point', () => {
     expect(screen.getByRole('timer', { name: '關卡時間 00:00.0' })).toBeInTheDocument()
     act(() => vi.advanceTimersByTime(1_250))
     expect(screen.getByTestId('level-timer-value')).toHaveTextContent('00:01.2')
-    expect(screen.getByRole('button', { name: '開始救援' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '開始救援' })).toHaveClass('artwork-button')
-    expect(container.querySelector('.planning-start img')).toHaveAttribute('src', '/assets/start.webp')
+    expect(screen.queryByRole('button', { name: '開始救援' })).toBeNull()
+    expect(screen.getByLabelText('廣告預覽')).toBeInTheDocument()
     await place(4, 5, 1)
     expect(container.querySelector('.planning-effect--place')).toBeInTheDocument()
     expect(container.querySelectorAll('.planning-tray img')).toHaveLength(2)
@@ -126,17 +126,10 @@ describe('8x8 planning level through the game entry point', () => {
     expect(container.querySelector('.planning-tray__empty-slot')).toBeInTheDocument()
     expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
     expect([...container.querySelectorAll('.planning-cat b')].map(node => node.textContent).sort()).toEqual(['1', '2', '3'])
-    expect(screen.getByRole('button', { name: '開始救援' })).toBeEnabled()
-    expect(screen.queryByLabelText(/生命/)).toBeNull()
-    act(() => vi.advanceTimersByTime(120000))
-    expect(container.querySelectorAll('.planning-cat')).toHaveLength(9)
-    fireEvent.click(screen.getByRole('button', { name: '拿回 3 奶霜' }))
-    expect(screen.getByRole('button', { name: '開始救援' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: /撤銷上一步 0/ })).toBeEnabled()
-    expect(screen.getByRole('button', { name: /撤銷上一步 0/ })).toHaveClass('is-attention')
-    expect(container.querySelectorAll('.planning-tray img')).toHaveLength(1)
-    expect(screen.queryByRole('button', { name: '拿回 2 小灰' })).toBeNull()
-    expect(screen.queryByText('失敗 0 次')).not.toBeInTheDocument()
+    expect(cell(4, 5)).toBeDisabled()
+    expect(screen.getByRole('button', { name: '撤銷上一步 1' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: '拿回 3 奶霜' })).toBeNull()
+    expect(completeLevel).not.toHaveBeenCalled()
   })
 
   it('keeps background music continuous when the arranged run starts', async () => {
@@ -145,7 +138,6 @@ describe('8x8 planning level through the game entry point', () => {
     await place(3, 5, 2)
     await place(2, 5, 3)
 
-    start()
 
     expect(startBackgroundMusic).toHaveBeenCalledOnce()
     expect(stopBackgroundMusic).not.toHaveBeenCalled()
@@ -155,11 +147,10 @@ describe('8x8 planning level through the game entry point', () => {
     mount()
     await place(4, 5, 1)
     await place(3, 5, 2)
-    await place(2, 5, 3)
     act(() => vi.advanceTimersByTime(1_500))
+    await place(2, 5, 3)
     const beforeStart = screen.getByTestId('level-timer-value').textContent
 
-    start()
     act(() => vi.advanceTimersByTime(5_000))
 
     expect(screen.getByTestId('level-timer-value')).toHaveTextContent(beforeStart ?? '')
@@ -328,7 +319,6 @@ describe('8x8 planning level through the game entry point', () => {
     await place(4, 5, 1)
     await place(3, 5, 2)
     await place(2, 5, 3)
-    start()
     await flushAsyncState()
     expect(screen.getByRole('status', { name: '消除！' })).toBeInTheDocument()
     expect(cell(4, 5)).toBeDisabled()
@@ -353,8 +343,8 @@ describe('8x8 planning level through the game entry point', () => {
     mount()
     await place(1, 1, 1)
     await place(1, 2, 2)
-    await place(1, 3, 3)
-    start()
+    fireEvent.click(cell(1, 3))
+    await flushAsyncState()
     await flushAsyncState()
 
     expect(screen.getByRole('dialog', { name: '挑戰失敗' })).toBeInTheDocument()
@@ -383,8 +373,8 @@ describe('8x8 planning level through the game entry point', () => {
     act(() => vi.advanceTimersByTime(1_500))
     await place(1, 1, 1)
     await place(1, 2, 2)
-    await place(1, 3, 3)
-    start()
+    fireEvent.click(cell(1, 3))
+    await flushAsyncState()
     await flushAsyncState()
 
     expect(screen.getByRole('dialog', { name: '挑戰失敗' })).toBeInTheDocument()
@@ -400,8 +390,8 @@ describe('8x8 planning level through the game entry point', () => {
     mount()
     await place(1, 1, 1)
     await place(1, 2, 2)
-    await place(1, 3, 3)
-    start()
+    fireEvent.click(cell(1, 3))
+    await flushAsyncState()
     await flushAsyncState()
     finish()
 
@@ -419,7 +409,6 @@ describe('8x8 planning level through the game entry point', () => {
     await place(4, 5, 1)
     await place(3, 5, 2)
     await place(2, 5, 3)
-    start()
     await flushAsyncState()
     finish()
 
@@ -445,7 +434,6 @@ describe('8x8 planning level through the game entry point', () => {
     await place(4, 5, 1)
     await place(3, 5, 2)
     await place(2, 5, 3)
-    start()
     fireEvent.click(screen.getByRole('button', { name: '暫停' }))
     finish()
     expect(completeLevel).not.toHaveBeenCalled()

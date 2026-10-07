@@ -37,8 +37,6 @@ export interface Strings {
     soundLabel: string
     hapticsLabel: string
     language: string
-    about: string
-    aboutToast: string
     backHome: string
     privacy: string
     privacyOptions: string

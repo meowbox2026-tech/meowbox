@@ -21,7 +21,7 @@ afterEach(() => {
 describe('SettingsScreen controls', () => {
   it('uses the home artwork for the settings return action and removes the subtitle', () => {
     const { container } = render(
-      <SettingsScreen onBack={vi.fn()} onToast={vi.fn()} onLegal={vi.fn()} />
+      <SettingsScreen onBack={vi.fn()} onLegal={vi.fn()} />
     )
 
     expect(screen.getByRole('heading', { name: '設定' })).toBeInTheDocument()
@@ -36,7 +36,7 @@ describe('SettingsScreen controls', () => {
 
   it('keeps the three icon-only toggles together without descriptions', () => {
     const { container } = render(
-      <SettingsScreen onBack={vi.fn()} onToast={vi.fn()} onLegal={vi.fn()} />
+      <SettingsScreen onBack={vi.fn()} onLegal={vi.fn()} />
     )
 
     const toggleRow = container.querySelector('.settings-toggle-row')
@@ -56,7 +56,7 @@ describe('SettingsScreen controls', () => {
   })
 
   it('continues to update each setting from its icon toggle', () => {
-    render(<SettingsScreen onBack={vi.fn()} onToast={vi.fn()} onLegal={vi.fn()} />)
+    render(<SettingsScreen onBack={vi.fn()} onLegal={vi.fn()} />)
 
     fireEvent.click(screen.getByRole('checkbox', { name: '音效' }))
 
@@ -66,7 +66,7 @@ describe('SettingsScreen controls', () => {
   it('opens the native privacy options when the platform provides it', () => {
     const onPrivacyOptions = vi.fn()
 
-    render(<SettingsScreen onBack={vi.fn()} onToast={vi.fn()} onLegal={vi.fn()} onPrivacyOptions={onPrivacyOptions} />)
+    render(<SettingsScreen onBack={vi.fn()} onLegal={vi.fn()} onPrivacyOptions={onPrivacyOptions} />)
     fireEvent.click(screen.getByRole('button', { name: '隱私權選項' }))
 
     expect(onPrivacyOptions).toHaveBeenCalledOnce()

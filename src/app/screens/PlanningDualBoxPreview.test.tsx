@@ -32,7 +32,6 @@ describe('dual box previews', () => {
       const column = p.x % level.dualBox!.splitAt + 1
       fireEvent.click(screen.getByRole('button', { name: `${side} ${p.y + 1}, ${column}` }))
     }
-    fireEvent.click(screen.getByRole('button', { name: '開始救援' }))
     for (let i = 0; i < 35; i++) act(() => vi.advanceTimersByTime(2500))
     expect(screen.getByRole('heading', { name: '全部回家了！' })).toBeInTheDocument()
     expect(completeLevel).not.toHaveBeenCalled()
@@ -87,9 +86,8 @@ describe('dual box previews', () => {
     expect(screen.getByRole('button', { name: '右箱 8, 2' })).toBeEnabled()
     expect(screen.getByRole('button', { name: '左箱 5, 3' })).toBeDisabled()
   })
-  it('keeps the released level unchanged outside preview mode', () => {
-    const { container } = mount(false)
-    expect(screen.queryByRole('button', { name: '看傳送示範' })).not.toBeInTheDocument()
-    expect(container.querySelectorAll('.planning-cell')).toHaveLength(64)
+  it.each([31, 61, 90])('serves the dual-box level %i to released builds outside preview mode', levelId => {
+    const { container } = mount(false, levelId)
+    expect(container.querySelectorAll('.dual-box__case')).toHaveLength(2)
   })
 })

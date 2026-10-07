@@ -1,17 +1,13 @@
-import { EXPANDED_DUAL_BOX_LEVELS } from '../data/planningDualBoxExpanded'
-import { DUAL_BOX_WORLD_2 } from '../data/planningDualBoxWorld2'
 import { getTransferFrameDuration } from './planningTransferTiming'
 import { useCallback, useEffect, useReducer } from 'react'
 import { usePageSuspended } from '../../app/usePageSuspended'
 import { arrangeCats } from '../core/planningEngine'
 import { findSafePlacementAsync } from '../core/planningSolvability'
-import { getPlanningLevel } from '../data/planningLevels'
+import { getMainlineLevel } from '../data/mainlineLevels'
 import { freshPlanning, planningReducer, type PlanningState, type PlanningAction } from './planningState'
 
-export function usePlanningGame(paused: boolean, levelId = 1, previewMode = false) {
-  const level = (previewMode ? DUAL_BOX_WORLD_2.get(levelId) : undefined)
-    ?? (previewMode ? EXPANDED_DUAL_BOX_LEVELS.get(levelId) : undefined)
-    ?? getPlanningLevel(levelId)
+export function usePlanningGame(paused: boolean, levelId = 1) {
+  const level = getMainlineLevel(levelId)
   const [state, dispatch] = useReducer(
     (current: PlanningState, action: PlanningAction) => planningReducer(current, action, level),
     undefined,

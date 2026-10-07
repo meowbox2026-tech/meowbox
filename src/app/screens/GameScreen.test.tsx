@@ -19,10 +19,11 @@ describe('GameScreen mainline routing', () => {
     expect(screen.getByText('救出全部 54 隻貓咪')).toHaveClass('planning-top-goal')
   })
 
-  it('routes an extended level request to the authored planning level', () => {
+  it('routes level 31 to the released dual-box stage', () => {
     render(<GameScreen levelId={31} onHome={vi.fn()} onSettings={vi.fn()} onNextLevel={vi.fn()} onLevelSelect={vi.fn()} onToast={vi.fn()} onPlayAction={vi.fn()} onWatchUndoAd={vi.fn()} />)
 
-    expect(screen.getByText('救出全部 54 隻貓咪')).toHaveClass('planning-top-goal')
+    expect(document.querySelectorAll('.dual-box__case')).toHaveLength(2)
+    expect(screen.getByText('救出全部 18 隻貓咪')).toHaveClass('planning-top-goal')
     expect(screen.getByRole('timer', { name: /關卡時間/ })).toBeInTheDocument()
   })
 })
