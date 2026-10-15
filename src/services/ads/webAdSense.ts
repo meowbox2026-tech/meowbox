@@ -55,7 +55,9 @@ export function loadAdSenseScript(config: WebAdSenseConfig, doc: Document = docu
   if (!win) return false
   win.adsbygoogle = win.adsbygoogle ?? []
   // Official H5 Games Ads bootstrap: queue calls until the library loads.
-  win.adBreak = win.adConfig = win.adBreak ?? function (options: unknown) { win.adsbygoogle!.push(options) }
+  const queue = (options: unknown) => { win.adsbygoogle!.push(options) }
+  win.adBreak = win.adBreak ?? queue
+  win.adConfig = win.adConfig ?? queue
   if (doc.getElementById(SCRIPT_ID)) return true
   const script = doc.createElement('script')
   script.id = SCRIPT_ID
