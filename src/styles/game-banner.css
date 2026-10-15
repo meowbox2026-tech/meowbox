@@ -25,3 +25,7 @@
   font-size: 12px;
 }
 .game-banner-preview small { opacity: .7; }
+/* Real AdSense units must stay clickable, unlike the native overlay slot. */
+.game-banner-slot--web { pointer-events: auto; }
+.game-banner-web-frame { width: 320px; max-width: 100%; height: 50px; overflow: hidden; }
+.game-banner-web-frame[hidden] { display: none; }

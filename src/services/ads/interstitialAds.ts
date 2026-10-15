@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core'
 import { getNativeAdMobGateways } from './nativeAdMob'
+import { getWebAdSenseGateways } from './webAdSense'
 
 // Browser-only placeholder. Native AdMob interstitials use the provider's
 // full-screen UI and dismissal callbacks; this timer is not a revenue signal.
@@ -30,7 +31,9 @@ class UnavailableInterstitialAdGateway implements InterstitialAdGateway {
 const demoGateway = new DemoInterstitialAdGateway()
 const unavailableGateway = new UnavailableInterstitialAdGateway()
 const nativeGateways = getNativeAdMobGateways()
-let gateway: InterstitialAdGateway = nativeGateways?.interstitial ?? (Capacitor.isNativePlatform() ? unavailableGateway : demoGateway)
+// Web: real AdSense when configured, the timed demo only in local dev, otherwise none.
+const webGateway = getWebAdSenseGateways()?.interstitial ?? (import.meta.env.DEV ? demoGateway : unavailableGateway)
+let gateway: InterstitialAdGateway = nativeGateways?.interstitial ?? (Capacitor.isNativePlatform() ? unavailableGateway : webGateway)
 
 export function setInterstitialAdGateway(nextGateway?: InterstitialAdGateway): void {
   gateway = nextGateway ?? demoGateway
