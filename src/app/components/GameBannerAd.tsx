@@ -2,7 +2,7 @@ import { Capacitor } from '@capacitor/core'
 import { useEffect, useRef } from 'react'
 import { useLocale } from '../../i18n'
 import { setGameBannerVisible } from '../../services/ads/bannerAds'
-import { getWebAdSenseConfig, loadAdSenseScript, pushAdSenseSlot } from '../../services/ads/webAdSense'
+import { getWebAdSenseConfig, isWebAdSenseActive, loadAdSenseScript, pushAdSenseSlot } from '../../services/ads/webAdSense'
 
 const webAdSense = getWebAdSenseConfig()
 
@@ -26,7 +26,7 @@ function WebAdSenseBanner() {
 export function GameBannerAd({ visible }: { visible: boolean }) {
   const locale = useLocale()
   const native = Capacitor.isNativePlatform()
-  const webAd = !native && Boolean(webAdSense.client && webAdSense.bannerSlot)
+  const webAd = !native && isWebAdSenseActive() && Boolean(webAdSense.bannerSlot)
   const preview = !native && !webAd && import.meta.env.DEV
   const label = { 'zh-TW': '廣告預覽', en: 'Ad preview', ja: '広告プレビュー' }[locale]
   useEffect(() => {

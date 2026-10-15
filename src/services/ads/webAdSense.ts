@@ -15,18 +15,25 @@ export interface WebAdSenseConfig {
 type Environment = Record<string, string | boolean | undefined>
 const clean = (value: string | boolean | undefined) => typeof value === 'string' ? value.trim() : ''
 const CLIENT_PATTERN = /^ca-pub-\d{10,20}$/
+// Public identifiers (they ship in page markup anyway); env vars can override them.
+const DEFAULT_CLIENT = 'ca-pub-6662722631869742'
+const DEFAULT_BANNER_SLOT = '3638501215'
 
 export function getWebAdSenseConfig(environment: Environment = import.meta.env): WebAdSenseConfig {
-  const client = clean(environment.VITE_ADSENSE_CLIENT)
+  const client = clean(environment.VITE_ADSENSE_CLIENT) || DEFAULT_CLIENT
+  const bannerSlot = clean(environment.VITE_ADSENSE_BANNER_SLOT) || DEFAULT_BANNER_SLOT
+  const testing = clean(environment.VITE_ADSENSE_TESTING)
   return {
     client: CLIENT_PATTERN.test(client) ? client : '',
-    bannerSlot: /^\d+$/.test(clean(environment.VITE_ADSENSE_BANNER_SLOT)) ? clean(environment.VITE_ADSENSE_BANNER_SLOT) : '',
-    // Test mode is the safe default, matching AdMob. Production must opt out explicitly.
-    isTesting: environment.VITE_ADSENSE_TESTING !== 'false'
+    bannerSlot: /^\d+$/.test(bannerSlot) ? bannerSlot : '',
+    // Test ads everywhere except production builds, unless explicitly overridden.
+    isTesting: testing ? testing !== 'false' : environment.PROD !== true
   }
 }
 
 export const hasWebAdSense = (config: WebAdSenseConfig = getWebAdSenseConfig()) => Boolean(config.client)
+/** Local dev keeps the timed demo and preview box instead of live AdSense. */
+export const isWebAdSenseActive = (isDev: boolean = import.meta.env.DEV) => !isDev && hasWebAdSense()
 
 interface PlacementInfo { breakStatus?: string }
 interface AdBreakOptions {
@@ -129,7 +136,7 @@ export function createWebAdSenseGateways(config: WebAdSenseConfig, win: AdSenseW
 
 let cached: ReturnType<typeof createWebAdSenseGateways> | null | undefined
 export function getWebAdSenseGateways() {
-  if (cached === undefined) cached = typeof window === 'undefined' ? null : createWebAdSenseGateways(getWebAdSenseConfig()) ?? null
+  if (cached === undefined) cached = typeof window === 'undefined' || !isWebAdSenseActive() ? null : createWebAdSenseGateways(getWebAdSenseConfig()) ?? null
   return cached ?? undefined
 }
 

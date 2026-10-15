@@ -11,9 +11,14 @@ function fakeWindow(behaviour: (options: Break) => void) {
 afterEach(() => { document.head.innerHTML = '' })
 
 describe('web AdSense config', () => {
-  it('accepts only well-formed ids and defaults to test mode', () => {
-    expect(getWebAdSenseConfig({ VITE_ADSENSE_CLIENT: ' ca-pub-6662722631869742 ', VITE_ADSENSE_BANNER_SLOT: '42' }))
-      .toEqual({ client: 'ca-pub-6662722631869742', bannerSlot: '42', isTesting: true })
+  it('uses the MeowBox units by default, with live ads only in production builds', () => {
+    expect(getWebAdSenseConfig({})).toEqual({ client: 'ca-pub-6662722631869742', bannerSlot: '3638501215', isTesting: true })
+    expect(getWebAdSenseConfig({ PROD: true }).isTesting).toBe(false)
+    expect(getWebAdSenseConfig({ PROD: true, VITE_ADSENSE_TESTING: 'true', VITE_ADSENSE_BANNER_SLOT: ' 42 ' }))
+      .toMatchObject({ bannerSlot: '42', isTesting: true })
+  })
+
+  it('rejects malformed ids', () => {
     expect(getWebAdSenseConfig({ VITE_ADSENSE_CLIENT: 'evil"><script>', VITE_ADSENSE_BANNER_SLOT: 'x', VITE_ADSENSE_TESTING: 'false' }))
       .toEqual({ client: '', bannerSlot: '', isTesting: false })
   })
