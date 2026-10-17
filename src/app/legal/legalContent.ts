@@ -13,7 +13,7 @@ export interface LegalDocument {
 }
 
 export const SUPPORT_EMAIL = 'meowbox2026@gmail.com'
-export const LEGAL_UPDATED_AT = '2026 年 9 月 25 日'
+export const LEGAL_UPDATED_AT = '2026 年 10 月 18 日'
 
 export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
   privacy: {
@@ -40,7 +40,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
       },
       {
         heading: '第三方服務',
-        paragraphs: ['匿名分析事件會傳送到 Supabase 託管的資料庫；前端只可送出符合規則的事件，無法讀取原始事件，玩家狀態頁只讀取彙總結果。Supabase 可能依其服務政策處理必要的連線技術資料。iOS App 啟用 Google Mobile Ads SDK／User Messaging Platform，插頁式與獎勵式廣告的請求、顯示與完成回呼由 SDK 處理。為提供廣告與量測，Google 可能處理 IP 位址／概略位置、裝置 ID（包含廣告識別碼）、廣告資料、產品互動、效能資料、崩潰與其他診斷資料；這些資料可能用於第三方廣告、開發者廣告或分析，裝置 ID 可能用於廣告追蹤，並會依適用的 App Tracking Transparency 同意狀態處理。拒絕追蹤不會阻止非個人化廣告載入。瀏覽器版本只使用本機測試廣告畫面，不會向第三方廣告 SDK 發出請求。']
+        paragraphs: ['匿名分析事件會傳送到 Supabase 託管的資料庫；前端只可送出符合規則的事件，無法讀取原始事件，玩家狀態頁只讀取彙總結果。Supabase 可能依其服務政策處理必要的連線技術資料。iOS App 啟用 Google Mobile Ads SDK／User Messaging Platform，橫幅、插頁式與獎勵式廣告的請求、顯示與完成回呼由 SDK 處理。為提供廣告與量測，Google 可能處理 IP 位址／概略位置、裝置 ID（包含廣告識別碼）、廣告資料、產品互動、效能資料、崩潰與其他診斷資料；這些資料可能用於第三方廣告、開發者廣告或分析，裝置 ID 可能用於廣告追蹤，並會依適用的 App Tracking Transparency 同意狀態處理。拒絕追蹤不會阻止非個人化廣告載入。手機網頁版透過 Google AdSense 顯示橫幅、插頁式與獎勵式廣告。Google 等第三方供應商會使用 Cookie 或類似技術，依據你先前造訪本網站或其他網站的紀錄放送與衡量廣告；Google 的廣告 Cookie 讓 Google 及其合作夥伴能根據這些造訪紀錄向你顯示廣告。你可前往 Google 廣告設定（https://adssettings.google.com）停用個人化廣告，或前往 www.aboutads.info 停用第三方供應商的個人化廣告 Cookie。歐洲經濟區、英國與瑞士的訪客會先看到 Google 的同意訊息。Google 如何使用合作夥伴網站資料：https://policies.google.com/technologies/partner-sites。']
       },
       {
         heading: '兒童隱私',
@@ -79,7 +79,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
       },
       {
         heading: '付費內容與廣告',
-        paragraphs: ['目前版本不提供遊戲內貨幣、商店、每日獎勵或購買獎勵。iOS App 的全螢幕插頁廣告由遠端設定控制是否啟用，以及累計幾次開始新局、從選關進入關卡、前往下一關或點擊重新開始後觸發；提示或上一步次數歸零時，仍可選擇觀看獎勵式廣告，完成後分別增加三次提示或五次上一步，僅限當前關卡使用。瀏覽器版本只顯示本機測試畫面，不會請求第三方廣告。正式廣告的載入、曝光、獎勵完成與關閉時機由廣告供應商回呼控制；遊戲不要求玩家點擊廣告或開啟商店。若未來提供 App 內購買，交易會透過 Apple App Store 處理。']
+        paragraphs: ['目前版本不提供遊戲內貨幣、商店、每日獎勵或購買獎勵。iOS App 的全螢幕插頁廣告由遠端設定控制是否啟用，以及累計幾次開始新局、從選關進入關卡、前往下一關或點擊重新開始後觸發；提示或上一步次數歸零時，仍可選擇觀看獎勵式廣告，完成後分別增加三次提示或五次上一步，僅限當前關卡使用。遊戲畫面底部會顯示橫幅廣告，暫停、教學、結算與設定畫面會隱藏。手機網頁版透過 Google AdSense 以相同時機顯示橫幅、插頁式廣告與可自行選擇觀看的獎勵式廣告。正式廣告的載入、曝光、獎勵完成與關閉時機由廣告供應商回呼控制；遊戲不要求玩家點擊廣告或開啟商店。若未來提供 App 內購買，交易會透過 Apple App Store 處理。']
       },
       {
         heading: '智慧財產權',
