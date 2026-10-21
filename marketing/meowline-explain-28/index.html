@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <!-- Generated from tools/index.template.html by tools/build.py — edit tools/, not index.html. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-latin-400-normal.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+2000-206F, U+00D7;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-chinese-traditional-400-normal.woff2") format("woff2");
+        font-display: block;
+      }
+      :root {
+        --cream: #fff6e8;
+        --ink: #33231b;
+        --muted: #7a5a48;
+        --marker: #e8456f;
+        --good: #2f8f5b;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Huninn", sans-serif;
+        color: var(--ink);
+        background: var(--cream);
+      }
+      .clip { position: absolute; inset: 0; }
+      #cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #cam video { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      .mark { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .mark path { fill: none; stroke: var(--marker); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+
+      .tap { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; }
+      .tap-dot { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45); border: 5px solid rgba(51, 35, 27, 0.75); }
+      .tap-ring { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        border: 5px solid #ffffff; opacity: 0; }
+
+      #scrim {
+        position: absolute;
+        left: 0; right: 0; bottom: 0; height: 640px;
+        background: linear-gradient(to bottom, rgba(30, 18, 12, 0), rgba(30, 18, 12, 0.5));
+      }
+
+      /* Series tag: the same corner label on every episode. */
+      #series { opacity: 0; }
+      .series-tag {
+        position: absolute; left: 36px; top: 40px;
+        padding: 12px 26px 14px;
+        border-radius: 14px;
+        background: var(--cream);
+        border: 4px solid var(--ink);
+        font-size: 40px; line-height: 1;
+        letter-spacing: 0.04em;
+      }
+      .series-tag b { font-weight: 400; color: #c0254c; }
+
+      .sec-box { position: absolute; left: 0; right: 0; top: 1500px; text-align: center; }
+      .sec-box span {
+        display: inline-block;
+        padding: 10px 24px 12px;
+        border-radius: 12px;
+        background: var(--cream);
+        color: var(--ink);
+        font-size: 44px; line-height: 1;
+        letter-spacing: 0.04em;
+      }
+      .sec-box span.bad { background: var(--marker); color: #fffaf3; }
+      .sec-box span.good { background: var(--good); color: #fffaf3; }
+
+      .cap-box { position: absolute; left: 50px; right: 50px; top: 1590px; text-align: center; }
+      .cap-box > span {
+        display: inline-block;
+        font-size: 72px;
+        line-height: 1.3;
+        letter-spacing: 0.02em;
+        color: #ffffff;
+        -webkit-text-stroke: 11px var(--ink);
+        paint-order: stroke fill;
+        text-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+      }
+      .cap-box .hi { color: #ffd56b; }
+
+      /* Recap + CTA card */
+      #card { background: var(--cream); }
+      .card-head { position: absolute; left: 110px; top: 250px; font-size: 52px; color: var(--muted); letter-spacing: 0.06em; }
+      .card-title { position: absolute; left: 110px; top: 330px; font-size: 104px; line-height: 1.1; }
+      .card-title .mark { left: -10px; top: 110px; width: 460px; height: 50px; }
+      .points { position: absolute; left: 110px; right: 80px; top: 560px; display: flex; flex-direction: column; gap: 46px; }
+      .point { display: flex; align-items: baseline; gap: 30px; font-size: 66px; line-height: 1.2; opacity: 0; }
+      .point i { font-style: normal; display: inline-block; width: 74px; color: var(--marker); font-size: 72px; }
+      .cta { position: absolute; left: 0; right: 0; top: 1120px; display: flex; flex-direction: column; align-items: center; opacity: 0; }
+      .cta-q { font-size: 64px; }
+      .cta-row { display: flex; align-items: center; gap: 30px; margin-top: 56px; }
+      .cta-logo { width: 220px; height: 220px; object-fit: contain; }
+      .cta-name { display: block; font-size: 50px; letter-spacing: 0.06em; }
+      .cta-sub { display: block; margin-top: 14px; font-size: 42px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="62.21" data-width="1080" data-height="1920">
+
+      <div id="cam">
+        <video id="seg00" src="assets/footage/l28slow.mp4" data-start="0.0" data-duration="3.3" data-media-start="13.0" data-track-index="0" playsinline muted></video>
+        <video id="seg01" src="assets/footage/l28slow.mp4" data-start="3.3" data-duration="4.0" data-media-start="0.3" data-playback-rate="0.15" data-track-index="0" playsinline muted></video>
+        <video id="seg02" src="assets/footage/l28slow.mp4" data-start="7.3" data-duration="2.9" data-media-start="0.9" data-playback-rate="0.3103" data-track-index="0" playsinline muted></video>
+        <video id="seg03" src="assets/footage/l28slow.mp4" data-start="10.2" data-duration="3.649" data-media-start="1.8" data-playback-rate="0.1699" data-track-index="0" playsinline muted></video>
+        <video id="seg04" src="assets/footage/l28slow.mp4" data-start="13.849" data-duration="1.043" data-media-start="2.42" data-playback-rate="0.7" data-track-index="0" playsinline muted></video>
+        <video id="seg05" src="assets/footage/l28slow.mp4" data-start="14.892" data-duration="10.684" data-media-start="3.15" data-playback-rate="0.0234" data-track-index="0" playsinline muted></video>
+        <video id="seg06" src="assets/footage/l28slow.mp4" data-start="25.576" data-duration="4.938" data-media-start="3.4" data-playback-rate="1.6" data-track-index="0" playsinline muted></video>
+        <video id="seg07" src="assets/footage/l28slow.mp4" data-start="30.514" data-duration="2.333" data-media-start="11.3" data-playback-rate="0.6" data-track-index="0" playsinline muted></video>
+        <video id="seg08" src="assets/footage/l28slow.mp4" data-start="32.847" data-duration="0.714" data-media-start="12.7" data-playback-rate="0.35" data-track-index="0" playsinline muted></video>
+        <video id="seg09" src="assets/footage/l28slow.mp4" data-start="33.561" data-duration="2.415" data-media-start="12.95" data-playback-rate="0.0207" data-track-index="0" playsinline muted></video>
+        <video id="seg10" src="assets/footage/l28miss.mp4" data-start="35.976" data-duration="1.6" data-media-start="12.3" data-playback-rate="0.5" data-track-index="0" playsinline muted></video>
+        <video id="seg11" src="assets/footage/l28miss.mp4" data-start="37.576" data-duration="2.967" data-media-start="13.1" data-playback-rate="3.0" data-track-index="0" playsinline muted></video>
+        <video id="seg12" src="assets/footage/l28miss.mp4" data-start="40.543" data-duration="2.43" data-media-start="22.0" data-playback-rate="0.3704" data-track-index="0" playsinline muted></video>
+        <video id="seg13" src="assets/footage/l28slow.mp4" data-start="42.973" data-duration="4.867" data-media-start="13.0" data-playback-rate="1.5" data-track-index="0" playsinline muted></video>
+        <video id="seg14" src="assets/footage/l28slow.mp4" data-start="47.84" data-duration="2.5" data-media-start="20.3" data-playback-rate="0.4" data-track-index="0" playsinline muted></video>
+        <video id="seg15" src="assets/footage/l28slow.mp4" data-start="50.34" data-duration="2.273" data-media-start="22.0" data-playback-rate="0.66" data-track-index="0" playsinline muted></video>
+        <svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true">
+          <path id="m-diag" pathLength="1" d="M 916 797 C 826 897, 644 1059, 532 1175" />
+          <path id="m-white" pathLength="1" d="M 162 978 C 162 898, 537 892, 562 978 C 574 1058, 266 1080, 172 1028 C 147 998, 177 918, 242 906" />
+          <path id="m-row" pathLength="1" d="M 292 1302 C 482 1290, 746 1294, 916 1286" />
+          <path id="m-miss" pathLength="1" d="M 882 1341 C 882 1261, 1027 1255, 1052 1341 C 1064 1421, 871 1443, 892 1391 C 867 1361, 897 1281, 962 1269" />
+          <path id="m-final" pathLength="1" d="M 112 1341 C 112 1261, 587 1255, 612 1341 C 624 1421, 266 1443, 122 1391 C 97 1361, 127 1281, 192 1269" />
+        </svg>
+        <div class="tap" id="tap"><div class="tap-ring" id="tap-ring"></div><div class="tap-dot" id="tap-dot"></div></div>
+      </div>
+
+      <div id="scrim"></div>
+      <div id="series" class="clip" data-start="0" data-duration="52.613" data-track-index="1"><span class="series-tag">關卡解說 <b>#28</b></span></div>
+
+      <div id="sec00" class="clip sec" data-start="7.3" data-duration="6.549" data-track-index="2"><div class="sec-box"><span class="">重點 1｜找引爆點</span></div></div>
+      <div id="sec01" class="clip sec" data-start="13.849" data-duration="11.727" data-track-index="2"><div class="sec-box"><span class="">重點 2｜連好的排先留著</span></div></div>
+      <div id="sec02" class="clip sec" data-start="30.514" data-duration="5.462" data-track-index="2"><div class="sec-box"><span class="">重點 3｜最後一隻補完整排</span></div></div>
+      <div id="sec03" class="clip sec" data-start="35.976" data-duration="6.997" data-track-index="2"><div class="sec-box"><span class="bad">錯誤示範</span></div></div>
+      <div id="sec04" class="clip sec" data-start="42.973" data-duration="7.367" data-track-index="2"><div class="sec-box"><span class="good">正確解法</span></div></div>
+
+      <div id="cap00" class="clip cap" data-start="0.1" data-duration="3.2" data-track-index="3"><div class="cap-box"><span>第 28 關，<span class='hi'>13</span> 連鎖全清<br>怎麼做到的？</span></div></div>
+      <div id="cap01" class="clip cap" data-start="3.4" data-duration="3.9" data-track-index="3"><div class="cap-box"><span>關卡解說<br>三個重點，一次講完</span></div></div>
+      <div id="cap02" class="clip cap" data-start="7.4" data-duration="2.1" data-track-index="3"><div class="cap-box"><span>第一個重點：找引爆點</span></div></div>
+      <div id="cap03" class="clip cap" data-start="9.5" data-duration="1.8" data-track-index="3"><div class="cap-box"><span>第一隻咖啡貓，放這裡</span></div></div>
+      <div id="cap04" class="clip cap" data-start="11.3" data-duration="2.549" data-track-index="3"><div class="cap-box"><span>斜斜連成一條<br>結算一開始就會先消</span></div></div>
+      <div id="cap05" class="clip cap" data-start="13.999" data-duration="2.4" data-track-index="3"><div class="cap-box"><span>第二個重點<br>連好的排，可以先留著</span></div></div>
+      <div id="cap06" class="clip cap" data-start="16.399" data-duration="3.093" data-track-index="3"><div class="cap-box"><span>白貓放中間<br>三隻已經連成一排</span></div></div>
+      <div id="cap07" class="clip cap" data-start="19.492" data-duration="3.0" data-track-index="3"><div class="cap-box"><span>結算時一次只消一組<br>剛掉下來接上的先消</span></div></div>
+      <div id="cap08" class="clip cap" data-start="22.492" data-duration="3.084" data-track-index="3"><div class="cap-box"><span>所以這排<br>會一路被往後排</span></div></div>
+      <div id="cap09" class="clip cap" data-start="25.676" data-duration="4.838" data-track-index="3"><div class="cap-box"><span>中間照順序放<br>先想消掉以後貓會掉到哪</span></div></div>
+      <div id="cap10" class="clip cap" data-start="30.574" data-duration="2.1" data-track-index="3"><div class="cap-box"><span>第三個重點<br>最後一隻藍貓</span></div></div>
+      <div id="cap11" class="clip cap" data-start="32.674" data-duration="3.302" data-track-index="3"><div class="cap-box"><span>要補在這裡<br>下面整排藍貓才會接起來</span></div></div>
+      <div id="cap12" class="clip cap" data-start="36.476" data-duration="1.9" data-track-index="3"><div class="cap-box"><span>如果把它丟到角落呢？</span></div></div>
+      <div id="cap13" class="clip cap" data-start="38.376" data-duration="4.597" data-track-index="3"><div class="cap-box"><span>前面一樣一路連<br>最後就剩這一隻</span></div></div>
+      <div id="cap14" class="clip cap" data-start="45.573" data-duration="1.0" data-track-index="3"><div class="cap-box"><span>放對的話</span></div></div>
+      <div id="cap15" class="clip cap" data-start="46.573" data-duration="2.6" data-track-index="3"><div class="cap-box"><span>最後一波<br>就是剛剛那排白貓</span></div></div>
+      <div id="cap16" class="clip cap" data-start="49.173" data-duration="3.44" data-track-index="3"><div class="cap-box"><span><span class='hi'>13</span> 連鎖，全清</span></div></div>
+
+      <div id="card" class="clip" data-start="52.613" data-duration="9.6" data-track-index="4">
+        <span class="card-head">關卡解說 #28</span>
+        <span class="card-title" id="card-title">重點整理
+          <svg class="mark" viewBox="0 0 460 50" aria-hidden="true"><path id="title-line" pathLength="1" d="M 12 30 C 120 18, 250 16, 360 24 C 400 26, 430 30, 448 26" /></svg>
+        </span>
+        <div class="points">
+          <span class="point" id="p1"><i>1</i>找引爆點</span>
+          <span class="point" id="p2"><i>2</i>連好的排，先留著</span>
+          <span class="point" id="p3"><i>3</i>最後一隻，補完整排</span>
+        </div>
+        <div class="cta" id="cta">
+          <span class="cta-q">你卡在哪一關？留言告訴我</span>
+          <div class="cta-row">
+            <img class="cta-logo" src="assets/img/meowlogo.webp" alt="MEOW LINE" />
+            <div><span class="cta-name">MEOW LINE｜貓咪落下連線</span><span class="cta-sub">App Store 免費下載</span></div>
+          </div>
+        </div>
+      </div>
+
+      <audio id="bgm" src="assets/audio/geoffharvey-excuse-me-cat-150613.mp3" data-start="0" data-duration="62.21" data-volume="1" data-track-index="10"
+        data-automation='{"version": 1, "lanes": [{"target": "volume", "points": [{"t": 0, "v": 0.28}, {"t": 40.84, "v": 0.28}, {"t": 42.97, "v": 0.55}, {"t": 45.27, "v": 0.55}, {"t": 45.57, "v": 0.28}, {"t": 61.01, "v": 0.28}, {"t": 62.21, "v": 0}]}]}'></audio>
+      <audio id="vo-e01" src="assets/vo/e01.wav" data-start="0.1" data-duration="3.05" data-volume="1" data-track-index="20"></audio>
+      <audio id="vo-e02" src="assets/vo/e02.wav" data-start="3.4" data-duration="3.65" data-volume="1" data-track-index="21"></audio>
+      <audio id="vo-e03" src="assets/vo/e03.wav" data-start="7.4" data-duration="6.24" data-volume="1" data-track-index="22"></audio>
+      <audio id="vo-e04" src="assets/vo/e04.wav" data-start="13.999" data-duration="5.28" data-volume="1" data-track-index="23"></audio>
+      <audio id="vo-e05" src="assets/vo/e05.wav" data-start="19.492" data-duration="5.83" data-volume="1" data-track-index="24"></audio>
+      <audio id="vo-e06" src="assets/vo/e06.wav" data-start="25.676" data-duration="4.08" data-volume="1" data-track-index="25"></audio>
+      <audio id="vo-e07" src="assets/vo/e07.wav" data-start="30.574" data-duration="5.14" data-volume="1" data-track-index="26"></audio>
+      <audio id="vo-e08" src="assets/vo/e08.wav" data-start="36.476" data-duration="4.06" data-volume="1" data-track-index="27"></audio>
+      <audio id="vo-e09" src="assets/vo/e09.wav" data-start="45.573" data-duration="4.65" data-volume="1" data-track-index="28"></audio>
+      <audio id="vo-e10" src="assets/vo/e10.wav" data-start="52.963" data-duration="4.45" data-volume="1" data-track-index="29"></audio>
+      <audio id="vo-e11" src="assets/vo/e11.wav" data-start="57.813" data-duration="3.41" data-volume="1" data-track-index="30"></audio>
+      <audio id="pop0" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="10.2" data-duration="0.35" data-volume="0.6" data-track-index="40"></audio>
+      <audio id="pop1" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="13.898" data-duration="0.35" data-volume="0.6" data-track-index="41"></audio>
+      <audio id="pop2" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="14.833" data-duration="0.35" data-volume="0.6" data-track-index="42"></audio>
+      <audio id="pop3" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="33.004" data-duration="0.35" data-volume="0.6" data-track-index="43"></audio>
+      <audio id="pop4" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="37.1" data-duration="0.35" data-volume="0.6" data-track-index="44"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const CARD = 52.613;
+      const CUES = {"p1": 54.26, "p2": 55.26, "p3": 56.26, "cta": 57.61};
+
+      document.querySelectorAll(".cap, .sec").forEach(clip => {
+        tl.fromTo(clip, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Number(clip.dataset.start));
+      });
+      tl.to("#series", { opacity: 1, duration: 0.25, ease: "none" }, 3.3);
+
+      tl.set("#cam", { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.to("#cam", { scale: 1.05, x: -27.0, y: -27.0, duration: 3.2, ease: "none" }, 0.0);
+      tl.to("#cam", { scale: 1.0, x: 0, y: 0, duration: 0.3, ease: "power2.inOut" }, 3.3);
+      tl.to("#cam", { scale: 1.9, x: -837.5, y: -1017.2, duration: 0.7, ease: "power2.inOut" }, 7.3);
+      tl.to("#cam", { scale: 1.9, x: -147.8, y: -1017.2, duration: 0.6, ease: "power2.inOut" }, 13.849);
+      tl.to("#cam", { scale: 2.0, x: -184.0, y: -1116.0, duration: 10.927, ease: "none" }, 14.549);
+      tl.to("#cam", { scale: 1.0, x: 0, y: 0, duration: 0.6, ease: "power2.inOut" }, 25.576);
+      tl.to("#cam", { scale: 1.6, x: -426.4, y: -1068.0, duration: 0.7, ease: "power2.inOut" }, 30.514);
+      tl.to("#cam", { scale: 1.5, x: -540.0, y: -945.0, duration: 0.5, ease: "power2.inOut" }, 35.976);
+      tl.to("#cam", { scale: 1.0, x: 0, y: 0, duration: 0.4, ease: "power2.inOut" }, 37.576);
+      tl.to("#cam", { scale: 1.9, x: -972.0, y: -1566.9, duration: 0.5, ease: "power2.inOut" }, 40.543);
+      tl.to("#cam", { scale: 1.0, x: 0, y: 0, duration: 0.5, ease: "power2.inOut" }, 42.973);
+      tl.to("#cam", { scale: 1.9, x: -147.8, y: -1566.9, duration: 0.6, ease: "power2.inOut" }, 47.84);
+      tl.to("#cam", { scale: 1.0, x: 0, y: 0, duration: 0.5, ease: "power2.inOut" }, 50.34);
+
+      tl.set("#m-diag", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-diag", { opacity: 1 }, 11.4);
+      tl.to("#m-diag", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 11.4);
+      tl.to("#m-diag", { opacity: 0, duration: 0.15, ease: "none" }, 13.699);
+      tl.set("#m-white", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-white", { opacity: 1 }, 16.599);
+      tl.to("#m-white", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 16.599);
+      tl.to("#m-white", { opacity: 0, duration: 0.15, ease: "none" }, 25.426);
+      tl.set("#m-row", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-row", { opacity: 1 }, 33.861);
+      tl.to("#m-row", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 33.861);
+      tl.to("#m-row", { opacity: 0, duration: 0.15, ease: "none" }, 35.826);
+      tl.set("#m-miss", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-miss", { opacity: 1 }, 40.693);
+      tl.to("#m-miss", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 40.693);
+      tl.to("#m-miss", { opacity: 0, duration: 0.15, ease: "none" }, 42.823);
+      tl.set("#m-final", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-final", { opacity: 1 }, 47.99);
+      tl.to("#m-final", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 47.99);
+      tl.to("#m-final", { opacity: 0, duration: 0.15, ease: "none" }, 50.19);
+
+      const TAPS = [{"t": 10.2, "x": 721, "y": 988}, {"t": 13.898, "x": 359, "y": 1230}, {"t": 14.833, "x": 359, "y": 988}, {"t": 26.365, "x": 117, "y": 626}, {"t": 26.679, "x": 359, "y": 746}, {"t": 26.994, "x": 842, "y": 1230}, {"t": 27.308, "x": 963, "y": 867}, {"t": 27.623, "x": 721, "y": 626}, {"t": 27.937, "x": 480, "y": 1109}, {"t": 28.251, "x": 600, "y": 746}, {"t": 28.565, "x": 963, "y": 1109}, {"t": 28.88, "x": 480, "y": 1351}, {"t": 29.195, "x": 117, "y": 867}, {"t": 29.509, "x": 238, "y": 746}, {"t": 29.823, "x": 480, "y": 505}, {"t": 30.137, "x": 238, "y": 1109}, {"t": 30.45, "x": 842, "y": 746}, {"t": 33.004, "x": 480, "y": 1230}, {"t": 37.1, "x": 963, "y": 1351}];
+      tl.set("#tap", { x: TAPS[0].x, y: TAPS[0].y + 160, opacity: 0 }, 0);
+      let prevEnd = 0;
+      TAPS.forEach((tp, i) => {
+        const lead = Math.min(0.45, Math.max(0.12, tp.t - prevEnd - 0.05));
+        const from = tp.t - lead;
+        tl.to("#tap", { opacity: 1, duration: 0.1, ease: "none" }, from);
+        tl.to("#tap", { x: tp.x, y: tp.y, duration: lead, ease: "power2.inOut" }, from);
+        tl.fromTo("#tap-dot", { scale: 1 }, { scale: 0.8, duration: 0.07, yoyo: true, repeat: 1, ease: "power1.inOut", immediateRender: false }, tp.t);
+        tl.fromTo("#tap-ring", { scale: 1, opacity: 0.9 }, { scale: 2, opacity: 0, duration: 0.4, ease: "power2.out", immediateRender: false }, tp.t);
+        const next = TAPS[i + 1];
+        if (!next || next.t - tp.t > 1.6) tl.to("#tap", { opacity: 0, duration: 0.2, ease: "none" }, tp.t + 0.6);
+        prevEnd = tp.t + 0.1;
+      });
+
+      tl.fromTo("#card", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none" }, CARD);
+      tl.fromTo("#card-title", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out" }, CARD + 0.1);
+      tl.set("#title-line", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#title-line", { opacity: 1 }, CARD + 0.45);
+      tl.to("#title-line", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, CARD + 0.45);
+      ["p1", "p2", "p3"].forEach(id => {
+        tl.fromTo("#" + id, { x: -24, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3, ease: "power2.out" }, CUES[id]);
+      });
+      tl.fromTo("#cta", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, CUES.cta);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

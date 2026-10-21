@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <!-- Generated from tools/index.template.html by tools/build.py — edit tools/, not index.html. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-latin-400-normal.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+2000-206F, U+00D7;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-chinese-traditional-400-normal.woff2") format("woff2");
+        font-display: block;
+      }
+      :root {
+        --cream: #fff6e8;
+        --ink: #33231b;
+        --marker: #e8456f;
+        --novice: #e8456f;
+        --pro: #3f8f6b;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        font-family: "Huninn", sans-serif; color: var(--ink); background: var(--cream);
+      }
+      .clip { position: absolute; inset: 0; }
+      .cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .cam video { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      .mark { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .mark path { fill: none; stroke: var(--marker); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+
+      .tap { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; }
+      .tap-dot { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45); border: 5px solid rgba(51, 35, 27, 0.75); }
+      .tap-ring { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        border: 5px solid #ffffff; opacity: 0; }
+
+      /* Split screen: two phones side by side on paper. */
+      .split { background: var(--cream); }
+      .panel { position: absolute; top: 330px; width: 500px; height: 889px; overflow: hidden;
+        border-radius: 34px; border: 5px solid var(--ink); }
+      .panel.l { left: 26px; transform: rotate(-1.2deg); }
+      .panel.r { right: 26px; transform: rotate(1deg); }
+      .panel video { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: scale(0.463); transform-origin: 0 0; }
+      .split-lbl { position: absolute; top: 200px; width: 500px; text-align: center; font-size: 84px; }
+      .split-lbl.l { left: 26px; color: var(--novice); }
+      .split-lbl.r { right: 26px; color: var(--pro); }
+      .stat { position: absolute; top: 1260px; width: 500px; text-align: center; font-size: 54px; line-height: 1.35; }
+      .stat b { font-weight: 400; font-size: 70px; }
+      .stat.sl { left: 26px; }
+      .stat.sl b { color: var(--novice); }
+      .stat.sr { right: 26px; }
+      .stat.sr b { color: var(--pro); }
+
+      #scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 640px;
+        background: linear-gradient(to bottom, rgba(30, 18, 12, 0), rgba(30, 18, 12, 0.5)); }
+      .who { position: absolute; left: 50%; top: 1440px; transform: translateX(-50%);
+        padding: 8px 30px 12px; border-radius: 14px; background: var(--cream); font-size: 46px; }
+      #lbl-n .who { color: var(--novice); }
+      #lbl-e .who { color: var(--pro); }
+      .cap { position: absolute; left: 50px; right: 50px; top: 1540px; text-align: center; }
+      .cap > span {
+        display: inline-block; font-size: 72px; line-height: 1.3; letter-spacing: 0.02em; color: #ffffff;
+        -webkit-text-stroke: 11px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+      }
+      .cap .hi { color: #ffd56b; }
+
+      #end { background: var(--cream); }
+      .end-stack { position: absolute; left: 0; right: 0; top: 470px; display: flex; flex-direction: column; align-items: center; }
+      .end-q { position: relative; display: block; font-size: 80px; line-height: 1.2; white-space: nowrap; }
+      .end-q .mark { left: 330px; top: 92px; width: 600px; height: 50px; }
+      .end-logo { display: block; width: 500px; height: 500px; object-fit: contain; margin-top: 110px; }
+      .end-name { display: block; margin-top: 30px; font-size: 56px; letter-spacing: 0.08em; }
+      .end-sub { display: block; margin-top: 28px; font-size: 50px; color: #7a5a48; letter-spacing: 0.04em; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="54.11" data-width="1080" data-height="1920">
+
+      <div class="cam" id="camN">
+        <video id="n1-v" src="assets/footage/n28.mp4" data-start="4.0" data-duration="5.308" data-media-start="1.0" data-playback-rate="1.3" data-track-index="0" playsinline muted></video>
+        <video id="n2-v" src="assets/footage/n28.mp4" data-start="9.308" data-duration="4.5" data-media-start="7.9" data-track-index="0" playsinline muted></video>
+        <video id="n3-v" src="assets/footage/n28.mp4" data-start="13.808" data-duration="6.667" data-media-start="12.4" data-playback-rate="0.075" data-track-index="0" playsinline muted></video>
+        <div class="tap" id="tapN"><div class="tap-ring" id="tapN-ring"></div><div class="tap-dot" id="tapN-dot"></div></div>
+      </div>
+      <div class="cam" id="camE">
+        <video id="e1-v" src="assets/footage/l28slow.mp4" data-start="20.475" data-duration="3.889" data-media-start="0.3" data-playback-rate="0.36" data-track-index="1" playsinline muted></video>
+        <video id="e2-v" src="assets/footage/l28slow.mp4" data-start="24.364" data-duration="2.769" data-media-start="1.7" data-playback-rate="0.26" data-track-index="1" playsinline muted></video>
+        <video id="e3-v" src="assets/footage/l28slow.mp4" data-start="27.133" data-duration="1.043" data-media-start="2.42" data-playback-rate="0.7" data-track-index="1" playsinline muted></video>
+        <video id="e3b-v" src="assets/footage/l28slow.mp4" data-start="28.176" data-duration="2.5" data-media-start="3.15" data-playback-rate="0.1" data-track-index="1" playsinline muted></video>
+        <video id="e4-v" src="assets/footage/l28slow.mp4" data-start="30.676" data-duration="4.341" data-media-start="3.4" data-playback-rate="2.2" data-track-index="1" playsinline muted></video>
+        <video id="e5-v" src="assets/footage/l28slow.mp4" data-start="35.017" data-duration="6.423" data-media-start="12.95" data-playback-rate="1.3" data-track-index="1" playsinline muted></video>
+        <video id="e6-v" src="assets/footage/l28slow.mp4" data-start="41.44" data-duration="2.667" data-media-start="22.0" data-playback-rate="0.6" data-track-index="1" playsinline muted></video>
+        <svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true">
+          <path id="m-diag" pathLength="1" d="M 916 797 C 826 897, 644 1059, 532 1175" />
+          <path id="m-white" pathLength="1" d="M 162 978 C 162 898, 537 892, 562 978 C 574 1058, 266 1080, 172 1028 C 147 998, 177 918, 242 906" />
+        </svg>
+        <div class="tap" id="tapE"><div class="tap-ring" id="tapE-ring"></div><div class="tap-dot" id="tapE-dot"></div></div>
+      </div>
+
+      <div id="scrim"></div>
+
+      <div id="hook" class="clip split" data-start="0.0" data-duration="4.0" data-track-index="2">
+        <span class="split-lbl l">新手</span><span class="split-lbl r">老手</span>
+        
+      </div>
+      <div class="panel l" data-win="0.0,4.0"><video id="hook-l" src="assets/footage/n28.mp4" data-start="0.0" data-duration="4.0" data-media-start="12.2" data-playback-rate="0.025" data-track-index="5" playsinline muted></video></div>
+      <div class="panel r" data-win="0.0,4.0"><video id="hook-r" src="assets/footage/l28slow.mp4" data-start="0.0" data-duration="4.0" data-media-start="21.5" data-playback-rate="0.025" data-track-index="6" playsinline muted></video></div>
+      <div id="cmp" class="clip split" data-start="44.107" data-duration="4.2" data-track-index="2">
+        <span class="split-lbl l">新手</span><span class="split-lbl r">老手</span>
+        <span class="stat sl" id="cmp-sl">連鎖 7 次<br><b>剩 12 隻</b></span><span class="stat sr" id="cmp-sr">連鎖 13 次<br><b>全部清光</b></span>
+      </div>
+      <div class="panel l" data-win="44.107,48.307"><video id="cmp-l" src="assets/footage/n28.mp4" data-start="44.107" data-duration="4.2" data-media-start="14.0" data-playback-rate="0.025" data-track-index="5" playsinline muted></video></div>
+      <div class="panel r" data-win="44.107,48.307"><video id="cmp-r" src="assets/footage/l28slow.mp4" data-start="44.107" data-duration="4.2" data-media-start="23.6" data-playback-rate="0.025" data-track-index="6" playsinline muted></video></div>
+
+      <div id="lbl-n" class="clip" data-start="4.0" data-duration="16.475" data-track-index="4"><span class="who">新手示範</span></div>
+      <div id="lbl-e" class="clip" data-start="20.475" data-duration="23.632" data-track-index="4"><span class="who">老手示範</span></div>
+      <div id="c00" class="clip" data-start="0.2" data-duration="3.8" data-track-index="3"><div class="cap"><span>同樣是第 28 關<br>新手跟老手差這麼多</span></div></div>
+      <div id="c01" class="clip" data-start="4.1" data-duration="2.6" data-track-index="3"><div class="cap"><span>新手的直覺：<br>看到同色，就先湊成一排</span></div></div>
+      <div id="c02" class="clip" data-start="6.7" data-duration="5.108" data-track-index="3"><div class="cap"><span>放完看起來<br>到處都連好了</span></div></div>
+      <div id="c03" class="clip" data-start="11.908" data-duration="1.9" data-track-index="3"><div class="cap"><span>結果，連鎖 7 次就停了</span></div></div>
+      <div id="c04" class="clip" data-start="14.008" data-duration="1.3" data-track-index="3"><div class="cap"><span>還剩 <span class='hi'>12</span> 隻</span></div></div>
+      <div id="c05" class="clip" data-start="15.308" data-duration="5.167" data-track-index="3"><div class="cap"><span>一次只消一組，貓往下掉<br>湊好的排就散了</span></div></div>
+      <div id="c06" class="clip" data-start="20.625" data-duration="3.739" data-track-index="3"><div class="cap"><span>老手先想：消完以後<br>上面的貓會掉到哪</span></div></div>
+      <div id="c07" class="clip" data-start="24.464" data-duration="2.669" data-track-index="3"><div class="cap"><span>第一隻咖啡貓放這裡<br>當第一個引爆點</span></div></div>
+      <div id="c08" class="clip" data-start="28.276" data-duration="2.4" data-track-index="3"><div class="cap"><span>這排白貓<br>故意留到最後才消</span></div></div>
+      <div id="c09" class="clip" data-start="36.017" data-duration="2.6" data-track-index="3"><div class="cap"><span>一直連，一直連，還沒停</span></div></div>
+      <div id="c10" class="clip" data-start="41.74" data-duration="2.367" data-track-index="3"><div class="cap"><span><span class='hi'>13</span> 連鎖，一隻不剩</span></div></div>
+      <div id="c11" class="clip" data-start="44.307" data-duration="4.0" data-track-index="3"><div class="cap"><span>差別只在：有沒有先想好<br>貓會掉到哪</span></div></div>
+
+      <div id="end" class="clip" data-start="48.307" data-duration="5.8" data-track-index="7">
+        <div class="end-stack">
+          <span class="end-q" id="end-q">第 28 關，你是哪一種？
+            <svg class="mark" viewBox="0 0 600 50" aria-hidden="true"><path id="underline" pathLength="1" d="M 12 30 C 160 18, 330 16, 480 24 C 530 26, 562 30, 588 26" /></svg>
+          </span>
+          <img class="end-logo" id="end-logo" src="assets/img/meowlogo.webp" alt="MEOW LINE" />
+          <span class="end-name" id="end-name">MEOW LINE｜貓咪落下連線</span>
+          <span class="end-sub" id="end-sub">App Store 免費下載</span>
+        </div>
+      </div>
+
+      <audio id="bgm" src="assets/audio/geoffharvey-excuse-me-cat-150613.mp3" data-start="0" data-duration="54.11" data-volume="1" data-track-index="10"
+        data-automation='{"version": 1, "lanes": [{"target": "volume", "points": [{"t": 0, "v": 0.3}, {"t": 30.68, "v": 0.3}, {"t": 30.98, "v": 0.6}, {"t": 35.72, "v": 0.6}, {"t": 36.02, "v": 0.3}, {"t": 52.91, "v": 0.3}, {"t": 54.11, "v": 0}]}]}'></audio>
+      <audio id="vo-v01" src="assets/vo/v01.wav" data-start="0.2" data-duration="3.68" data-volume="1" data-track-index="20"></audio>
+      <audio id="vo-v02" src="assets/vo/v02.wav" data-start="4.1" data-duration="5.27" data-volume="1" data-track-index="21"></audio>
+      <audio id="vo-v03" src="assets/vo/v03.wav" data-start="11.908" data-duration="1.75" data-volume="1" data-track-index="22"></audio>
+      <audio id="vo-v04" src="assets/vo/v04.wav" data-start="14.008" data-duration="6.21" data-volume="1" data-track-index="23"></audio>
+      <audio id="vo-v05" src="assets/vo/v05.wav" data-start="20.625" data-duration="3.52" data-volume="1" data-track-index="24"></audio>
+      <audio id="vo-v06" src="assets/vo/v06.wav" data-start="24.464" data-duration="2.59" data-volume="1" data-track-index="25"></audio>
+      <audio id="vo-v07" src="assets/vo/v07.wav" data-start="28.276" data-duration="2.32" data-volume="1" data-track-index="26"></audio>
+      <audio id="vo-v08" src="assets/vo/v08.wav" data-start="36.017" data-duration="2.1" data-volume="1" data-track-index="27"></audio>
+      <audio id="vo-v09" src="assets/vo/v09.wav" data-start="41.74" data-duration="1.6" data-volume="1" data-track-index="28"></audio>
+      <audio id="vo-v10" src="assets/vo/v10.wav" data-start="44.307" data-duration="3.31" data-volume="1" data-track-index="29"></audio>
+      <audio id="vo-v11" src="assets/vo/v11.wav" data-start="48.607" data-duration="4.93" data-volume="1" data-track-index="30"></audio>
+      <audio id="pop0" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="4.154" data-duration="0.35" data-volume="0.7" data-track-index="12"></audio>
+      <audio id="pop1" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="24.749" data-duration="0.35" data-volume="0.7" data-track-index="13"></audio>
+      <audio id="pop2" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="28.117" data-duration="0.35" data-volume="0.7" data-track-index="14"></audio>
+      <audio id="pop3" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="34.928" data-duration="0.35" data-volume="0.7" data-track-index="15"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const END = 48.307;
+
+      document.querySelectorAll(".cap, .who").forEach(el => {
+        const clip = el.parentElement;
+        tl.fromTo(clip, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Number(clip.dataset.start));
+      });
+
+      // Split screens: phones settle in, stats appear after.
+      document.querySelectorAll(".split").forEach(split => {
+        const t0 = Number(split.dataset.start);
+        tl.fromTo(split.querySelectorAll(".split-lbl"), { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none", stagger: 0.12 }, t0 + 0.2);
+        tl.fromTo(split.querySelectorAll(".stat"), { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.25 }, t0 + 0.6);
+      });
+
+      // Panels sit outside the timed split wrapper (nested timed video is not allowed), so window them here.
+      document.querySelectorAll(".panel").forEach((panel, i) => {
+        const [a, b] = panel.dataset.win.split(",").map(Number);
+        tl.set(panel, { opacity: 0 }, 0);
+        tl.fromTo(panel, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, a + (i % 2) * 0.12);
+        tl.set(panel, { opacity: 0 }, b);
+      });
+
+      tl.set("#camN", { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.to("#camN", { scale: 1.04, x: -21.6, y: -17.6, duration: 9.808, ease: "none" }, 4.0);
+      tl.to("#camN", { scale: 1.0, x: 0, y: 0, duration: 0.5, ease: "power2.inOut" }, 13.808);
+      tl.set("#camE", { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.to("#camE", { scale: 1.7, x: -378.0, y: 0, duration: 0.01, ease: "power2.inOut" }, 20.475);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 3.289, ease: "none" }, 20.875);
+      tl.to("#camE", { scale: 1.9, x: -837.5, y: -1017.2, duration: 0.6, ease: "power2.inOut" }, 24.364);
+      tl.to("#camE", { scale: 1.9, x: -147.8, y: -1017.2, duration: 0.6, ease: "power2.inOut" }, 27.133);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 0.6, ease: "power2.inOut" }, 30.676);
+      tl.to("#camE", { scale: 1.06, x: -32.4, y: -36.4, duration: 5.623, ease: "none" }, 35.617);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 0.4, ease: "power2.inOut" }, 41.44);
+
+      tl.set("#m-diag", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-diag", { opacity: 1 }, 25.464);
+      tl.to("#m-diag", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 25.464);
+      tl.to("#m-diag", { opacity: 0, duration: 0.15, ease: "none" }, 26.983);
+      tl.set("#m-white", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-white", { opacity: 1 }, 28.776);
+      tl.to("#m-white", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 28.776);
+      tl.to("#m-white", { opacity: 0, duration: 0.15, ease: "none" }, 30.526);
+
+      function taps(id, list) {
+        if (!list.length) return;
+        tl.set(`#${id}`, { x: list[0].x, y: list[0].y + 160, opacity: 0 }, 0);
+        let prevEnd = 0;
+        list.forEach((tp, i) => {
+          const lead = Math.min(0.45, Math.max(0.12, tp.t - prevEnd - 0.05));
+          const from = tp.t - lead;
+          tl.to(`#${id}`, { opacity: 1, duration: 0.1, ease: "none" }, from);
+          tl.to(`#${id}`, { x: tp.x, y: tp.y, duration: lead, ease: "power2.inOut" }, from);
+          tl.fromTo(`#${id}-dot`, { scale: 1 }, { scale: 0.8, duration: 0.07, yoyo: true, repeat: 1, ease: "power1.inOut", immediateRender: false }, tp.t);
+          tl.fromTo(`#${id}-ring`, { scale: 1, opacity: 0.9 }, { scale: 2, opacity: 0, duration: 0.4, ease: "power2.out", immediateRender: false }, tp.t);
+          const next = list[i + 1];
+          if (!next || next.t - tp.t > 1.6) tl.to(`#${id}`, { opacity: 0, duration: 0.2, ease: "none" }, tp.t + 0.6);
+          prevEnd = tp.t + 0.1;
+        });
+      }
+      taps("tapN", [{"t": 4.154, "x": 842, "y": 746}, {"t": 4.449, "x": 359, "y": 1230}, {"t": 4.745, "x": 480, "y": 867}, {"t": 5.04, "x": 480, "y": 1351}, {"t": 5.335, "x": 480, "y": 1109}, {"t": 5.631, "x": 480, "y": 1230}, {"t": 5.925, "x": 480, "y": 505}, {"t": 6.219, "x": 842, "y": 1351}, {"t": 6.514, "x": 117, "y": 1230}, {"t": 6.809, "x": 842, "y": 1230}, {"t": 7.104, "x": 963, "y": 867}, {"t": 7.402, "x": 963, "y": 1351}, {"t": 7.696, "x": 117, "y": 1351}, {"t": 7.991, "x": 359, "y": 988}, {"t": 8.285, "x": 963, "y": 1109}, {"t": 8.578, "x": 238, "y": 1109}, {"t": 8.874, "x": 117, "y": 867}, {"t": 9.168, "x": 721, "y": 1109}]);
+      taps("tapE", [{"t": 24.749, "x": 721, "y": 988}, {"t": 27.182, "x": 359, "y": 1230}, {"t": 28.117, "x": 359, "y": 988}, {"t": 31.25, "x": 117, "y": 626}, {"t": 31.478, "x": 359, "y": 746}, {"t": 31.707, "x": 842, "y": 1230}, {"t": 31.936, "x": 963, "y": 867}, {"t": 32.165, "x": 721, "y": 626}, {"t": 32.393, "x": 480, "y": 1109}, {"t": 32.621, "x": 600, "y": 746}, {"t": 32.85, "x": 963, "y": 1109}, {"t": 33.079, "x": 480, "y": 1351}, {"t": 33.308, "x": 117, "y": 867}, {"t": 33.536, "x": 238, "y": 746}, {"t": 33.765, "x": 480, "y": 505}, {"t": 33.993, "x": 238, "y": 1109}, {"t": 34.221, "x": 842, "y": 746}, {"t": 34.928, "x": 480, "y": 1230}]);
+
+      tl.fromTo("#end", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none" }, END);
+      tl.fromTo("#end-q", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, END + 0.1);
+      tl.set("#underline", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#underline", { opacity: 1 }, END + 0.55);
+      tl.to("#underline", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, END + 0.55);
+      tl.fromTo("#end-logo", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, END + 0.7);
+      tl.fromTo("#end-name", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.1);
+      tl.fromTo("#end-sub", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.3);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

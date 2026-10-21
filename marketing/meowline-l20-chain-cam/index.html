@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>喵序 第20關運鏡版</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1d140e; display: grid; place-items: center; font-family: "Huninn", "PingFang TC", sans-serif; }
+  .stage { position: relative; height: min(100vh, 177.78vw); aspect-ratio: 9 / 16; }
+  canvas { width: 100%; height: 100%; display: block; border-radius: 12px; }
+  .ctrl { position: absolute; inset: auto 0 16px; display: flex; justify-content: center; }
+  button { font: inherit; font-size: 15px; padding: 8px 18px; border-radius: 999px; border: 0; background: #ff7a3d; color: #fff; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #fff; }
+</style>
+</head>
+<body>
+<main class="stage">
+  <canvas id="c" width="1080" height="1920" aria-label="喵序第 20 關：放下最後一隻，15 波連鎖全部消除（運鏡版）"></canvas>
+  <div class="ctrl"><button id="play">▶ 播放（含音效）</button></div>
+</main>
+<script src="data.js"></script>
+<script>
+// 14 秒 9:16 無縫循環（運鏡版）。render(t) 只依時間計算畫面，t=14 與 t=0 畫面相同。
+// 運鏡：Crane Down → FPV Rush 推到落點 → Dutch Tilt 停格 → Tracking 跟著每波消除 + 微 Roll
+//      → Dolly Zoom 收尾 → Pull Back 揭露空盤 → Zoom Cut 穿進片尾 → 回到 Crane 起點
+const W = 1080, H = 1920, DUR = 14;
+const C = { bg: '#fff4e3', ink: '#3b2416', accent: '#ff7a3d', good: '#2fb36b', pink: '#ff8fb8', cell: '#d8f1f5', cell2: '#c3e7ee', board: '#8fd3df' };
+const ctx = document.getElementById('c').getContext('2d');
+const IMG = {};
+['blue', 'orange', 'white', 'fishLover'].forEach(k => { IMG[k] = new Image(); IMG[k].src = `assets/${k === 'fishLover' ? 'fish-lover' : k}.png`; });
+const LOGO = new Image(); LOGO.src = 'assets/meowlogo.webp';
+const BG = new Image(); BG.src = 'assets/bg-main.webp'; // App 主畫面的花園背景
+const D = window.LV, [LX, LY, LID, LTYPE, LORD] = D.last;
+const CELL = 118, BX = (W - CELL * 8) / 2, BY = 600, BCX = W / 2, BCY = BY + CELL * 4, FY = 1080;
+const T = { drop: 0.8, chain: 1.5, clear: 9.0, cta: 9.7, reset: 13.0 };
+const NF = D.frames.length, F0 = 0.34, F1 = 0.16; // 變速：每幀 0.34s → 0.16s
+const FD = Array.from({ length: NF }, (_, i) => F0 + (F1 - F0) * i / (NF - 1));
+const FS = FD.reduce((a, d, i) => (a.push(a[i] + d), a), [0]);
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const prog = (t, s, d) => clamp((t - s) / d);
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const easeIn = p => p * p * p;
+const easeIO = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const back = p => { const s = 1.7; return 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2); };
+const lerp = (a, b, k) => a + (b - a) * k;
+const cellXY = (x, y) => [BX + x * CELL + CELL / 2, BY + y * CELL + CELL / 2];
+
+function text(str, x, y, size, color = C.ink, o = {}) {
+  ctx.save(); ctx.font = `900 ${size}px Huninn, "PingFang TC", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.globalAlpha = o.alpha ?? 1; ctx.translate(x, y); ctx.rotate(o.rot || 0); ctx.transform(1, 0, o.skew || 0, 1, 0, 0); ctx.scale(o.sx ?? o.scale ?? 1, o.sy ?? o.scale ?? 1);
+  if (o.stroke) { ctx.lineWidth = size * 0.17; ctx.strokeStyle = o.stroke; ctx.lineJoin = 'round'; ctx.strokeText(str, 0, 0); }
+  ctx.fillStyle = color; ctx.fillText(str, 0, 0); ctx.restore();
+}
+// 逐字動效：每個字依序砸下（從大縮回、帶旋轉）
+function stamp(str, x, y, size, color, t0, t, o = {}) {
+  const chars = [...str], gap = o.gap ?? 0.06, w = size * 0.98, x0 = x - (chars.length - 1) * w / 2;
+  chars.forEach((ch, i) => { const p = prog(t, t0 + i * gap, 0.22); if (!p) return;
+    text(ch, x0 + i * w, y - (o.drop ?? 0) * (1 - easeOut(p)), size, color, { alpha: clamp(p * 3) * (o.alpha ?? 1), scale: lerp(o.from ?? 2.2, 1, back(p)), rot: (1 - p) * (i % 2 ? 0.4 : -0.4), stroke: o.stroke ?? '#fff' }); });
+}
+function pill(x, y, w, h, color, alpha = 1) { ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.restore(); }
+function badge(n, x, y, s, color = C.ink, alpha = 1) {
+  if (!n) return; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, s, 0, 7); ctx.fill();
+  ctx.lineWidth = s * 0.18; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.restore();
+  text(String(n), x, y + 2, s * 1.15, '#fff', { alpha });
+}
+function cat(type, x, y, size, alpha = 1, order = 0, badgeColor) {
+  const img = IMG[type]; if (!img || !img.complete) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.drawImage(img, x - size / 2, y - size / 2, size, size); ctx.restore();
+  badge(order, x + size * 0.36, y - size * 0.36, size * 0.2, badgeColor, alpha);
+}
+
+// ---------- 棋盤 ----------
+const toMap = b => { const m = new Map(); b.forEach((row, y) => row.forEach((c, x) => { if (c) m.set(c[0], { type: c[1], order: c[2], x, y }); })); return m; };
+function drawBoardBase() {
+  ctx.save(); ctx.shadowColor = 'rgba(59,36,22,0.28)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 18;
+  ctx.fillStyle = C.board; ctx.beginPath(); ctx.roundRect(BX - 22, BY - 22, CELL * 8 + 44, CELL * 8 + 44, 40); ctx.fill(); ctx.restore();
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    ctx.fillStyle = (x + y) % 2 ? C.cell : C.cell2; ctx.beginPath(); ctx.roundRect(BX + x * CELL + 4, BY + y * CELL + 4, CELL - 8, CELL - 8, 18); ctx.fill();
+  }
+}
+function drawMap(m, o = {}) {
+  m.forEach((c, id) => {
+    const [px, py] = cellXY(c.x, c.y), pop = o.pop?.has(id) ? o.popP : 0;
+    if (o.pop?.has(id)) { ctx.save(); ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.8 * (1 - pop); ctx.beginPath(); ctx.arc(px, py, CELL * (0.5 + pop * 0.4), 0, 7); ctx.fill(); ctx.restore(); }
+    cat(c.type, px, py + (c.dy || 0), CELL * 0.92 * (1 + pop * 0.6), (1 - pop) * (c.alpha ?? 1), c.order);
+  });
+}
+function frameAt(lt) { let i = 0; while (i < NF - 1 && lt >= FS[i + 1]) i++; return [i, clamp((lt - FS[i]) / FD[i])]; }
+function chainState(lt) {
+  const [i, p] = frameAt(lt), f = D.frames;
+  const prev = i === 0 ? toMap(D.start) : toMap(f[i - 1].b), cur = toMap(f[i].b);
+  const waves = f.slice(0, i + 1).filter(x => x.c.length).length;
+  if (f[i].c.length) return { i, p, map: prev, pop: new Set(f[i].c), popP: easeOut(clamp((p - 0.35) / 0.65)), waves, fresh: 1 - p };
+  const map = new Map(), e = easeOut(p);
+  cur.forEach((c, id) => { const a = prev.get(id) || c; map.set(id, { ...c, x: a.x + (c.x - a.x) * e, y: a.y + (c.y - a.y) * e }); });
+  return { i, p, map, waves, fresh: 0 };
+}
+// 跟拍焦點：每個消除幀取被消貓咪的重心，重力幀沿用上一個焦點
+const FOCUS = (() => { const out = []; let last = [BCX, BCY];
+  D.frames.forEach((f, i) => { if (f.c.length) { const m = i === 0 ? toMap(D.start) : toMap(D.frames[i - 1].b); let sx = 0, sy = 0;
+    f.c.forEach(id => { const c = m.get(id); const [x, y] = cellXY(c.x, c.y); sx += x; sy += y; }); last = [sx / f.c.length, sy / f.c.length]; } out.push(last); });
+  return out; })();
+
+// 連鎖分段運鏡（每幀一個鏡頭關鍵格，幀內補間）：
+//  1–4 波 Tracking 平順跟拍｜5–9 波 Zoom In 推近跟拍｜10–13 波 Crane Up 拉高看全盤｜14–15 波 Dolly Zoom 推進最後一團（全程不震動、不傾斜）
+const whip = p => easeIO(p); // 平順移動，不甩鏡
+const CK = (() => { const f = D.frames, out = []; let w = 0;
+  f.forEach((fr, i) => { const k = f.findIndex((x, j) => j >= i && x.c.length), tw = f.slice(0, (k < 0 ? i : k) + 1).filter(x => x.c.length).length, side = tw % 2 ? 1 : -1;
+    const [fx, fy] = FOCUS[k < 0 ? i : k];
+    if (tw <= 4) out.push({ cx: fx, cy: fy, s: 1.5, r: 0, dz: 0 });
+    else if (tw <= 9) out.push({ cx: fx, cy: fy, s: 1.68, r: 0, dz: 0 });
+    else if (tw <= 13) out.push({ cx: lerp(BCX, fx, 0.3), cy: lerp(BCY, fy, 0.3), s: 1.02 + (tw - 10) * 0.04, r: 0, dz: 0 });
+    else out.push({ cx: fx, cy: fy, s: tw === 14 ? 1.55 : 1.85, r: 0, dz: tw === 14 ? 0.5 : 1 }); });
+  return out; })();
+// ---------- 鏡頭 ----------
+const CAM0 = { cx: BCX, cy: BCY, s: 0.82, r: 0, oy: 430 }; // t=0 的 Crane 起點（循環接縫用同一組）
+function camAt(t) {
+  const [tx, ty] = cellXY(LX, LY);
+  if (t < T.drop) { const k = easeOut(prog(t, 0, 0.65)); return { cx: BCX, cy: BCY, s: lerp(CAM0.s, 1, k), r: 0, oy: lerp(CAM0.oy, 0, k) }; } // Crane Down
+  if (t < T.chain) { const lt = t - T.drop, k = easeIn(prog(lt, 0, 0.24)), d = easeOut(prog(lt, 0.24, 0.4)); // FPV Rush + Dutch Tilt
+    return { cx: lerp(BCX, tx, k), cy: lerp(BCY, ty - 40, k), s: lerp(1, 2.0, k) + 0.08 * d, r: 0, oy: 0 }; }
+  if (t < T.clear) { const lt = t - T.chain, s = chainState(lt), [tx0, ty0] = cellXY(LX, LY);
+    const a = s.i ? CK[s.i - 1] : { cx: tx0, cy: ty0 - 40, s: 2.08, r: 0, dz: 0 }, b = CK[s.i];
+    const e = D.frames[s.i].c.length ? easeOut(clamp(s.p / 0.35)) : whip(s.p); // 重力幀甩鏡到下一團，消除幀前就定位
+    const sc = lerp(a.s, b.s, e), lim = W / 2 / sc;
+    return { cx: clamp(lerp(a.cx, b.cx, e), BX + lim - 30, BX + CELL * 8 - lim + 30), cy: clamp(lerp(a.cy, b.cy, e), BCY - 260, BCY + 260), s: sc, r: lerp(a.r, b.r, e), oy: 0, dz: lerp(a.dz, b.dz, e) }; } // 跟拍時不加震動，避免暈眩
+  if (t < T.cta) { const p = camAt(T.clear - 1e-4), k = easeOut(prog(t - T.clear, 0, 0.55)); // Pull Back
+    return { cx: lerp(p.cx, BCX, k), cy: lerp(p.cy, BCY, k), s: lerp(p.s, 0.86, k), r: lerp(p.r, 0, k), oy: 0, dz: 1 - k }; }
+  if (t < T.reset) { const k = easeIn(prog(t - T.cta, 0, 0.45)); return { cx: BCX, cy: BCY, s: lerp(0.86, 4, k), r: 0, oy: 0 }; } // Zoom Cut
+  const k = easeOut(prog(t - T.reset, 0.15, 0.85)); return { cx: BCX, cy: BCY, s: lerp(0.6, CAM0.s, k), r: 0, oy: lerp(900, CAM0.oy, k) }; // 落回 Crane 起點
+}
+function applyCam(c) { ctx.translate(W / 2 + (c.shake || 0), FY + c.oy + (c.shake || 0) * 0.4); ctx.rotate(c.r); ctx.scale(c.s, c.s); ctx.translate(-c.cx, -c.cy); }
+
+// ---------- 背景（視差層：只跟鏡頭動 15%，Dolly Zoom 時反向縮） ----------
+function bg(t, c) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  if (BG.complete && BG.naturalWidth) { const z = (1 + (c.s - 1) * 0.12) * (1 - 0.1 * (c.dz || 0)), s = Math.max(W / BG.width, H / BG.height) * 1.12 * z, w = BG.width * s, h = BG.height * s;
+    ctx.save(); ctx.translate(W / 2 - (c.cx - BCX) * 0.12, H / 2 + c.oy * 0.25); ctx.rotate(c.r * 0.4); ctx.drawImage(BG, -w / 2, -h / 2, w, h); ctx.restore(); }
+  ctx.fillStyle = 'rgba(255,250,244,0.26)'; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.fillStyle = '#ffb3cf'; // 前景花瓣（快一點，做出景深）
+  for (let i = 0; i < 16; i++) { const k = (i * 0.137 + t / DUR * (i % 3 ? 1 : 2)) % 1, y = k * (H + 200) - 100, x = (i * 337) % W + Math.sin(k * 12 + i) * 40, sz = i % 3 ? 1 : 1.7;
+    ctx.globalAlpha = 0.75; ctx.translate(x, y); ctx.rotate(k * 9 + i); ctx.beginPath(); ctx.ellipse(0, 0, 22 * sz, 11 * sz, 0, 0, 7); ctx.fill(); ctx.setTransform(1, 0, 0, 1, 0, 0); }
+  ctx.restore();
+}
+function speedLines(t, a) { // 連鎖加速時的放射速度線
+  if (a <= 0) return; ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = '#fff'; ctx.lineCap = 'round';
+  for (let i = 0; i < 28; i++) { const ang = i / 28 * Math.PI * 2 + i * 0.37, ph = (t * 3 + i * 0.29) % 1, r0 = 560 + ph * 500;
+    ctx.lineWidth = 6 + (i % 3) * 4; ctx.beginPath(); ctx.moveTo(W / 2 + Math.cos(ang) * r0, FY + Math.sin(ang) * r0); ctx.lineTo(W / 2 + Math.cos(ang) * (r0 + 220), FY + Math.sin(ang) * (r0 + 220)); ctx.stroke(); }
+  ctx.restore();
+}
+
+// ---------- 場景 ----------
+function hoverCat(t, k = 0) {
+  const [px, py] = cellXY(LX, LY), bob = Math.sin(t / DUR * Math.PI * 2 * 13) * 14;
+  ctx.save(); ctx.setLineDash([16, 12]); ctx.lineWidth = 7; ctx.strokeStyle = C.accent; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t / DUR * Math.PI * 2 * 18);
+  ctx.beginPath(); ctx.roundRect(px - CELL / 2 + 6, py - CELL / 2 + 6, CELL - 12, CELL - 12, 18); ctx.stroke(); ctx.restore();
+  cat(LTYPE, px, py - 230 * (1 - k) + bob * (1 - k), CELL * (1.15 - 0.23 * k), 1, LORD, C.accent);
+}
+function hookTitle(t, a = 1) { // 文字動效：逐字砸下，問句抖動
+  stamp('放下最後一隻', W / 2, 230, 92, C.ink, -0.05, t, { alpha: a, gap: 0.05 });
+  text('會發生什麼事？', W / 2, 380, 112, C.accent, { alpha: a * prog(t, 0.2, 0.15), scale: back(prog(t, 0.2, 0.3)), stroke: '#fff', rot: 0 });
+}
+function boardLayer(t, c, draw) { ctx.save(); applyCam(c); draw(); ctx.restore(); }
+function sceneHook(t, c) { boardLayer(t, c, () => { drawBoardBase(); drawMap(toMap(D.pre)); hoverCat(t); }); hookTitle(t + 0.65); }
+function sceneDrop(t, c) {
+  const lt = t - T.drop, k = easeIn(prog(lt, 0, 0.24));
+  boardLayer(t, c, () => { drawBoardBase(); drawMap(toMap(D.pre)); if (k < 1) hoverCat(t, k); else { const [px, py] = cellXY(LX, LY); cat(LTYPE, px, py, CELL * 0.92, 1, LORD, C.accent); } });
+  hookTitle(T.drop + 0.65, 1 - prog(lt, 0.05, 0.2));
+  if (lt > 0.24) { const p = prog(lt, 0.24, 0.2); text('咚！', W / 2, 360, 200, C.accent, { scale: back(p), stroke: '#fff', rot: -0.12, alpha: 1 - prog(lt, 0.5, 0.2) }); }
+}
+const CAPTIONS = [[4, '還沒完…'], [8, '停不下來！'], [13, '還在消？！']];
+function sceneChain(t, c) {
+  const lt = t - T.chain, s = chainState(lt);
+  boardLayer(t, c, () => { drawBoardBase(); drawMap(s.map, s); });
+  speedLines(t, clamp((s.waves - 7) / 4) * 0.55);
+  if (!s.waves) return;
+  // 計數器：新數字砸進來，舊數字往上飛走
+  const col = s.waves >= 10 ? C.good : C.accent, size = 200 + s.waves * 6;
+  text('連鎖', W / 2, 150, 66, C.ink, { stroke: '#fff' });
+  if (s.waves > 1 && s.fresh > 0.4) text(`×${s.waves - 1}`, W / 2, 330 - (1 - s.fresh) * 260, size * 0.8, col, { alpha: (s.fresh - 0.4) * 1.6, stroke: '#fff' });
+  text(`×${s.waves}`, W / 2, 330, size, col, { sx: 1 + 0.45 * s.fresh, sy: 1 + 0.2 * s.fresh, stroke: '#fff' });
+  const cap = [...CAPTIONS].reverse().find(([w]) => s.waves >= w);
+  if (cap) { const since = lt - FS[D.frames.findIndex((f, i) => f.c.length && D.frames.slice(0, i + 1).filter(x => x.c.length).length === cap[0])], p = easeOut(prog(since, 0, 0.25));
+    pill(W / 2 + (1 - p) * 700, 1740, 640, 140, C.ink, 0.9); text(cap[1], W / 2 + (1 - p) * 700, 1740, 76, '#fff', { skew: -0.2 * (1 - p) }); }
+}
+function sceneClear(t, c) {
+  const lt = t - T.clear;
+  boardLayer(t, c, () => drawBoardBase());
+  text(`連鎖 ×${D.waves}`, W / 2, 300, 120, C.good, { stroke: '#fff', scale: lerp(1.5, 1, easeOut(prog(lt, 0, 0.3))) });
+  stamp('全部消除！', W / 2, FY, 168, C.good, 0.05, lt, { gap: 0.07, from: 2.6 });
+}
+function sceneCta(t, c) {
+  const lt = t - T.cta, r = easeIn(prog(lt, 0.05, 0.45)) * 2300;
+  if (lt < 0.5) boardLayer(t, c, () => drawBoardBase());
+  ctx.save(); ctx.fillStyle = C.good; ctx.beginPath(); ctx.arc(W / 2, FY, r, 0, 7); ctx.fill(); ctx.restore(); // 轉場接力：綠圓
+  const kb = 1 + (lt - 0.5) * 0.015; // 片尾 Ken Burns 緩慢推近
+  ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(kb, kb); ctx.translate(-W / 2, -H / 2);
+  { const p = prog(lt, 0.5, 0.25); text('15 波', W / 2, 400, 150, '#fff', { alpha: clamp(p * 3), scale: lerp(2.4, 1, back(p)), rot: (1 - p) * -0.3, stroke: C.ink }); }
+  stamp('一次清空', W / 2, 560, 120, '#fff', 0.75, lt, { stroke: C.ink, gap: 0.06 });
+  if (LOGO.complete) { const p = prog(lt, 1.1, 0.4), s = 540 * back(p); ctx.save(); ctx.globalAlpha = clamp(p * 2); ctx.drawImage(LOGO, W / 2 - s / 2, 700 + (540 - s) * 0.3, s, s * LOGO.height / LOGO.width); ctx.restore(); }
+  ['blue', 'orange', 'white', 'fishLover'].forEach((k, i) => cat(k, 210 + i * 220, 1290 - Math.abs(Math.sin(lt * 5 + i)) * 60, 170, prog(lt, 1.3 + i * 0.08, 0.25)));
+  const p = prog(lt, 1.7, 0.3); pill(W / 2, 1560, 840, 150, '#fff', p);
+  text('90 關免費玩｜搜尋 MEOW LINE', W / 2, 1560, 52, C.good, { alpha: p, scale: back(p) });
+  if (lt > 2.2) text('👇 你猜對幾波？', W / 2, 1720, 58, '#fff', { alpha: prog(lt, 2.2, 0.3), rot: 0 });
+  ctx.restore();
+}
+function sceneReset(t, c) {
+  const lt = t - T.reset, g = 1 - easeOut(prog(lt, 0, 0.3)), m = toMap(D.pre), out = new Map();
+  m.forEach((v, id) => { const k = easeOut(prog(lt, 0.15 + (v.y * 8 + v.x) / 64 * 0.4, 0.3)); out.set(id, { ...v, dy: -700 * (1 - k), alpha: k }); });
+  boardLayer(t, c, () => { drawBoardBase(); drawMap(out); if (lt > 0.7) hoverCat(t); });
+  if (lt > 0.75) hookTitle((lt - 0.75) * 2.6);
+  if (g > 0) { ctx.save(); ctx.globalAlpha = g; ctx.fillStyle = C.good; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+}
+
+function render(t) {
+  t = ((t % DUR) + DUR) % DUR; const c = camAt(t); bg(t, c);
+  const scenes = [[T.drop, sceneHook], [T.chain, sceneDrop], [T.clear, sceneChain], [T.cta, sceneClear], [T.reset, sceneCta], [Infinity, sceneReset]];
+  scenes.find(([end]) => t < end)[1](t, c);
+}
+// 音效時間表：落下一聲低音「啵」，之後每波升半音，全清放 clear
+const CUES = [{ t: T.drop + 0.24, rate: 0.8, k: 'pop' }];
+{ let w = 0; D.frames.forEach((f, i) => { if (f.c.length) CUES.push({ t: T.chain + FS[i] + FD[i] * 0.35, rate: Math.pow(2, w++ / 12), k: 'pop' }); }); }
+CUES.push({ t: T.clear, rate: 1, k: 'clear' });
+window.render = render; window.DURATION = DUR; window.CUES = CUES;
+
+// ---------- 播放 ----------
+const SRC = { pop: 'assets/pop.mp3', clear: 'assets/clear.wav' };
+let start = null, last = 0, sound = false;
+function tick(now) {
+  if (start === null) start = now;
+  const t = ((now - start) / 1000) % DUR;
+  if (sound) CUES.forEach(c => { if ((last < c.t && t >= c.t) || (t < last && c.t <= t)) { const a = new Audio(SRC[c.k]); a.preservesPitch = false; a.playbackRate = c.rate; a.volume = 0.6; a.play().catch(() => {}); } });
+  last = t; render(t); requestAnimationFrame(tick);
+}
+document.getElementById('play').addEventListener('click', e => { sound = true; start = null; last = 0; e.target.textContent = '↻ 重播'; });
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

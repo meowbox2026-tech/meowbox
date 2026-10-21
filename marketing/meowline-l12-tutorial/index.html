@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>喵序 第12關教學</title>
+<style>
+  :root { --bg: #fff4e3; --ink: #3b2416; --accent: #ff7a3d; }
+  html, body { margin: 0; height: 100%; background: #1d140e; display: grid; place-items: center; font-family: "Huninn", "PingFang TC", sans-serif; }
+  .stage { position: relative; height: min(100vh, 177.78vw); aspect-ratio: 9 / 16; }
+  canvas { width: 100%; height: 100%; display: block; border-radius: 12px; }
+  .ctrl { position: absolute; inset: auto 0 16px; display: flex; justify-content: center; gap: 12px; }
+  button { font: inherit; font-size: 15px; padding: 8px 18px; border-radius: 999px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #fff; }
+</style>
+</head>
+<body>
+<main class="stage">
+  <canvas id="c" width="1080" height="1920" aria-label="喵序第 12 關教學行銷動畫"></canvas>
+  <div class="ctrl"><button id="play">▶ 播放（含音效）</button></div>
+</main>
+<script src="data.js"></script>
+<script>
+// 32 秒 9:16 純 JavaScript 動畫。render(t) 只依時間計算畫面，可逐格擷取輸出。
+const W = 1080, H = 1920, DUR = 32;
+const C = { bg: '#fff4e3', ink: '#3b2416', accent: '#ff7a3d', good: '#2fb36b', bad: '#e5484d', cell: '#d8f1f5', cell2: '#c3e7ee', board: '#8fd3df' };
+const ctx = document.getElementById('c').getContext('2d');
+const IMG = {};
+['blue', 'orange', 'white', 'fishLover'].forEach(k => { IMG[k] = new Image(); IMG[k].src = `assets/${k === 'fishLover' ? 'fish-lover' : k}.png`; });
+const LOGO = new Image(); LOGO.src = 'assets/meowlogo.webp';
+const D = window.L12;
+const CELL = 118, BX = (W - CELL * 8) / 2, BY = 520;
+const T = { rule: 3, board: 7, place: 10, ask: 15, chain: 19.6, cta: 27.6 };
+const STEP = 0.55, FR = 0.4;
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const prog = (t, s, d) => clamp((t - s) / d);
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const back = p => { const s = 1.7; return 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2); };
+const cellXY = (x, y) => [BX + x * CELL + CELL / 2, BY + y * CELL + CELL / 2];
+
+function cat(type, x, y, size, alpha = 1, rot = 0) {
+  const img = IMG[type]; if (!img || !img.complete) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.translate(x, y); ctx.rotate(rot);
+  ctx.drawImage(img, -size / 2, -size / 2, size, size); ctx.restore();
+}
+function text(str, x, y, size, color = C.ink, opts = {}) {
+  ctx.save(); ctx.font = `${opts.weight || 900} ${size}px Huninn, "PingFang TC", sans-serif`;
+  ctx.textAlign = opts.align || 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = opts.alpha ?? 1;
+  ctx.translate(x, y); ctx.rotate(opts.rot || 0); ctx.scale(opts.scale || 1, opts.scale || 1);
+  if (opts.stroke) { ctx.lineWidth = size * 0.16; ctx.strokeStyle = opts.stroke; ctx.lineJoin = 'round'; ctx.strokeText(str, 0, 0); }
+  ctx.fillStyle = color; ctx.fillText(str, 0, 0); ctx.restore();
+}
+function pill(x, y, w, h, color, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.restore();
+}
+
+// ---------- 棋盤狀態 ----------
+const toMap = b => { const m = new Map(); b.forEach((row, y) => row.forEach((c, x) => { if (c) m.set(c[0], { type: c[1], x, y }); })); return m; };
+const placedBoard = n => { // 初始盤面 + 前 n 隻托盤貓
+  const m = toMap(D.initial);
+  for (let i = 0; i < n; i++) { const [id, type] = D.cats[i]; const [x, y] = D.solution[i]; m.set(id, { type, x, y }); }
+  return m;
+};
+function drawBoardBase(alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.fillStyle = C.board; ctx.beginPath(); ctx.roundRect(BX - 22, BY - 22, CELL * 8 + 44, CELL * 8 + 44, 40); ctx.fill();
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    ctx.fillStyle = (x + y) % 2 ? C.cell : C.cell2; ctx.beginPath(); ctx.roundRect(BX + x * CELL + 4, BY + y * CELL + 4, CELL - 8, CELL - 8, 18); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawMap(m, opts = {}) {
+  m.forEach((c, id) => {
+    const [px, py] = cellXY(c.x, c.y);
+    const pop = opts.pop?.has(id) ? opts.popP : 0;
+    const s = CELL * 0.9 * (1 + pop * 0.5) * (opts.scaleOf?.(id) ?? 1);
+    cat(c.type, px, py, s, 1 - pop, 0);
+    if (opts.glow?.has(id)) { ctx.save(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 10; ctx.globalAlpha = opts.glowA; ctx.beginPath(); ctx.arc(px, py, CELL * 0.48, 0, 7); ctx.stroke(); ctx.restore(); }
+  });
+}
+// 連鎖：每段 FR 秒。消除幀（c 非空）先發光再爆開；重力幀依 id 補間位置
+function chainState(run, t) {
+  const f = run.frames, i = Math.min(f.length - 1, Math.floor(t / FR)), p = clamp((t - i * FR) / FR);
+  const prev = i === 0 ? placedBoard(10) : toMap(f[i - 1].b), cur = toMap(f[i].b);
+  const waves = f.slice(0, i + (p > 0.5 ? 1 : 0)).filter(x => x.c.length).length;
+  if (f[i].c.length) return { map: prev, pop: new Set(f[i].c), popP: easeOut(clamp((p - 0.35) / 0.65)), glow: new Set(f[i].c), glowA: 1 - p, waves };
+  const map = new Map(); const e = easeOut(p);
+  cur.forEach((c, id) => { const a = prev.get(id) || c; map.set(id, { type: c.type, x: a.x + (c.x - a.x) * e, y: a.y + (c.y - a.y) * e }); });
+  return { map, waves };
+}
+
+// ---------- 場景 ----------
+function bg(t) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.globalAlpha = 0.08; ctx.fillStyle = C.accent;
+  for (let i = 0; i < 14; i++) { const y = ((i * 170 + t * 60) % (H + 200)) - 100; ctx.beginPath(); ctx.arc((i * 337) % W, y, 26, 0, 7); ctx.fill(); }
+  ctx.restore();
+}
+function sceneHook(t) {
+  const shake = Math.sin(t * 40) * 8 * (1 - prog(t, 0.2, 1.2));
+  text('第 12 關', W / 2 + shake, 600, 110, C.accent, { scale: back(prog(t, 0, 0.4)), stroke: '#fff' });
+  text('很多人卡在', W / 2, 820, 96, C.ink, { alpha: prog(t, 0.4, 0.3) });
+  text('最後一隻貓', W / 2, 960, 150, C.bad, { scale: back(prog(t, 0.7, 0.4)), stroke: '#fff', rot: Math.sin(t * 6) * 0.03 });
+  cat('orange', W / 2, 1300 - Math.abs(Math.sin(t * 5)) * 60, 300, prog(t, 1, 0.3));
+  text('你看得出來嗎？', W / 2, 1600, 70, C.ink, { alpha: prog(t, 1.6, 0.4) });
+}
+function sceneRule(t) { // 教學：三隻同色連一線 = 消除
+  const lt = t - T.rule;
+  text('規則只有一條', W / 2, 420, 84, C.ink, { alpha: prog(lt, 0, 0.3) });
+  text('3 隻同色連成一線 → 消除', W / 2, 540, 66, C.accent, { alpha: prog(lt, 0.3, 0.3) });
+  const pop = easeOut(prog(lt, 2.3, 0.5));
+  for (let i = 0; i < 3; i++) {
+    const drop = easeOut(prog(lt, 0.7 + i * 0.45, 0.4));
+    cat('blue', 300 + i * 240, 700 + drop * 360, 220 * (1 + pop * 0.6), (drop > 0 ? 1 : 0) * (1 - pop));
+  }
+  if (pop > 0) text('啵！', W / 2, 1060, 160, C.accent, { scale: back(prog(lt, 2.3, 0.3)), alpha: 1 - prog(lt, 3.3, 0.4), stroke: '#fff' });
+  text('橫・直・斜 都算，消掉後上面的會掉下來', W / 2, 1420, 52, C.ink, { alpha: prog(lt, 2.6, 0.4) });
+  text('還會「連鎖」再消一次', W / 2, 1510, 60, C.accent, { alpha: prog(lt, 3.0, 0.4) });
+}
+function tray(n, hl) { // 托盤：還沒放的貓
+  pill(W / 2, 1630, 980, 170, '#ffffff', 0.85);
+  const rest = D.cats.slice(n);
+  rest.forEach(([, type], i) => cat(type, 140 + i * 100, 1630, i === 0 && hl ? 120 : 92, i === 0 ? 1 : 0.7));
+  text(`下一隻 ▸`, 140, 1530, 36, C.ink, { align: 'left', alpha: rest.length ? 1 : 0 });
+}
+function sceneBoard(t) {
+  const lt = t - T.board, a = easeOut(prog(lt, 0, 0.5));
+  text('把托盤的貓放進空格', W / 2, 300, 72, C.ink, { alpha: a });
+  text('全部放好，才開始消除', W / 2, 400, 56, C.accent, { alpha: prog(lt, 0.8, 0.4) });
+  ctx.save(); ctx.translate(0, (1 - a) * 200); drawBoardBase(a); drawMap(placedBoard(0), { scaleOf: () => a }); ctx.restore();
+  tray(0, true);
+}
+function scenePlace(t) { // 快轉：前 9 隻依官方解放入
+  const lt = t - T.place, n = Math.min(9, Math.floor(lt / STEP)), p = (lt - n * STEP) / STEP;
+  text('快轉 ⏩', W / 2, 300, 72, C.ink); text(`${Math.min(n + 1, 9)} / 10`, W / 2, 400, 60, C.accent);
+  drawBoardBase(); drawMap(placedBoard(n));
+  if (n < 9) { const [, type] = D.cats[n]; const [x, y] = D.solution[n]; const [px, py] = cellXY(x, y);
+    const e = easeOut(clamp(p / 0.7)); cat(type, 140 + (px - 140) * e, 1630 + (py - 1630) * e, CELL * 0.9 * (1 + (1 - e) * 0.2)); }
+  tray(n + 1, false);
+}
+function ghostAt(x, y, color, a, label) {
+  const [px, py] = cellXY(x, y);
+  ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = color; ctx.lineWidth = 12; ctx.setLineDash([22, 14]);
+  ctx.beginPath(); ctx.roundRect(px - CELL / 2, py - CELL / 2, CELL, CELL, 20); ctx.stroke(); ctx.restore();
+  cat('orange', px, py, CELL * 0.85, a * 0.75);
+  text(label, px, py - CELL * 1.05, 50, '#fff', { alpha: a, stroke: color });
+}
+function sceneAsk(t) { // 慢動作：最後一隻貓放哪？
+  const lt = t - T.ask, zoom = 1 + 0.2 * easeOut(prog(lt, 0, 0.8));
+  const [fx, fy] = cellXY(5, 7);
+  ctx.save(); ctx.translate(fx, fy); ctx.scale(zoom, zoom); ctx.translate(-fx, -fy);
+  drawBoardBase(); drawMap(placedBoard(9));
+  const nov = prog(lt, 0.8, 0.3) * (1 - prog(lt, 2.4, 0.3)), pro = prog(lt, 2.6, 0.3);
+  if (nov > 0) ghostAt(4, 7, C.bad, nov, '新手');
+  if (pro > 0) ghostAt(5, 7, C.good, pro * (0.75 + 0.25 * Math.sin(lt * 10)), '高手');
+  ctx.restore();
+  pill(W / 2, 330, 900, 220, '#ffffff', 0.92);
+  text('最後一隻，放哪？', W / 2, 290, 80, C.ink);
+  if (nov > 0) text('放這：9 連鎖就斷了，殘留 3 隻 ✗', W / 2, 380, 46, C.bad, { alpha: nov });
+  if (pro > 0) text('貼住 2 隻同款貓 → 一路連鎖到底', W / 2, 380, 46, C.good, { alpha: pro });
+  tray(9, true);
+}
+function sceneChain(t) {
+  const lt = t - T.chain, s = chainState(D.sol, lt);
+  const shake = s.pop ? Math.sin(lt * 70) * 10 * s.popP * (1 - s.popP) * 4 : 0;
+  ctx.save(); ctx.translate(shake, 0); drawBoardBase(); drawMap(s.map, s); ctx.restore();
+  const fresh = s.pop ? 1 + 0.3 * (1 - s.popP) : 1;
+  text(`連鎖 ×${s.waves}`, W / 2, 330, 130, C.accent, { scale: fresh, stroke: '#fff', alpha: s.waves ? 1 : 0 });
+  const done = prog(lt, D.sol.frames.length * FR, 0.4);
+  if (done > 0) text('全清！', W / 2, BY + CELL * 4, 220, C.good, { scale: back(done), stroke: '#fff' });
+}
+function sceneCta(t) {
+  const lt = t - T.cta, r = easeOut(prog(lt, 0, 0.6)) * 2300; // 「全清」綠色圓擴散成片尾底色（轉場接力）
+  ctx.save(); ctx.fillStyle = C.good; ctx.beginPath(); ctx.arc(W / 2, BY + CELL * 4, r, 0, 7); ctx.fill(); ctx.restore();
+  const a = prog(lt, 0.5, 0.4);
+  text('你不是運氣好', W / 2, 520, 80, '#fff', { alpha: a });
+  text('是看見了下一步', W / 2, 650, 104, '#fff', { alpha: prog(lt, 0.9, 0.4), scale: back(prog(lt, 0.9, 0.4)), stroke: C.ink });
+  if (LOGO.complete) { ctx.save(); ctx.globalAlpha = prog(lt, 1.5, 0.4); const s = 560; ctx.drawImage(LOGO, W / 2 - s / 2, 820, s, s * LOGO.height / LOGO.width); ctx.restore(); }
+  ['blue', 'orange', 'white'].forEach((k, i) => cat(k, 300 + i * 240, 1330 - Math.abs(Math.sin(lt * 4 + i)) * 50, 190, prog(lt, 1.8 + i * 0.15, 0.3)));
+  pill(W / 2, 1600, 760, 140, '#fff', prog(lt, 2.4, 0.3));
+  text('90 關免費玩・App Store', W / 2, 1600, 56, C.good, { alpha: prog(lt, 2.4, 0.3) });
+}
+
+function render(t) {
+  bg(t);
+  if (t < T.rule) sceneHook(t); else if (t < T.board) sceneRule(t); else if (t < T.place) sceneBoard(t);
+  else if (t < T.ask) scenePlace(t); else if (t < T.chain) sceneAsk(t); else if (t < T.cta) sceneChain(t); else sceneCta(t);
+}
+window.render = render; window.DURATION = DUR; // 方便日後逐格錄製
+
+// ---------- 播放與音效 ----------
+const pop = new Audio('assets/pop.mp3'), clear = new Audio('assets/clear.wav');
+const cues = [ // 每個落點、消除對應的音效時間
+  ...[0.7, 1.15, 1.6, 2.3].map(x => [T.rule + x, pop]),
+  ...Array.from({ length: 9 }, (_, i) => [T.place + i * STEP + STEP * 0.7, pop]),
+  ...D.sol.frames.map((f, i) => f.c.length ? [T.chain + i * FR + FR * 0.35, pop] : null).filter(Boolean),
+  [T.chain + D.sol.frames.length * FR, clear],
+];
+let start = null, last = -1, sound = false;
+function tick(now) {
+  if (start === null) start = now;
+  const t = ((now - start) / 1000) % DUR;
+  if (sound) cues.forEach(([ct, a]) => { if (last < ct && t >= ct) { const s = a.cloneNode(); s.volume = 0.6; s.play().catch(() => {}); } });
+  last = t; render(t); requestAnimationFrame(tick);
+}
+document.getElementById('play').addEventListener('click', e => { sound = true; start = null; last = -1; e.target.textContent = '↻ 重播'; });
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

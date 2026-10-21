@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <!-- Generated from tools/index.template.html by tools/build.py — edit tools/, not index.html. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-latin-400-normal.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+2000-206F, U+00D7;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-chinese-traditional-400-normal.woff2") format("woff2");
+        font-display: block;
+      }
+      :root {
+        --cream: #fff6e8;
+        --ink: #33231b;
+        --marker: #e8456f;
+        --novice: #e8456f;
+        --pro: #3f8f6b;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        font-family: "Huninn", sans-serif; color: var(--ink); background: var(--cream);
+      }
+      .clip { position: absolute; inset: 0; }
+      .cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .cam video { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      .mark { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .mark path { fill: none; stroke: var(--marker); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+
+      .tap { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; }
+      .tap-dot { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45); border: 5px solid rgba(51, 35, 27, 0.75); }
+      .tap-ring { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        border: 5px solid #ffffff; opacity: 0; }
+
+      /* Split screen: two phones side by side on paper. */
+      .split { background: var(--cream); }
+      .panel { position: absolute; top: 330px; width: 500px; height: 889px; overflow: hidden;
+        border-radius: 34px; border: 5px solid var(--ink); }
+      .panel.l { left: 26px; transform: rotate(-1.2deg); }
+      .panel.r { right: 26px; transform: rotate(1deg); }
+      .panel .screen { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: scale(0.463); transform-origin: 0 0; }
+      .panel video, .panel img { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .panel .mark path { stroke-width: 16; }
+      .split-lbl { position: absolute; top: 200px; width: 500px; text-align: center; font-size: 84px; }
+      .split-lbl.l { left: 26px; color: var(--novice); }
+      .split-lbl.r { right: 26px; color: var(--pro); }
+      .stat { position: absolute; top: 1270px; width: 500px; text-align: center; font-size: 56px; line-height: 1.35; }
+      .stat b { font-weight: 400; font-size: 70px; }
+      .stat.sl { left: 26px; }
+      .stat.sl b { color: var(--novice); }
+      .stat.sr { right: 26px; }
+      .stat.sr b { color: var(--pro); }
+
+      #scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 640px;
+        background: linear-gradient(to bottom, rgba(30, 18, 12, 0), rgba(30, 18, 12, 0.5)); }
+      .who { position: absolute; left: 50%; top: 1440px; transform: translateX(-50%);
+        padding: 8px 30px 12px; border-radius: 14px; background: var(--cream); font-size: 46px; }
+      .who.novice { color: var(--novice); }
+      .who.pro { color: var(--pro); }
+      .who.ink { color: var(--ink); }
+      .cap { position: absolute; left: 50px; right: 50px; top: 1540px; text-align: center; }
+      .cap > span {
+        display: inline-block; font-size: 72px; line-height: 1.3; letter-spacing: 0.02em; color: #ffffff;
+        -webkit-text-stroke: 11px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+      }
+      .cap .hi { color: #ffd56b; }
+
+      #end { background: var(--cream); }
+      .end-stack { position: absolute; left: 0; right: 0; top: 470px; display: flex; flex-direction: column; align-items: center; }
+      .end-q { position: relative; display: block; font-size: 80px; line-height: 1.2; white-space: nowrap; }
+      .end-q .mark { left: 390px; top: 92px; width: 520px; height: 50px; }
+      .end-logo { display: block; width: 500px; height: 500px; object-fit: contain; margin-top: 110px; }
+      .end-name { display: block; margin-top: 30px; font-size: 56px; letter-spacing: 0.08em; }
+      .end-hint { display: block; margin-top: 36px; font-size: 50px; color: var(--marker); }
+      .end-sub { display: block; margin-top: 28px; font-size: 50px; color: #7a5a48; letter-spacing: 0.04em; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="35.49" data-width="1080" data-height="1920">
+
+      <div class="cam" id="camN">
+        <video id="n1-v" src="assets/footage/l2n.mp4" data-start="6.6" data-duration="1.778" data-media-start="3.9" data-playback-rate="0.9" data-track-index="0" playsinline muted></video>
+        <video id="n1b-v" src="assets/footage/l2n.mp4" data-start="8.378" data-duration="2.5" data-media-start="5.5" data-playback-rate="0.1" data-track-index="0" playsinline muted></video>
+        <video id="n2-v" src="assets/footage/l2n.mp4" data-start="10.878" data-duration="2.0" data-media-start="5.75" data-playback-rate="0.75" data-track-index="0" playsinline muted></video>
+        <video id="n3-v" src="assets/footage/l2n.mp4" data-start="12.878" data-duration="3.333" data-media-start="7.25" data-playback-rate="0.03" data-track-index="0" playsinline muted></video>
+        <svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true">
+          <path id="m-top4" pathLength="1" d="M 51.5 494 C 51.5 416, 526.5 410, 551.5 494 C 563.5 574, 205.5 596, 61.5 544 C 36.5 514, 66.5 434, 131.5 422" />
+          <path id="m-lone1" pathLength="1" d="M 413 1099 C 413 1039, 553 1033, 555 1109 C 553 1179, 423 1183, 409 1117 C 407 1079, 463 1031, 493 1033" />
+          <path id="m-lone2" pathLength="1" d="M 171 1341 C 171 1281, 311 1275, 313 1351 C 311 1421, 181 1425, 167 1359 C 165 1321, 221 1273, 251 1275" />
+        </svg>
+        <div class="tap" id="tapN"><div class="tap-ring" id="tapN-ring"></div><div class="tap-dot" id="tapN-dot"></div></div>
+      </div>
+      <div class="cam" id="camE">
+        <video id="s1-v" src="assets/footage/l2e.mp4" data-start="3.6" data-duration="3.0" data-media-start="0.9" data-track-index="1" playsinline muted></video>
+        <video id="e1-v" src="assets/footage/l2e.mp4" data-start="16.211" data-duration="1.778" data-media-start="3.9" data-playback-rate="0.9" data-track-index="1" playsinline muted></video>
+        <video id="e1b-v" src="assets/footage/l2e.mp4" data-start="17.989" data-duration="2.5" data-media-start="5.5" data-playback-rate="0.1" data-track-index="1" playsinline muted></video>
+        <video id="e2-v" src="assets/footage/l2e.mp4" data-start="20.489" data-duration="3.0" data-media-start="5.75" data-playback-rate="0.85" data-track-index="1" playsinline muted></video>
+        <svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true">
+          <path id="m-diag" pathLength="1" d="M 532.4974746830583 1059.5025253169417 C 410.4 1187.6, 313.6 1272.4, 191.50252531694167 1400.4974746830583" />
+        </svg>
+        <div class="tap" id="tapE"><div class="tap-ring" id="tapE-ring"></div><div class="tap-dot" id="tapE-dot"></div></div>
+      </div>
+
+      <div id="scrim"></div>
+
+      <div id="hook" class="clip split" data-start="0.0" data-duration="3.6" data-track-index="2">
+        <span class="split-lbl l">新手</span><span class="split-lbl r">老手</span>
+        
+      </div>
+      <div class="panel l" data-win="0.0,3.6"><div class="screen"><img src="assets/stills/hook-l.jpg" alt="" /></div></div>
+      <div class="panel r" data-win="0.0,3.6"><div class="screen"><img src="assets/stills/hook-r.jpg" alt="" /></div></div>
+      <div id="why" class="clip split" data-start="23.489" data-duration="5.6" data-track-index="2">
+        <span class="split-lbl l">新手</span><span class="split-lbl r">老手</span>
+        <span class="stat sl">4 連 ＋ <b>落單 2 隻</b></span><span class="stat sr">3 ＋ 3 <b>剛剛好</b></span>
+      </div>
+      <div class="panel l" data-win="23.489,29.089"><div class="screen"><img src="assets/stills/why-l.jpg" alt="" /><svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true"><path id="w-top4" pathLength="1" d="M 51.5 494 C 51.5 416, 526.5 410, 551.5 494 C 563.5 574, 205.5 596, 61.5 544 C 36.5 514, 66.5 434, 131.5 422" /><path id="w-lone1" pathLength="1" d="M 413 1099 C 413 1039, 553 1033, 555 1109 C 553 1179, 423 1183, 409 1117 C 407 1079, 463 1031, 493 1033" /><path id="w-lone2" pathLength="1" d="M 171 1341 C 171 1281, 311 1275, 313 1351 C 311 1421, 181 1425, 167 1359 C 165 1321, 221 1273, 251 1275" /></svg></div></div>
+      <div class="panel r" data-win="23.489,29.089"><div class="screen"><img src="assets/stills/why-r.jpg" alt="" /><svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true"><path id="w-top3" pathLength="1" d="M 51 494 C 51 416, 406 410, 431 494 C 443 574, 145 596, 61 544 C 36 514, 66 434, 131 422" /><path id="w-diag" pathLength="1" d="M 532.4974746830583 1059.5025253169417 C 410.4 1187.6, 313.6 1272.4, 191.50252531694167 1400.4974746830583" /></svg></div></div>
+
+      <div id="lbl-s" class="clip" data-start="3.6" data-duration="3.0" data-track-index="4"><span class="who ink">前三步一樣</span></div>
+      <div id="lbl-n" class="clip" data-start="6.6" data-duration="9.611" data-track-index="4"><span class="who novice">新手</span></div>
+      <div id="lbl-e" class="clip" data-start="16.211" data-duration="7.278" data-track-index="4"><span class="who pro">老手</span></div>
+      <div id="c00" class="clip" data-start="0.15" data-duration="3.45" data-track-index="3"><div class="cap"><span>第 2 關，新手跟老手<br>只差最後一隻貓</span></div></div>
+      <div id="c01" class="clip" data-start="3.9" data-duration="2.7" data-track-index="3"><div class="cap"><span>前面三隻，大家都放一樣</span></div></div>
+      <div id="c02" class="clip" data-start="6.7" data-duration="3.608" data-track-index="3"><div class="cap"><span>新手：最後一隻白貓<br>放上面湊成 4 隻一排</span></div></div>
+      <div id="c03" class="clip" data-start="10.308" data-duration="1.37" data-track-index="3"><div class="cap"><span>看起來超順</span></div></div>
+      <div id="c04" class="clip" data-start="11.678" data-duration="2.0" data-track-index="3"><div class="cap"><span>結果上面一次消掉 4 隻</span></div></div>
+      <div id="c05" class="clip" data-start="13.678" data-duration="2.533" data-track-index="3"><div class="cap"><span>下面這兩隻白貓<br><span class='hi'>落單了</span></span></div></div>
+      <div id="c06" class="clip" data-start="16.311" data-duration="3.218" data-track-index="3"><div class="cap"><span>老手：最後一隻放這裡</span></div></div>
+      <div id="c07" class="clip" data-start="19.529" data-duration="2.36" data-track-index="3"><div class="cap"><span>跟下面兩隻白貓<br>斜斜連成一排</span></div></div>
+      <div id="c08" class="clip" data-start="21.889" data-duration="1.6" data-track-index="3"><div class="cap"><span><span class='hi'>4</span> 次連鎖，全部清光</span></div></div>
+      <div id="c09" class="clip" data-start="23.789" data-duration="2.4" data-track-index="3"><div class="cap"><span>白貓一共 6 隻<br>剛好兩組 3 隻</span></div></div>
+      <div id="c10" class="clip" data-start="26.189" data-duration="2.9" data-track-index="3"><div class="cap"><span>湊成 4 連<br>反而浪費了一隻</span></div></div>
+
+      <div id="end" class="clip" data-start="29.089" data-duration="6.4" data-track-index="7">
+        <div class="end-stack">
+          <span class="end-q" id="end-q">第 2 關就有陷阱，你中了嗎？
+            <svg class="mark" viewBox="0 0 600 50" aria-hidden="true"><path id="underline" pathLength="1" d="M 12 30 C 160 18, 330 16, 480 24 C 530 26, 562 30, 588 26" /></svg>
+          </span>
+          <img class="end-logo" id="end-logo" src="assets/img/meowlogo.webp" alt="MEOW LINE" />
+          <span class="end-name" id="end-name">MEOW LINE｜貓咪落下連線</span>
+          <span class="end-hint" id="end-hint">越後面越燒腦</span>
+          <span class="end-sub" id="end-sub">App Store 免費下載</span>
+        </div>
+      </div>
+
+      <audio id="bgm" src="assets/audio/geoffharvey-excuse-me-cat-150613.mp3" data-start="0" data-duration="35.49" data-volume="1" data-track-index="10"
+        data-automation='{"version": 1, "lanes": [{"target": "volume", "points": [{"t": 0, "v": 0.3}, {"t": 34.29, "v": 0.3}, {"t": 35.49, "v": 0}]}]}'></audio>
+      <audio id="vo-v01" src="assets/vo/v01.wav" data-start="0.15" data-duration="2.97" data-volume="1" data-track-index="20"></audio>
+      <audio id="vo-v02" src="assets/vo/v02.wav" data-start="3.9" data-duration="1.94" data-volume="1" data-track-index="21"></audio>
+      <audio id="vo-v03" src="assets/vo/v03.wav" data-start="6.7" data-duration="4.89" data-volume="1" data-track-index="22"></audio>
+      <audio id="vo-v04" src="assets/vo/v04.wav" data-start="11.678" data-duration="4.29" data-volume="1" data-track-index="23"></audio>
+      <audio id="vo-v05" src="assets/vo/v05.wav" data-start="16.311" data-duration="4.35" data-volume="1" data-track-index="24"></audio>
+      <audio id="vo-v06" src="assets/vo/v06.wav" data-start="21.889" data-duration="1.74" data-volume="1" data-track-index="25"></audio>
+      <audio id="vo-v07" src="assets/vo/v07.wav" data-start="23.789" data-duration="4.59" data-volume="1" data-track-index="26"></audio>
+      <audio id="vo-v08" src="assets/vo/v08.wav" data-start="29.489" data-duration="5.25" data-volume="1" data-track-index="27"></audio>
+      <audio id="pop0" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="4.402" data-duration="0.35" data-volume="0.7" data-track-index="12"></audio>
+      <audio id="pop1" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="5.308" data-duration="0.35" data-volume="0.7" data-track-index="13"></audio>
+      <audio id="pop2" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="6.215" data-duration="0.35" data-volume="0.7" data-track-index="14"></audio>
+      <audio id="pop3" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="9.708" data-duration="0.35" data-volume="0.7" data-track-index="15"></audio>
+      <audio id="pop4" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="19.229" data-duration="0.35" data-volume="0.7" data-track-index="16"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const END = 29.089;
+
+      document.querySelectorAll(".cap, .who").forEach(el => {
+        const clip = el.parentElement;
+        tl.fromTo(clip, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Number(clip.dataset.start));
+      });
+
+      // Split screens: phones settle in, stats appear after.
+      document.querySelectorAll(".split").forEach(split => {
+        const t0 = Number(split.dataset.start);
+        tl.fromTo(split.querySelectorAll(".split-lbl"), { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none", stagger: 0.12 }, t0 + 0.2);
+        tl.fromTo(split.querySelectorAll(".stat"), { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.25 }, t0 + 0.6);
+      });
+
+      // Panels sit outside the timed split wrapper (nested timed video is not allowed), so window them here.
+      document.querySelectorAll(".panel").forEach((panel, i) => {
+        const [a, b] = panel.dataset.win.split(",").map(Number);
+        tl.set(panel, { opacity: 0 }, 0);
+        tl.fromTo(panel, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, a + (i % 2) * 0.12);
+        tl.set(panel, { opacity: 0 }, b);
+      });
+
+      tl.set("#camE", { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 0.01, ease: "power2.inOut" }, 3.6);
+      tl.to("#camE", { scale: 1.06, x: -32.4, y: -36.4, duration: 2.8, ease: "none" }, 3.7);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 0.01, ease: "power2.inOut" }, 16.211);
+      tl.to("#camE", { scale: 1.35, x: -27.0, y: -335.0, duration: 1.0, ease: "power2.inOut" }, 16.811);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 0.6, ease: "power2.inOut" }, 20.789);
+      tl.set("#camN", { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.to("#camN", { scale: 1.0, x: 0, y: 0, duration: 0.01, ease: "power2.inOut" }, 6.6);
+      tl.to("#camN", { scale: 1.35, x: -27.0, y: -206.0, duration: 1.0, ease: "power2.inOut" }, 7.2);
+      tl.to("#camN", { scale: 1.0, x: 0, y: 0, duration: 0.6, ease: "power2.inOut" }, 11.078);
+      tl.to("#camN", { scale: 1.35, x: 0, y: -660.5, duration: 0.6, ease: "power2.inOut" }, 13.078);
+      tl.set("#camN", { opacity: 0 }, 0);
+      tl.set("#camN", { opacity: 1 }, 6.6);
+      tl.set("#camN", { opacity: 0 }, 8.378);
+      tl.set("#camN", { opacity: 1 }, 8.378);
+      tl.set("#camN", { opacity: 0 }, 10.878);
+      tl.set("#camN", { opacity: 1 }, 10.878);
+      tl.set("#camN", { opacity: 0 }, 12.878);
+      tl.set("#camN", { opacity: 1 }, 12.878);
+      tl.set("#camN", { opacity: 0 }, 16.211);
+      tl.set("#camE", { opacity: 0 }, 0);
+      tl.set("#camE", { opacity: 1 }, 3.6);
+      tl.set("#camE", { opacity: 0 }, 6.6);
+      tl.set("#camE", { opacity: 1 }, 16.211);
+      tl.set("#camE", { opacity: 0 }, 17.989);
+      tl.set("#camE", { opacity: 1 }, 17.989);
+      tl.set("#camE", { opacity: 0 }, 20.489);
+      tl.set("#camE", { opacity: 1 }, 20.489);
+      tl.set("#camE", { opacity: 0 }, 23.489);
+      tl.set("#m-top4", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-top4", { opacity: 1 }, 10.058);
+      tl.to("#m-top4", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 10.058);
+      tl.to("#m-top4", { opacity: 0, duration: 0.12, ease: "none" }, 11.058);
+      tl.set("#m-lone1", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-lone1", { opacity: 1 }, 13.778);
+      tl.to("#m-lone1", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 13.778);
+      tl.to("#m-lone1", { opacity: 0, duration: 0.12, ease: "none" }, 16.091);
+      tl.set("#m-lone2", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-lone2", { opacity: 1 }, 14.178);
+      tl.to("#m-lone2", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 14.178);
+      tl.to("#m-lone2", { opacity: 0, duration: 0.12, ease: "none" }, 16.091);
+      tl.set("#m-diag", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-diag", { opacity: 1 }, 19.579);
+      tl.to("#m-diag", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 19.579);
+      tl.to("#m-diag", { opacity: 0, duration: 0.12, ease: "none" }, 20.869);
+      tl.set("#w-top4", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-top4", { opacity: 1 }, 24.389);
+      tl.to("#w-top4", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 24.389);
+      tl.to("#w-top4", { opacity: 0, duration: 0.12, ease: "none" }, 28.969);
+      tl.set("#w-lone1", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-lone1", { opacity: 1 }, 24.989);
+      tl.to("#w-lone1", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 24.989);
+      tl.to("#w-lone1", { opacity: 0, duration: 0.12, ease: "none" }, 28.969);
+      tl.set("#w-lone2", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-lone2", { opacity: 1 }, 25.189);
+      tl.to("#w-lone2", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 25.189);
+      tl.to("#w-lone2", { opacity: 0, duration: 0.12, ease: "none" }, 28.969);
+      tl.set("#w-top3", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-top3", { opacity: 1 }, 24.389);
+      tl.to("#w-top3", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 24.389);
+      tl.to("#w-top3", { opacity: 0, duration: 0.12, ease: "none" }, 28.969);
+      tl.set("#w-diag", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-diag", { opacity: 1 }, 24.989);
+      tl.to("#w-diag", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 24.989);
+      tl.to("#w-diag", { opacity: 0, duration: 0.12, ease: "none" }, 28.969);
+
+      function taps(id, list) {
+        if (!list.length) return;
+        tl.set(`#${id}`, { x: list[0].x, y: list[0].y + 160, opacity: 0 }, 0);
+        let prevEnd = 0;
+        list.forEach((tp, i) => {
+          const lead = Math.min(0.45, Math.max(0.12, tp.t - prevEnd - 0.05));
+          const from = tp.t - lead;
+          tl.to(`#${id}`, { opacity: 1, duration: 0.1, ease: "none" }, from);
+          tl.to(`#${id}`, { x: tp.x, y: tp.y, duration: lead, ease: "power2.inOut" }, from);
+          tl.fromTo(`#${id}-dot`, { scale: 1 }, { scale: 0.8, duration: 0.07, yoyo: true, repeat: 1, ease: "power1.inOut", immediateRender: false }, tp.t);
+          tl.fromTo(`#${id}-ring`, { scale: 1, opacity: 0.9 }, { scale: 2, opacity: 0, duration: 0.4, ease: "power2.out", immediateRender: false }, tp.t);
+          const next = list[i + 1];
+          if (!next || next.t - tp.t > 1.6) tl.to(`#${id}`, { opacity: 0, duration: 0.2, ease: "none" }, tp.t + 0.6);
+          prevEnd = tp.t + 0.1;
+        });
+      }
+      taps("tapN", [{"t": 9.708, "x": 480, "y": 505}]);
+      taps("tapE", [{"t": 4.402, "x": 238, "y": 505}, {"t": 5.308, "x": 842, "y": 505}, {"t": 6.215, "x": 842, "y": 1109}, {"t": 19.229, "x": 359, "y": 1230}]);
+
+      tl.fromTo("#end", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none" }, END);
+      tl.fromTo("#end-q", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, END + 0.1);
+      tl.set("#underline", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#underline", { opacity: 1 }, END + 0.55);
+      tl.to("#underline", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, END + 0.55);
+      tl.fromTo("#end-logo", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, END + 0.7);
+      tl.fromTo("#end-name", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.1);
+      tl.fromTo("#end-hint", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.3);
+      tl.fromTo("#end-sub", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.5);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

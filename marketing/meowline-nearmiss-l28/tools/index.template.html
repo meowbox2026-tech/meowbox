@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <!-- Generated from index.template.html by build.py — edit tools/, not index.html. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-latin-400-normal.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+2000-206F, U+00D7;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-chinese-traditional-400-normal.woff2") format("woff2");
+        font-display: block;
+      }
+      :root {
+        --cream: #fff6e8;
+        --ink: #33231b;
+        --marker: #e8456f;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Huninn", sans-serif;
+        color: var(--ink);
+        background: var(--cream);
+      }
+      .clip { position: absolute; inset: 0; }
+      #cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #cam video { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      .mark { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .mark path { fill: none; stroke: var(--marker); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+
+      /* Finger-tap indicator, inside the camera so it tracks zooms. */
+      .tap { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; }
+      .tap-dot { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45); border: 5px solid rgba(51, 35, 27, 0.75); }
+      .tap-ring { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        border: 5px solid #ffffff; opacity: 0; }
+
+      #scrim {
+        position: absolute;
+        left: 0; right: 0; bottom: 0; height: 600px;
+        background: linear-gradient(to bottom, rgba(30, 18, 12, 0), rgba(30, 18, 12, 0.5));
+      }
+      .cap { position: absolute; left: 50px; right: 50px; top: 1540px; text-align: center; }
+      .cap > span {
+        display: inline-block;
+        font-size: 72px;
+        line-height: 1.3;
+        letter-spacing: 0.02em;
+        color: #ffffff;
+        -webkit-text-stroke: 11px var(--ink);
+        paint-order: stroke fill;
+        text-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+      }
+      .cap .hi { color: #ffd56b; }
+
+      #end { background: var(--cream); }
+      .end-stack {
+        position: absolute;
+        left: 0; right: 0; top: 470px;
+        display: flex; flex-direction: column; align-items: center;
+      }
+      .end-q { position: relative; display: block; font-size: 88px; line-height: 1.2; white-space: nowrap; }
+      .end-q .mark { left: 180px; top: 98px; width: 560px; height: 50px; }
+      .end-logo { display: block; width: 500px; height: 500px; object-fit: contain; margin-top: 110px; }
+      .end-name { display: block; margin-top: 30px; font-size: 56px; letter-spacing: 0.08em; }
+      .end-sub { display: block; margin-top: 28px; font-size: 50px; color: #7a5a48; letter-spacing: 0.04em; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="{{COMP_ID}}" data-start="0" data-duration="{{TOTAL}}" data-width="1080" data-height="1920">
+
+      <div id="cam">
+{{VIDEOS}}
+        <svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true">
+{{MARK_PATHS}}
+        </svg>
+        <div class="tap" id="tap"><div class="tap-ring" id="tap-ring"></div><div class="tap-dot" id="tap-dot"></div></div>
+      </div>
+
+      <div id="scrim"></div>
+
+{{CAPTIONS}}
+
+      <div id="end" class="clip" data-start="{{END_START}}" data-duration="{{END_DUR}}" data-track-index="4">
+        <div class="end-stack">
+          <span class="end-q" id="end-q">這隻到底要放哪？
+            <svg class="mark" viewBox="0 0 520 50" preserveAspectRatio="none" aria-hidden="true"><path id="underline" pathLength="1" d="M 12 30 C 140 18, 290 16, 420 24 C 460 26, 488 30, 508 26" /></svg>
+          </span>
+          <img class="end-logo" id="end-logo" src="assets/img/meowlogo.webp" alt="MEOW LINE" />
+          <span class="end-name" id="end-name">MEOW LINE｜貓咪落下連線</span>
+          <span class="end-sub" id="end-sub">App Store 搜尋 MEOW LINE・免費</span>
+        </div>
+      </div>
+
+      <audio id="bgm" src="assets/audio/geoffharvey-excuse-me-cat-150613.mp3" data-start="0" data-duration="{{TOTAL}}" data-volume="1" data-track-index="10"
+        data-automation='{{BGM_AUTOMATION}}'></audio>
+{{VO}}
+{{POPS}}
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const END = {{END_START}};
+
+      document.querySelectorAll(".cap").forEach(cap => {
+        const clip = cap.parentElement;
+        tl.fromTo(clip, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Number(clip.dataset.start));
+      });
+
+      {{CAM_JS}}
+
+      {{MARKS_JS}}
+
+      // Tap cursor follows the recorder's tap log, mapped into composition time.
+      const TAPS = {{TAPS}};
+      tl.set("#tap", { x: TAPS[0].x, y: TAPS[0].y + 160, opacity: 0 }, 0);
+      let prevEnd = 0;
+      TAPS.forEach((tp, i) => {
+        const lead = Math.min(0.45, Math.max(0.12, tp.t - prevEnd - 0.05));
+        const from = tp.t - lead;
+        tl.to("#tap", { opacity: 1, duration: 0.1, ease: "none" }, from);
+        tl.to("#tap", { x: tp.x, y: tp.y, duration: lead, ease: "power2.inOut" }, from);
+        tl.fromTo("#tap-dot", { scale: 1 }, { scale: 0.8, duration: 0.07, yoyo: true, repeat: 1, ease: "power1.inOut", immediateRender: false }, tp.t);
+        tl.fromTo("#tap-ring", { scale: 1, opacity: 0.9 }, { scale: 2, opacity: 0, duration: 0.4, ease: "power2.out", immediateRender: false }, tp.t);
+        const next = TAPS[i + 1];
+        if (!next || next.t - tp.t > 1.6) tl.to("#tap", { opacity: 0, duration: 0.2, ease: "none" }, tp.t + 0.6);
+        prevEnd = tp.t + 0.1;
+      });
+
+      tl.fromTo("#end", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none" }, END);
+      tl.fromTo("#end-q", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, END + 0.1);
+      tl.set("#underline", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#underline", { opacity: 1 }, END + 0.55);
+      tl.to("#underline", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, END + 0.55);
+      tl.fromTo("#end-logo", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, END + 0.7);
+      tl.fromTo("#end-name", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.1);
+      tl.fromTo("#end-sub", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.3);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

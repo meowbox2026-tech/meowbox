@@ -1,5 +1,6 @@
 import { getSupabaseClient } from '../supabase/supabaseClient'
 import { getAnonymousUserId, resetAnonymousIdentity } from '../supabase/anonymousIdentity'
+import { mirrorToFirebase } from './firebaseEvents'
 
 export type PlayerEventName =
   | 'session_started'
@@ -145,6 +146,7 @@ async function flushPendingEvents(playerId: string): Promise<AnalyticsResult> {
 
 export async function recordPlayerEvent(input: PlayerEventInput): Promise<AnalyticsResult> {
   if (!validateEvent(input)) return { recorded: false, reason: 'invalid-event' }
+  void mirrorToFirebase(input)
   const client = getSupabaseClient()
   if (!client) return { recorded: false, reason: 'not-configured' }
 

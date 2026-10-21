@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <!-- Generated from tools/index.template.html by tools/build.py — edit tools/, not index.html. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-latin-400-normal.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+2000-206F, U+00D7;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-chinese-traditional-400-normal.woff2") format("woff2");
+        font-display: block;
+      }
+      :root {
+        --cream: #fff6e8;
+        --ink: #33231b;
+        --marker: #e8456f;
+        --novice: #e8456f;
+        --pro: #3f8f6b;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        font-family: "Huninn", sans-serif; color: var(--ink); background: var(--cream);
+      }
+      .clip { position: absolute; inset: 0; }
+      .cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .cam video { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      .mark { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .mark path { fill: none; stroke: var(--marker); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+
+      .tap { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; }
+      .tap-dot { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45); border: 5px solid rgba(51, 35, 27, 0.75); }
+      .tap-ring { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        border: 5px solid #ffffff; opacity: 0; }
+
+      /* Split screen: two phones side by side on paper. */
+      .split { background: var(--cream); }
+      .panel { position: absolute; top: 330px; width: 500px; height: 889px; overflow: hidden;
+        border-radius: 34px; border: 5px solid var(--ink); }
+      .panel.l { left: 26px; transform: rotate(-1.2deg); }
+      .panel.r { right: 26px; transform: rotate(1deg); }
+      .panel .screen { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform: scale(0.463); transform-origin: 0 0; }
+      .panel video, .panel img { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .panel .mark path { stroke-width: 16; }
+      .split-lbl { position: absolute; top: 200px; width: 500px; text-align: center; font-size: 84px; }
+      .split-lbl.l { left: 26px; color: var(--novice); }
+      .split-lbl.r { right: 26px; color: var(--pro); }
+      .stat { position: absolute; top: 1270px; width: 500px; text-align: center; font-size: 56px; line-height: 1.35; }
+      .stat b { font-weight: 400; font-size: 70px; }
+      .stat.sl { left: 26px; }
+      .stat.sl b { color: var(--novice); }
+      .stat.sr { right: 26px; }
+      .stat.sr b { color: var(--pro); }
+
+      #scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 640px;
+        background: linear-gradient(to bottom, rgba(30, 18, 12, 0), rgba(30, 18, 12, 0.5)); }
+      .who { position: absolute; left: 50%; top: 1440px; transform: translateX(-50%);
+        padding: 8px 30px 12px; border-radius: 14px; background: var(--cream); font-size: 46px; }
+      .who.novice { color: var(--novice); }
+      .who.pro { color: var(--pro); }
+      .who.ink { color: var(--ink); }
+      .cap { position: absolute; left: 50px; right: 50px; top: 1540px; text-align: center; }
+      .cap > span {
+        display: inline-block; font-size: 72px; line-height: 1.3; letter-spacing: 0.02em; color: #ffffff;
+        -webkit-text-stroke: 11px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+      }
+      .cap .hi { color: #ffd56b; }
+
+      #end { background: var(--cream); }
+      .end-stack { position: absolute; left: 0; right: 0; top: 470px; display: flex; flex-direction: column; align-items: center; }
+      .end-q { position: relative; display: block; font-size: 80px; line-height: 1.2; white-space: nowrap; }
+      .end-q .mark { left: 380px; top: 92px; width: 520px; height: 50px; }
+      .end-logo { display: block; width: 500px; height: 500px; object-fit: contain; margin-top: 110px; }
+      .end-name { display: block; margin-top: 30px; font-size: 56px; letter-spacing: 0.08em; }
+      .end-hint { display: block; margin-top: 36px; font-size: 50px; color: var(--marker); }
+      .end-sub { display: block; margin-top: 28px; font-size: 50px; color: #7a5a48; letter-spacing: 0.04em; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="44.57" data-width="1080" data-height="1920">
+
+      <div class="cam" id="camN">
+        <video id="n1-v" src="assets/footage/l17n.mp4" data-start="6.562" data-duration="3.889" data-media-start="8.6" data-playback-rate="0.09" data-track-index="0" playsinline muted></video>
+        <video id="n1b-v" src="assets/footage/l17n.mp4" data-start="10.451" data-duration="1.667" data-media-start="8.95" data-playback-rate="0.12" data-track-index="0" playsinline muted></video>
+        <video id="n2-v" src="assets/footage/l17n.mp4" data-start="12.118" data-duration="4.844" data-media-start="9.15" data-playback-rate="1.6" data-track-index="0" playsinline muted></video>
+        <video id="n3-v" src="assets/footage/l17n.mp4" data-start="16.962" data-duration="3.333" data-media-start="16.9" data-playback-rate="0.12" data-track-index="0" playsinline muted></video>
+        <svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true">
+          <path id="m-col4" pathLength="1" d="M 473 426 C 561 420, 569 827, 555 887 C 547 945, 405 951, 401 867 C 395 564, 411 436, 513 422" />
+          <path id="m-lone1" pathLength="1" d="M 655 978 C 655 918, 795 912, 797 988 C 795 1058, 665 1062, 651 996 C 649 958, 705 910, 735 912" />
+          <path id="m-lone2" pathLength="1" d="M 897 978 C 897 918, 1037 912, 1039 988 C 1037 1058, 907 1062, 893 996 C 891 958, 947 910, 977 912" />
+        </svg>
+        <div class="tap" id="tapN"><div class="tap-ring" id="tapN-ring"></div><div class="tap-dot" id="tapN-dot"></div></div>
+      </div>
+      <div class="cam" id="camE">
+        <video id="s1-v" src="assets/footage/l17e.mp4" data-start="3.6" data-duration="2.962" data-media-start="0.9" data-playback-rate="2.6" data-track-index="1" playsinline muted></video>
+        <video id="e1-v" src="assets/footage/l17e.mp4" data-start="20.295" data-duration="3.889" data-media-start="8.6" data-playback-rate="0.09" data-track-index="1" playsinline muted></video>
+        <video id="e1b-v" src="assets/footage/l17e.mp4" data-start="24.184" data-duration="1.667" data-media-start="8.95" data-playback-rate="0.12" data-track-index="1" playsinline muted></video>
+        <video id="e2-v" src="assets/footage/l17e.mp4" data-start="25.851" data-duration="5.031" data-media-start="9.15" data-playback-rate="1.6" data-track-index="1" playsinline muted></video>
+        <video id="e3-v" src="assets/footage/l17e.mp4" data-start="30.882" data-duration="2.286" data-media-start="17.2" data-playback-rate="0.35" data-track-index="1" playsinline muted></video>
+        <svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true">
+          <path id="m-gap" pathLength="1" d="M 656 978 C 656 900, 1011 894, 1036 978 C 1048 1058, 750 1080, 666 1028 C 641 998, 671 918, 736 906" />
+          <path id="m-final" pathLength="1" d="M 656 978 C 656 900, 1011 894, 1036 978 C 1048 1058, 750 1080, 666 1028 C 641 998, 671 918, 736 906" />
+        </svg>
+        <div class="tap" id="tapE"><div class="tap-ring" id="tapE-ring"></div><div class="tap-dot" id="tapE-dot"></div></div>
+      </div>
+
+      <div id="scrim"></div>
+
+      <div id="hook" class="clip split" data-start="0.0" data-duration="3.6" data-track-index="2">
+        <span class="split-lbl l">新手</span><span class="split-lbl r">老手</span>
+        
+      </div>
+      <div class="panel l" data-win="0.0,3.6"><div class="screen"><img src="assets/stills/hook-l.jpg" alt="" /></div></div>
+      <div class="panel r" data-win="0.0,3.6"><div class="screen"><img src="assets/stills/hook-r.jpg" alt="" /></div></div>
+      <div id="why" class="clip split" data-start="33.168" data-duration="5.4" data-track-index="2">
+        <span class="split-lbl l">新手</span><span class="split-lbl r">老手</span>
+        <span class="stat sl">4 連 ＋ <b>落單 2 隻</b></span><span class="stat sr">3 ＋ 3 <b>剛剛好</b></span>
+      </div>
+      <div class="panel l" data-win="33.168,38.568"><div class="screen"><img src="assets/stills/why-l.jpg" alt="" /><svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true"><path id="w-col4" pathLength="1" d="M 473 426 C 561 420, 569 827, 555 887 C 547 945, 405 951, 401 867 C 395 564, 411 436, 513 422" /><path id="w-lone1" pathLength="1" d="M 655 978 C 655 918, 795 912, 797 988 C 795 1058, 665 1062, 651 996 C 649 958, 705 910, 735 912" /><path id="w-lone2" pathLength="1" d="M 897 978 C 897 918, 1037 912, 1039 988 C 1037 1058, 907 1062, 893 996 C 891 958, 947 910, 977 912" /></svg></div></div>
+      <div class="panel r" data-win="33.168,38.568"><div class="screen"><img src="assets/stills/why-r.jpg" alt="" /><svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true"><path id="w-col3" pathLength="1" d="M 473 426 C 561 420, 569 706, 555 766 C 547 824, 405 830, 401 746 C 395 564, 411 436, 513 422" /><path id="w-row" pathLength="1" d="M 656 978 C 656 900, 1011 894, 1036 978 C 1048 1058, 750 1080, 666 1028 C 641 998, 671 918, 736 906" /></svg></div></div>
+
+      <div id="lbl-s" class="clip" data-start="3.6" data-duration="2.962" data-track-index="4"><span class="who ink">▶▶ 前 13 隻一樣</span></div>
+      <div id="lbl-n" class="clip" data-start="6.562" data-duration="13.733" data-track-index="4"><span class="who novice">新手</span></div>
+      <div id="lbl-e" class="clip" data-start="20.295" data-duration="12.873" data-track-index="4"><span class="who pro">老手</span></div>
+      <div id="c00" class="clip" data-start="0.15" data-duration="3.45" data-track-index="3"><div class="cap"><span>第 17 關，新手跟老手<br>只差最後一隻貓</span></div></div>
+      <div id="c01" class="clip" data-start="3.8" data-duration="2.762" data-track-index="3"><div class="cap"><span>前面 13 隻<br>兩個人放得一模一樣</span></div></div>
+      <div id="c02" class="clip" data-start="6.662" data-duration="3.956" data-track-index="3"><div class="cap"><span>最後一隻藍貓<br>新手：接在這排下面</span></div></div>
+      <div id="c03" class="clip" data-start="10.618" data-duration="1.8" data-track-index="3"><div class="cap"><span>湊成 4 隻一排<br>看起來超順</span></div></div>
+      <div id="c04" class="clip" data-start="15.762" data-duration="4.533" data-track-index="3"><div class="cap"><span>連鎖 <span class='hi'>12</span> 次<br>還是剩這兩隻藍貓</span></div></div>
+      <div id="c05" class="clip" data-start="20.395" data-duration="3.872" data-track-index="3"><div class="cap"><span>老手：右邊兩隻藍貓<br>中間剛好缺一格</span></div></div>
+      <div id="c06" class="clip" data-start="24.267" data-duration="1.884" data-track-index="3"><div class="cap"><span>最後一隻，塞進去</span></div></div>
+      <div id="c07" class="clip" data-start="29.251" data-duration="3.917" data-track-index="3"><div class="cap"><span>最後一下剛好就是這三隻<br><span class='hi'>13</span> 連鎖，全部清光</span></div></div>
+      <div id="c08" class="clip" data-start="33.468" data-duration="2.1" data-track-index="3"><div class="cap"><span>藍貓要剛好 3 隻一組</span></div></div>
+      <div id="c09" class="clip" data-start="35.568" data-duration="3.0" data-track-index="3"><div class="cap"><span>湊成 4 連<br>右邊兩隻就少了一個伴</span></div></div>
+
+      <div id="end" class="clip" data-start="38.568" data-duration="6.0" data-track-index="7">
+        <div class="end-stack">
+          <span class="end-q" id="end-q">第 17 關，換你會放哪裡？
+            <svg class="mark" viewBox="0 0 600 50" aria-hidden="true"><path id="underline" pathLength="1" d="M 12 30 C 160 18, 330 16, 480 24 C 530 26, 562 30, 588 26" /></svg>
+          </span>
+          <img class="end-logo" id="end-logo" src="assets/img/meowlogo.webp" alt="MEOW LINE" />
+          <span class="end-name" id="end-name">MEOW LINE｜貓咪落下連線</span>
+          <span class="end-hint" id="end-hint">越後面越燒腦</span>
+          <span class="end-sub" id="end-sub">App Store 免費下載</span>
+        </div>
+      </div>
+
+      <audio id="bgm" src="assets/audio/geoffharvey-excuse-me-cat-150613.mp3" data-start="0" data-duration="44.57" data-volume="1" data-track-index="10"
+        data-automation='{"version": 1, "lanes": [{"target": "volume", "points": [{"t": 0, "v": 0.3}, {"t": 43.37, "v": 0.3}, {"t": 44.57, "v": 0}]}]}'></audio>
+      <audio id="vo-v01" src="assets/vo/v01.wav" data-start="0.15" data-duration="3.14" data-volume="1" data-track-index="20"></audio>
+      <audio id="vo-v02" src="assets/vo/v02.wav" data-start="3.8" data-duration="2.54" data-volume="1" data-track-index="21"></audio>
+      <audio id="vo-v03" src="assets/vo/v03.wav" data-start="6.662" data-duration="5.43" data-volume="1" data-track-index="22"></audio>
+      <audio id="vo-v04" src="assets/vo/v04.wav" data-start="15.762" data-duration="2.94" data-volume="1" data-track-index="23"></audio>
+      <audio id="vo-v05" src="assets/vo/v05.wav" data-start="20.395" data-duration="5.28" data-volume="1" data-track-index="24"></audio>
+      <audio id="vo-v06" src="assets/vo/v06.wav" data-start="29.251" data-duration="3.75" data-volume="1" data-track-index="25"></audio>
+      <audio id="vo-v07" src="assets/vo/v07.wav" data-start="33.468" data-duration="4.14" data-volume="1" data-track-index="26"></audio>
+      <audio id="vo-v08" src="assets/vo/v08.wav" data-start="38.968" data-duration="4.96" data-volume="1" data-track-index="27"></audio>
+      <audio id="pop0" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="10.818" data-duration="0.35" data-volume="0.7" data-track-index="12"></audio>
+      <audio id="pop1" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="24.667" data-duration="0.35" data-volume="0.7" data-track-index="13"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const END = 38.568;
+
+      document.querySelectorAll(".cap, .who").forEach(el => {
+        const clip = el.parentElement;
+        tl.fromTo(clip, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Number(clip.dataset.start));
+      });
+
+      // Split screens: phones settle in, stats appear after.
+      document.querySelectorAll(".split").forEach(split => {
+        const t0 = Number(split.dataset.start);
+        tl.fromTo(split.querySelectorAll(".split-lbl"), { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none", stagger: 0.12 }, t0 + 0.2);
+        tl.fromTo(split.querySelectorAll(".stat"), { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.25 }, t0 + 0.6);
+      });
+
+      // Panels sit outside the timed split wrapper (nested timed video is not allowed), so window them here.
+      document.querySelectorAll(".panel").forEach((panel, i) => {
+        const [a, b] = panel.dataset.win.split(",").map(Number);
+        tl.set(panel, { opacity: 0 }, 0);
+        tl.fromTo(panel, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, a + (i % 2) * 0.12);
+        tl.set(panel, { opacity: 0 }, b);
+      });
+
+      tl.set("#camE", { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 0.01, ease: "power2.inOut" }, 3.6);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 0.01, ease: "power2.inOut" }, 20.295);
+      tl.to("#camE", { scale: 1.45, x: -475.0, y: -282.0, duration: 1.0, ease: "power2.inOut" }, 20.595);
+      tl.to("#camE", { scale: 1.0, x: 0, y: 0, duration: 0.6, ease: "power2.inOut" }, 26.151);
+      tl.to("#camE", { scale: 1.6, x: -648.0, y: -680.8, duration: 0.5, ease: "power2.inOut" }, 30.882);
+      tl.set("#camN", { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.to("#camN", { scale: 1.0, x: 0, y: 0, duration: 0.01, ease: "power2.inOut" }, 6.562);
+      tl.to("#camN", { scale: 1.45, x: -475.0, y: -282.0, duration: 1.0, ease: "power2.inOut" }, 6.862);
+      tl.to("#camN", { scale: 1.0, x: 0, y: 0, duration: 0.6, ease: "power2.inOut" }, 12.418);
+      tl.to("#camN", { scale: 1.6, x: -648.0, y: -680.8, duration: 0.5, ease: "power2.inOut" }, 16.962);
+      tl.set("#camN", { opacity: 0 }, 0);
+      tl.set("#camN", { opacity: 1 }, 6.562);
+      tl.set("#camN", { opacity: 0 }, 10.451);
+      tl.set("#camN", { opacity: 1 }, 10.451);
+      tl.set("#camN", { opacity: 0 }, 12.118);
+      tl.set("#camN", { opacity: 1 }, 12.118);
+      tl.set("#camN", { opacity: 0 }, 16.962);
+      tl.set("#camN", { opacity: 1 }, 16.962);
+      tl.set("#camN", { opacity: 0 }, 20.295);
+      tl.set("#camE", { opacity: 0 }, 0);
+      tl.set("#camE", { opacity: 1 }, 3.6);
+      tl.set("#camE", { opacity: 0 }, 6.562);
+      tl.set("#camE", { opacity: 1 }, 20.295);
+      tl.set("#camE", { opacity: 0 }, 24.184);
+      tl.set("#camE", { opacity: 1 }, 24.184);
+      tl.set("#camE", { opacity: 0 }, 25.851);
+      tl.set("#camE", { opacity: 1 }, 25.851);
+      tl.set("#camE", { opacity: 0 }, 30.882);
+      tl.set("#camE", { opacity: 1 }, 30.882);
+      tl.set("#camE", { opacity: 0 }, 33.168);
+      tl.set("#m-col4", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-col4", { opacity: 1 }, 11.168);
+      tl.to("#m-col4", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 11.168);
+      tl.to("#m-col4", { opacity: 0, duration: 0.12, ease: "none" }, 12.398);
+      tl.set("#m-lone1", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-lone1", { opacity: 1 }, 17.562);
+      tl.to("#m-lone1", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 17.562);
+      tl.to("#m-lone1", { opacity: 0, duration: 0.12, ease: "none" }, 20.175);
+      tl.set("#m-lone2", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-lone2", { opacity: 1 }, 17.862);
+      tl.to("#m-lone2", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 17.862);
+      tl.to("#m-lone2", { opacity: 0, duration: 0.12, ease: "none" }, 20.175);
+      tl.set("#m-gap", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-gap", { opacity: 1 }, 22.195);
+      tl.to("#m-gap", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 22.195);
+      tl.to("#m-gap", { opacity: 0, duration: 0.12, ease: "none" }, 26.131);
+      tl.set("#m-final", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-final", { opacity: 1 }, 31.282);
+      tl.to("#m-final", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 31.282);
+      tl.to("#m-final", { opacity: 0, duration: 0.12, ease: "none" }, 33.048);
+      tl.set("#w-col4", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-col4", { opacity: 1 }, 34.068);
+      tl.to("#w-col4", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 34.068);
+      tl.to("#w-col4", { opacity: 0, duration: 0.12, ease: "none" }, 38.448);
+      tl.set("#w-lone1", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-lone1", { opacity: 1 }, 34.668);
+      tl.to("#w-lone1", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 34.668);
+      tl.to("#w-lone1", { opacity: 0, duration: 0.12, ease: "none" }, 38.448);
+      tl.set("#w-lone2", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-lone2", { opacity: 1 }, 34.868);
+      tl.to("#w-lone2", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 34.868);
+      tl.to("#w-lone2", { opacity: 0, duration: 0.12, ease: "none" }, 38.448);
+      tl.set("#w-col3", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-col3", { opacity: 1 }, 34.068);
+      tl.to("#w-col3", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 34.068);
+      tl.to("#w-col3", { opacity: 0, duration: 0.12, ease: "none" }, 38.448);
+      tl.set("#w-row", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#w-row", { opacity: 1 }, 34.668);
+      tl.to("#w-row", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 34.668);
+      tl.to("#w-row", { opacity: 0, duration: 0.12, ease: "none" }, 38.448);
+
+      function taps(id, list) {
+        if (!list.length) return;
+        tl.set(`#${id}`, { x: list[0].x, y: list[0].y + 160, opacity: 0 }, 0);
+        let prevEnd = 0;
+        list.forEach((tp, i) => {
+          const lead = Math.min(0.45, Math.max(0.12, tp.t - prevEnd - 0.05));
+          const from = tp.t - lead;
+          tl.to(`#${id}`, { opacity: 1, duration: 0.1, ease: "none" }, from);
+          tl.to(`#${id}`, { x: tp.x, y: tp.y, duration: lead, ease: "power2.inOut" }, from);
+          tl.fromTo(`#${id}-dot`, { scale: 1 }, { scale: 0.8, duration: 0.07, yoyo: true, repeat: 1, ease: "power1.inOut", immediateRender: false }, tp.t);
+          tl.fromTo(`#${id}-ring`, { scale: 1, opacity: 0.9 }, { scale: 2, opacity: 0, duration: 0.4, ease: "power2.out", immediateRender: false }, tp.t);
+          const next = list[i + 1];
+          if (!next || next.t - tp.t > 1.6) tl.to(`#${id}`, { opacity: 0, duration: 0.2, ease: "none" }, tp.t + 0.6);
+          prevEnd = tp.t + 0.1;
+        });
+      }
+      taps("tapN", [{"t": 10.818, "x": 480, "y": 867}]);
+      taps("tapE", [{"t": 3.872, "x": 117, "y": 505}, {"t": 4.048, "x": 238, "y": 746}, {"t": 4.223, "x": 359, "y": 867}, {"t": 4.398, "x": 117, "y": 1109}, {"t": 4.571, "x": 238, "y": 1109}, {"t": 4.745, "x": 480, "y": 626}, {"t": 4.92, "x": 600, "y": 626}, {"t": 5.094, "x": 480, "y": 1230}, {"t": 5.268, "x": 600, "y": 1230}, {"t": 5.443, "x": 842, "y": 505}, {"t": 5.617, "x": 842, "y": 626}, {"t": 5.791, "x": 842, "y": 746}, {"t": 5.966, "x": 842, "y": 867}, {"t": 24.667, "x": 842, "y": 988}]);
+
+      tl.fromTo("#end", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none" }, END);
+      tl.fromTo("#end-q", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, END + 0.1);
+      tl.set("#underline", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#underline", { opacity: 1 }, END + 0.55);
+      tl.to("#underline", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, END + 0.55);
+      tl.fromTo("#end-logo", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, END + 0.7);
+      tl.fromTo("#end-name", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.1);
+      tl.fromTo("#end-hint", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.3);
+      tl.fromTo("#end-sub", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.5);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

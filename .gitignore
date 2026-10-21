@@ -26,3 +26,15 @@ Codex 圖像 *.png
 release/
 build/
 supabase/.temp/
+
+# Marketing video projects: keep sources (HTML, briefs, record.js), skip heavy media.
+# Footage is re-recordable with marketing/footage/record.js; assets are copies.
+marketing/footage/*.mp4
+marketing/*/renders/
+marketing/*/snapshots/
+marketing/*/assets/
+marketing/*/.hyperframes/
+marketing/*/.thumbnails/
+
+# Local Claude Code preview config
+.claude/launch.json

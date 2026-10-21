@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-latin-400-normal.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+2000-206F, U+25B6, U+00D7;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-chinese-traditional-400-normal.woff2") format("woff2");
+        font-display: block;
+      }
+      :root {
+        --cream: #fff6e8;
+        --cocoa: #4a2c22;
+        --coral: #e8456f;
+        --butter: #ffd56b;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Huninn", sans-serif;
+        color: var(--cocoa);
+        background: var(--cream);
+      }
+      .clip { position: absolute; inset: 0; }
+      .full { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+      .bg-img { position: absolute; inset: -40px; width: 1160px; height: 2000px; object-fit: cover; }
+      .cam { position: absolute; inset: 0; transform-origin: 50% 32%; }
+      .cam video { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+
+      /* Sticker captions — cocoa ink on cream, one coral accent. */
+      .cap { pointer-events: none; }
+      .cap-box {
+        position: absolute;
+        left: 64px;
+        right: 64px;
+        top: 1330px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 22px;
+      }
+      .kicker {
+        display: block;
+        padding: 10px 30px 14px;
+        border-radius: 999px;
+        background: var(--coral);
+        color: #fffaf3;
+        font-size: 58px;
+        line-height: 1.1;
+        box-shadow: 0 8px 0 var(--cocoa);
+      }
+      .headline {
+        display: block;
+        padding: 26px 44px 34px;
+        border: 7px solid var(--cocoa);
+        border-radius: 40px;
+        background: var(--cream);
+        font-size: 124px;
+        line-height: 1.05;
+        letter-spacing: 0.02em;
+        box-shadow: 0 16px 0 var(--cocoa);
+        white-space: nowrap;
+      }
+      .headline em { font-style: normal; color: var(--coral); }
+      .headline.sm { font-size: 104px; }
+      .ff-badge {
+        position: absolute;
+        top: 300px;
+        right: 48px;
+        padding: 10px 26px 14px;
+        border-radius: 22px;
+        background: var(--cocoa);
+        color: var(--butter);
+        font-size: 46px;
+      }
+
+      /* Level jump card */
+      #jump-tint { position: absolute; inset: 0; background: rgba(255, 246, 232, 0.72); }
+      .jump-stack {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 520px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .jump-label { display: block; font-size: 92px; letter-spacing: 0.12em; }
+      .jump-num {
+        display: block;
+        width: 760px;
+        text-align: center;
+        font-size: 420px;
+        line-height: 1;
+        color: var(--coral);
+        font-variant-numeric: tabular-nums;
+        -webkit-text-stroke: 12px var(--cocoa);
+        paint-order: stroke fill;
+        text-shadow: 0 22px 0 var(--cocoa);
+      }
+      .jump-q { position: absolute; left: 64px; right: 64px; top: 1330px; display: flex; justify-content: center; }
+
+      /* Chain counter */
+      .chain {
+        position: absolute;
+        left: 64px;
+        top: 1360px;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        padding: 24px 56px 34px 44px;
+        border: 7px solid var(--cocoa);
+        border-radius: 44px;
+        background: var(--cream);
+        box-shadow: 0 16px 0 var(--cocoa);
+      }
+      .chain-label { display: block; font-size: 88px; }
+      .chain-num {
+        display: block;
+        width: 330px;
+        font-size: 200px;
+        line-height: 1;
+        color: var(--coral);
+        font-variant-numeric: tabular-nums;
+        transform-origin: 30% 60%;
+      }
+
+      /* Confetti */
+      .confetti i { position: absolute; top: 0; display: block; width: 26px; height: 40px; border-radius: 6px; }
+
+      /* CTA */
+      .cta-stack {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+      }
+      .cta-logo { display: block; width: 640px; height: 640px; object-fit: contain; }
+      .cta-q {
+        display: block;
+        padding: 30px 54px 40px;
+        border: 7px solid var(--cocoa);
+        border-radius: 44px;
+        background: var(--cream);
+        font-size: 112px;
+        line-height: 1.05;
+        box-shadow: 0 16px 0 var(--cocoa);
+        white-space: nowrap;
+      }
+      .cta-name { display: block; font-size: 60px; letter-spacing: 0.06em; }
+      .cta-pill {
+        display: block;
+        margin-top: 20px;
+        padding: 26px 70px 34px;
+        border-radius: 999px;
+        background: var(--coral);
+        color: #fffaf3;
+        font-size: 78px;
+        box-shadow: 0 14px 0 var(--cocoa);
+      }
+      #flash { position: absolute; inset: 0; background: #fffaf3; opacity: 0; pointer-events: none; }
+      .tap { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+      .tap-dot { position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; border-radius: 50%;
+        background: rgba(255, 250, 243, 0.55); border: 7px solid var(--cocoa); box-shadow: 0 6px 0 rgba(74, 44, 34, 0.35); }
+      .tap-ring { position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; border-radius: 50%;
+        border: 6px solid var(--coral); opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="24" data-width="1080" data-height="1920">
+      <div id="bg" class="full"><img class="bg-img" id="bg-img" src="assets/img/bg-main.webp" alt="" /></div>
+
+      <div class="cam" id="cam1">
+        <video id="v1" src="assets/footage/01-level1-win-slow.mp4" data-start="0" data-duration="5.4" data-media-start="0.9" data-track-index="0" playsinline muted></video>
+      </div>
+      <div class="cam" id="cam3">
+        <video id="v3" src="assets/footage/02-level90-near-miss.mp4" data-start="6.6" data-duration="4" data-media-start="0.6" data-playback-rate="1.5" data-track-index="0" playsinline muted></video>
+      </div>
+      <div class="cam" id="cam4">
+        <video id="v4a" src="assets/footage/02-level90-near-miss.mp4" data-start="10.6" data-duration="6" data-media-start="6.6" data-playback-rate="1.4" data-track-index="0" playsinline muted></video>
+        <video id="v4b" src="assets/footage/02-level90-near-miss.mp4" data-start="16.6" data-duration="2" data-media-start="15" data-playback-rate="0.45" data-track-index="0" playsinline muted></video>
+        <video id="v4c" src="assets/footage/02-level90-near-miss.mp4" data-start="18.6" data-duration="1.8" data-media-start="15.95" data-playback-rate="0.36" data-track-index="0" playsinline muted></video>
+      </div>
+      <div class="tap" id="tap"><div class="tap-ring" id="tap-ring"></div><div class="tap-dot" id="tap-dot"></div></div>
+
+      <!-- Level 1 -->
+      <div id="c1" class="clip cap" data-start="0.1" data-duration="5.3" data-track-index="3">
+        <div class="cap-box" style="top: 1500px"><span class="kicker" id="c1k">第 1 關</span><span class="headline sm" id="c1h">簡單！</span><span class="headline sm" id="c1h2" style="position: absolute; top: 96px">輕鬆過關 <em>✓</em></span></div>
+      </div>
+      <!-- 1 → 90 -->
+      <div id="jump" class="clip" data-start="5.4" data-duration="1.2" data-track-index="2">
+        <div id="jump-tint"></div>
+        <div class="jump-stack" id="jump-stack"><span class="jump-label">LEVEL</span><span class="jump-num" id="jump-num">1</span></div>
+        <div class="jump-q"><span class="headline sm" id="jump-q" style="font-size: 92px">那……第 <em>90</em> 關呢？</span></div>
+      </div>
+      <!-- Level 90 -->
+      <div id="c3" class="clip cap" data-start="6.7" data-duration="3.9" data-track-index="3">
+        <div class="cap-box"><span class="kicker" id="c3k">第 90 關 · 30 隻貓</span><span class="headline" id="c3h">這是什麼？！</span></div>
+      </div>
+      <div id="c4a" class="clip cap" data-start="10.6" data-duration="6" data-track-index="3">
+        <div class="cap-box"><span class="kicker" id="c4ak">放好了，開始！</span><span class="headline sm" id="c4ah">連鎖、連鎖……</span></div>
+      </div>
+      <div id="c4b" class="clip cap" data-start="16.6" data-duration="3.8" data-track-index="3">
+        <div class="cap-box"><span class="kicker" id="c4bk">卡住了</span><span class="headline sm" id="c4bh">就差最後 <em>3</em> 隻！</span></div>
+      </div>
+      <!-- CTA -->
+      <div id="cta" class="clip" data-start="20.4" data-duration="3.6" data-track-index="4">
+        <div class="cta-stack">
+          <img class="cta-logo" id="cta-logo" src="assets/img/meowlogo.webp" alt="MEOW LINE" />
+          <span class="cta-q" id="cta-q">你能走到第幾關？</span>
+          <span class="cta-name" id="cta-name">MEOW LINE｜貓咪落下連線</span>
+          <span class="cta-pill" id="cta-pill">App Store 免費下載</span>
+        </div>
+      </div>
+      <div id="flash"></div>
+
+      <audio id="bgm" src="assets/audio/geoffharvey-excuse-me-cat-150613.mp3" data-start="0" data-duration="24" data-volume="0.6" data-track-index="10"
+        data-automation='{"version":1,"lanes":[{"target":"volume","points":[{"t":0,"v":0.85},{"t":16.4,"v":0.85},{"t":16.7,"v":0.3},{"t":20.2,"v":0.3},{"t":20.5,"v":1},{"t":22.8,"v":1},{"t":24,"v":0}]}]}'></audio>
+      <audio id="pop1" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="0.3" data-duration="0.3" data-track-index="11"></audio>
+      <audio id="pop2" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="1.207" data-duration="0.3" data-track-index="14"></audio>
+      <audio id="pop3" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="2.115" data-duration="0.3" data-track-index="11"></audio>
+      <audio id="win-chime" src="assets/audio/combo-bubble-tone-04-sparkle.wav" data-start="4.4" data-duration="0.9" data-volume="0.9" data-track-index="13"></audio>
+      <audio id="pop-jump" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="6.05" data-duration="0.5" data-track-index="12"></audio>
+      <audio id="pop-cta" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="20.5" data-duration="0.5" data-track-index="12"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#bg-img", { scale: 1, y: 0 }, { scale: 1.06, y: -30, duration: 24, ease: "none" }, 0);
+
+      // Level 1 (real speed) with tap cursor from the recorder's tap log
+      const TAPS = [{"t": 0.3, "x": 600, "y": 867}, {"t": 1.207, "x": 600, "y": 746}, {"t": 2.115, "x": 600, "y": 626}];
+      tl.fromTo("#tap", { x: 540, y: 1250, opacity: 0 }, { x: 540, y: 1250, opacity: 1, duration: 0.15, ease: "none" }, 0);
+      let prevEnd = 0;
+      TAPS.forEach(tp => {
+        const from = Math.max(prevEnd, tp.t - 0.42);
+        tl.to("#tap", { x: tp.x, y: tp.y, duration: tp.t - from, ease: "power2.inOut" }, from);
+        tl.fromTo("#tap-dot", { scale: 1 }, { scale: 0.78, duration: 0.07, yoyo: true, repeat: 1, ease: "power1.inOut", immediateRender: false }, tp.t);
+        tl.fromTo("#tap-ring", { scale: 1, opacity: 0.9 }, { scale: 2.2, opacity: 0, duration: 0.4, ease: "power2.out", immediateRender: false }, tp.t);
+        prevEnd = tp.t + 0.12;
+      });
+      tl.to("#tap", { opacity: 0, duration: 0.2, ease: "none" }, 2.6);
+      tl.fromTo("#c1k", { x: -260, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3, ease: "expo.out" }, 0.1);
+      tl.fromTo("#c1h", { scale: 1.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "power4.out" }, 0.3);
+      tl.to("#c1h", { opacity: 0, duration: 0.2, ease: "none" }, 4.25);
+      tl.fromTo("#c1h2", { scale: 0.4, opacity: 0, rotation: -6 }, { scale: 1, opacity: 1, rotation: -2, duration: 0.4, ease: "back.out(2)" }, 4.4);
+
+      // 1 → 90 jump
+      tl.fromTo("#flash", { opacity: 0.9 }, { opacity: 0, duration: 0.25, ease: "power2.out", immediateRender: false }, 5.4);
+      const jump = { v: 1 };
+      const jumpNum = document.getElementById("jump-num");
+      tl.fromTo(jump, { v: 1 }, { v: 90, duration: 0.65, ease: "power3.in",
+        onUpdate: () => { jumpNum.textContent = String(Math.round(jump.v)); } }, 5.4);
+      tl.fromTo("#jump-num", { scale: 0.55 }, { scale: 1, duration: 0.65, ease: "power3.in" }, 5.4);
+      tl.fromTo("#jump-stack", { x: 0 }, { x: 22, duration: 0.05, repeat: 5, yoyo: true, ease: "none" }, 6.05);
+      tl.fromTo("#jump-q", { y: 120, opacity: 0, rotation: 4 }, { y: 0, opacity: 1, rotation: 0, duration: 0.35, ease: "back.out(1.8)" }, 6.1);
+
+      // Level 90: curiosity
+      tl.fromTo("#cam3", { scale: 1.3, yPercent: 3 }, { scale: 1.03, yPercent: 0, duration: 4, ease: "power2.out" }, 6.6);
+      tl.fromTo("#c3k", { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "circ.out" }, 6.7);
+      tl.fromTo("#c3h", { x: 420, opacity: 0, rotation: -3 }, { x: 0, opacity: 1, rotation: 0, duration: 0.45, ease: "expo.out" }, 6.95);
+
+      // Level 90: cascade, stall, fail (no win afterwards)
+      tl.fromTo("#cam4", { scale: 1.03, xPercent: 0, yPercent: 0 }, { scale: 1.07, duration: 6, ease: "none" }, 10.6);
+      tl.fromTo("#c4ak", { y: -40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "circ.out" }, 10.6);
+      tl.fromTo("#c4ah", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" }, 10.8);
+      tl.to("#cam4", { scale: 1.4, xPercent: -22, yPercent: -3, duration: 0.45, ease: "power3.out" }, 16.6);
+      tl.fromTo("#c4bk", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.2)" }, 16.65);
+      tl.fromTo("#c4bh", { scale: 1.6, opacity: 0, rotation: -4 }, { scale: 1, opacity: 1, rotation: -2, duration: 0.4, ease: "power4.out" }, 16.85);
+      tl.fromTo("#c4bh", { x: 0 }, { x: 14, duration: 0.06, repeat: 5, yoyo: true, ease: "none", immediateRender: false }, 17.3);
+      tl.to("#cam4", { scale: 1.04, xPercent: 0, yPercent: 0, duration: 0.35, ease: "power2.inOut" }, 18.6);
+
+      // CTA
+      tl.fromTo("#flash", { opacity: 0.85 }, { opacity: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, 20.4);
+      tl.fromTo("#cta-logo", { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.6, ease: "back.out(1.7)" }, 20.45);
+      tl.fromTo("#cta-q", { y: 90, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "expo.out" }, 20.85);
+      tl.fromTo("#cta-name", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 21.2);
+      tl.fromTo("#cta-pill", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)" }, 21.4);
+      tl.fromTo("#cta-pill", { scale: 1 }, { scale: 1.06, duration: 0.5, repeat: 3, yoyo: true, ease: "sine.inOut", immediateRender: false }, 21.9);
+      tl.fromTo("#cta-logo", { y: 0 }, { y: -18, duration: 0.8, repeat: 2, yoyo: true, ease: "sine.inOut", immediateRender: false }, 21.1);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

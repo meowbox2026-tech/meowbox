@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>喵序 第20關連鎖循環</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1d140e; display: grid; place-items: center; font-family: "Huninn", "PingFang TC", sans-serif; }
+  .stage { position: relative; height: min(100vh, 177.78vw); aspect-ratio: 9 / 16; }
+  canvas { width: 100%; height: 100%; display: block; border-radius: 12px; }
+  .ctrl { position: absolute; inset: auto 0 16px; display: flex; justify-content: center; }
+  button { font: inherit; font-size: 15px; padding: 8px 18px; border-radius: 999px; border: 0; background: #ff7a3d; color: #fff; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #fff; }
+</style>
+</head>
+<body>
+<main class="stage">
+  <canvas id="c" width="1080" height="1920" aria-label="喵序第 20 關：放下最後一隻，15 波連鎖全部消除"></canvas>
+  <div class="ctrl"><button id="play">▶ 播放（含音效）</button></div>
+</main>
+<script src="data.js"></script>
+<script>
+// 14 秒 9:16 無縫循環。render(t) 只依時間計算畫面，t=14 與 t=0 畫面相同。
+const W = 1080, H = 1920, DUR = 14;
+const C = { bg: '#fff4e3', ink: '#3b2416', accent: '#ff7a3d', good: '#2fb36b', cell: '#d8f1f5', cell2: '#c3e7ee', board: '#8fd3df' };
+const ctx = document.getElementById('c').getContext('2d');
+const IMG = {};
+['blue', 'orange', 'white', 'fishLover'].forEach(k => { IMG[k] = new Image(); IMG[k].src = `assets/${k === 'fishLover' ? 'fish-lover' : k}.png`; });
+const LOGO = new Image(); LOGO.src = 'assets/meowlogo.webp';
+const D = window.LV, [LX, LY, LID, LTYPE, LORD] = D.last;
+const CELL = 118, BX = (W - CELL * 8) / 2, BY = 600, BCX = W / 2, BCY = BY + CELL * 4;
+const T = { drop: 0.8, chain: 1.5, clear: 9.0, cta: 9.7, reset: 13.0 };
+// 變速：每幀時長由 0.34s 線性縮到 0.16s，連鎖越跑越快
+const NF = D.frames.length, F0 = 0.34, F1 = 0.16;
+const FD = Array.from({ length: NF }, (_, i) => F0 + (F1 - F0) * i / (NF - 1));
+const FS = FD.reduce((a, d, i) => (a.push(a[i] + d), a), [0]); // 各幀起點
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const prog = (t, s, d) => clamp((t - s) / d);
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const easeIn = p => p * p * p;
+const back = p => { const s = 1.7; return 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2); };
+const cellXY = (x, y) => [BX + x * CELL + CELL / 2, BY + y * CELL + CELL / 2];
+
+function text(str, x, y, size, color = C.ink, o = {}) {
+  ctx.save(); ctx.font = `900 ${size}px Huninn, "PingFang TC", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.globalAlpha = o.alpha ?? 1; ctx.translate(x, y); ctx.rotate(o.rot || 0); ctx.scale(o.scale || 1, o.scale || 1);
+  if (o.stroke) { ctx.lineWidth = size * 0.16; ctx.strokeStyle = o.stroke; ctx.lineJoin = 'round'; ctx.strokeText(str, 0, 0); }
+  ctx.fillStyle = color; ctx.fillText(str, 0, 0); ctx.restore();
+}
+function pill(x, y, w, h, color, alpha = 1) { ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.restore(); }
+function badge(n, x, y, s, color = C.ink, alpha = 1) { // 放置順序號碼：小的先消
+  if (!n) return; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, s, 0, 7); ctx.fill();
+  ctx.lineWidth = s * 0.18; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.restore();
+  text(String(n), x, y + 2, s * 1.15, '#fff', { alpha });
+}
+function cat(type, x, y, size, alpha = 1, order = 0, badgeColor) {
+  const img = IMG[type]; if (!img || !img.complete) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.drawImage(img, x - size / 2, y - size / 2, size, size); ctx.restore();
+  badge(order, x + size * 0.36, y - size * 0.36, size * 0.2, badgeColor, alpha);
+}
+
+// ---------- 棋盤 ----------
+const toMap = b => { const m = new Map(); b.forEach((row, y) => row.forEach((c, x) => { if (c) m.set(c[0], { type: c[1], order: c[2], x, y }); })); return m; };
+function drawBoardBase() {
+  ctx.fillStyle = C.board; ctx.beginPath(); ctx.roundRect(BX - 22, BY - 22, CELL * 8 + 44, CELL * 8 + 44, 40); ctx.fill();
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    ctx.fillStyle = (x + y) % 2 ? C.cell : C.cell2; ctx.beginPath(); ctx.roundRect(BX + x * CELL + 4, BY + y * CELL + 4, CELL - 8, CELL - 8, 18); ctx.fill();
+  }
+}
+function drawMap(m, o = {}) {
+  m.forEach((c, id) => {
+    const [px, py] = cellXY(c.x, c.y), pop = o.pop?.has(id) ? o.popP : 0;
+    if (o.pop?.has(id)) { ctx.save(); ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.75 * (1 - pop); ctx.beginPath(); ctx.arc(px, py, CELL * 0.5, 0, 7); ctx.fill(); ctx.restore(); }
+    cat(c.type, px, py + (c.dy || 0), CELL * 0.92 * (1 + pop * 0.5), (1 - pop) * (c.alpha ?? 1), c.order);
+  });
+}
+function frameAt(lt) { let i = 0; while (i < NF - 1 && lt >= FS[i + 1]) i++; return [i, clamp((lt - FS[i]) / FD[i])]; }
+function chainState(lt) { // 消除幀先發光再爆開；重力幀依 id 補間位置
+  const [i, p] = frameAt(lt), f = D.frames;
+  const prev = i === 0 ? toMap(D.start) : toMap(f[i - 1].b), cur = toMap(f[i].b);
+  const waves = f.slice(0, i + 1).filter(x => x.c.length).length;
+  if (f[i].c.length) return { map: prev, pop: new Set(f[i].c), popP: easeOut(clamp((p - 0.35) / 0.65)), waves, fresh: 1 - p };
+  const map = new Map(), e = easeOut(p);
+  cur.forEach((c, id) => { const a = prev.get(id) || c; map.set(id, { ...c, x: a.x + (c.x - a.x) * e, y: a.y + (c.y - a.y) * e }); });
+  return { map, waves, fresh: 0 };
+}
+
+// ---------- 場景 ----------
+const BG = new Image(); BG.src = 'assets/bg-main.webp'; // App 主畫面的花園背景
+function bg(t) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  if (BG.complete && BG.naturalWidth) { const s = Math.max(W / BG.width, H / BG.height) * 1.04, w = BG.width * s, h = BG.height * s, d = Math.sin(t / DUR * Math.PI * 2) * 12; ctx.drawImage(BG, (W - w) / 2 + d, (H - h) / 2, w, h); }
+  ctx.save(); ctx.fillStyle = 'rgba(255,250,244,0.28)'; ctx.fillRect(0, 0, W, H); ctx.restore();
+  ctx.save(); ctx.fillStyle = '#ffb3cf'; // 花瓣飄落，以 DUR 為週期循環無接縫
+  for (let i = 0; i < 14; i++) { const k = (i * 0.137 + t / DUR) % 1, y = k * (H + 200) - 100, x = (i * 337) % W + Math.sin(k * 12 + i) * 40;
+    ctx.globalAlpha = 0.75; ctx.translate(x, y); ctx.rotate(k * 9 + i); ctx.beginPath(); ctx.ellipse(0, 0, 22, 11, 0, 0, 7); ctx.fill(); ctx.setTransform(1, 0, 0, 1, 0, 0); }
+  ctx.restore();
+}
+function camera(s, dx = 0, dy = 0) { ctx.translate(BCX + dx, BCY + dy); ctx.scale(s, s); ctx.translate(-BCX, -BCY); }
+function hookTitle(alpha, t) {
+  text('放下最後一隻', W / 2, 250, 96, C.ink, { alpha, stroke: '#fff' });
+  text('會發生什麼事？', W / 2, 400, 116, C.accent, { alpha, stroke: '#fff', rot: Math.sin(t * 7) * 0.025 });
+}
+function hoverCat(t, k = 0) { // 最後一隻懸在目標格上方，下面虛線提示落點
+  const [px, py] = cellXY(LX, LY), bob = Math.sin(t * 6) * 14;
+  ctx.save(); ctx.setLineDash([16, 12]); ctx.lineWidth = 7; ctx.strokeStyle = C.accent; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 8);
+  ctx.beginPath(); ctx.roundRect(px - CELL / 2 + 6, py - CELL / 2 + 6, CELL - 12, CELL - 12, 18); ctx.stroke(); ctx.restore();
+  const y = py - 230 * (1 - k) + bob * (1 - k);
+  cat(LTYPE, px, y, CELL * (1.15 - 0.23 * k), 1, LORD, C.accent);
+}
+function sceneHook(t) { // 0–0.8：開場即懸念，無 logo、無教學
+  drawBoardBase(); drawMap(toMap(D.pre)); hoverCat(t); hookTitle(1, t);
+}
+function sceneDrop(t) { // 0.8–1.5：落下 → 停格 0.3 秒吊胃口
+  const lt = t - T.drop, k = easeIn(prog(lt, 0, 0.22)), freeze = prog(lt, 0.22, 0.48);
+  ctx.save(); camera(1 + 0.04 * freeze, Math.sin(lt * 80) * 10 * (1 - prog(lt, 0.22, 0.12)) * (lt > 0.22 ? 1 : 0));
+  drawBoardBase(); drawMap(toMap(D.pre));
+  if (k < 1) hoverCat(t, k); else { const [px, py] = cellXY(LX, LY); cat(LTYPE, px, py, CELL * 0.92, 1, LORD, C.accent); }
+  ctx.restore();
+  hookTitle(1 - prog(lt, 0.2, 0.3), t);
+  if (lt > 0.22) text('…', W / 2, 330, 160, C.ink, { alpha: freeze, stroke: '#fff' });
+}
+function sceneChain(t) { // 1.5–9：Zoom In + 每波震動 + 連鎖計數
+  const lt = t - T.chain, s = chainState(lt), z = 1.04 + 0.06 * easeOut(prog(lt, 0, 6));
+  const shake = s.pop ? Math.sin(lt * 70) * (6 + s.waves) * s.fresh : 0;
+  ctx.save(); camera(z, shake, shake * 0.4); drawBoardBase(); drawMap(s.map, s); ctx.restore();
+  if (!s.waves) return;
+  const hot = s.waves >= 10 ? C.good : C.accent;
+  text('連鎖', W / 2, 200, 70, C.ink, { stroke: '#fff' });
+  text(`×${s.waves}`, W / 2, 360, 190 + s.waves * 4, hot, { scale: 1 + 0.35 * s.fresh, stroke: '#fff', rot: Math.sin(lt * 9) * 0.03 * s.fresh });
+}
+function sceneClear(t) { // 9–9.7：Pull Back 揭露空盤面
+  const lt = t - T.clear, z = 1.1 - 0.18 * easeOut(prog(lt, 0, 0.5));
+  ctx.save(); camera(z); drawBoardBase(); ctx.restore();
+  text(`連鎖 ×${D.waves}`, W / 2, 330, 110, C.good, { stroke: '#fff' });
+  text('全部消除！', W / 2, BCY, 190, C.good, { scale: back(prog(lt, 0, 0.35)), stroke: '#fff' });
+}
+function sceneCta(t) { // 9.7–13：綠圓擴散成片尾底色（轉場接力）
+  const lt = t - T.cta, r = easeOut(prog(lt, 0, 0.5)) * 2300;
+  ctx.save(); camera(0.92); drawBoardBase(); ctx.restore();
+  ctx.save(); ctx.fillStyle = C.good; ctx.beginPath(); ctx.arc(BCX, BCY, r, 0, 7); ctx.fill(); ctx.restore();
+  text('15 波一次清空', W / 2, 470, 96, '#fff', { alpha: prog(lt, 0.25, 0.25), scale: back(prog(lt, 0.25, 0.35)), stroke: C.ink });
+  if (LOGO.complete) { ctx.save(); ctx.globalAlpha = prog(lt, 0.45, 0.3); const s = 560; ctx.drawImage(LOGO, W / 2 - s / 2, 640, s, s * LOGO.height / LOGO.width); ctx.restore(); }
+  ['blue', 'orange', 'white', 'fishLover'].forEach((k, i) => cat(k, 210 + i * 220, 1240 - Math.abs(Math.sin(lt * 5 + i)) * 50, 170, prog(lt, 0.55 + i * 0.08, 0.25)));
+  pill(W / 2, 1520, 820, 140, '#fff', prog(lt, 0.7, 0.25));
+  text('90 關免費玩｜搜尋 MEOW LINE', W / 2, 1520, 52, C.good, { alpha: prog(lt, 0.7, 0.25) });
+}
+function sceneReset(t) { // 13–14：綠底退回、貓咪落回開場盤面，無縫接 t=0
+  const lt = t - T.reset, g = 1 - easeOut(prog(lt, 0, 0.35));
+  drawBoardBase();
+  const m = toMap(D.pre), out = new Map();
+  [...m].forEach(([id, c], i) => { const k = easeOut(prog(lt, 0.2 + (c.y * 8 + c.x) / 64 * 0.4, 0.3)); out.set(id, { ...c, dy: -900 * (1 - k), alpha: k }); });
+  drawMap(out);
+  const h = prog(lt, 0.7, 0.3); if (h > 0) { hoverCat(t, 0); hookTitle(h, t); }
+  if (g > 0) { ctx.save(); ctx.globalAlpha = g; ctx.fillStyle = C.good; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+}
+
+function render(t) {
+  t = ((t % DUR) + DUR) % DUR; bg(t);
+  const scenes = [[T.drop, sceneHook], [T.chain, sceneDrop], [T.clear, sceneChain], [T.cta, sceneClear], [T.reset, sceneCta], [Infinity, sceneReset]];
+  scenes.find(([end]) => t < end)[1](t);
+}
+// 音效時間表：每波消除一聲「啵」，音高逐波上升（半音），供播放與離線混音共用
+const CUES = [{ t: T.drop + 0.22, rate: 0.8, k: 'pop' }];
+{ let w = 0; D.frames.forEach((f, i) => { if (f.c.length) CUES.push({ t: T.chain + FS[i] + FD[i] * 0.35, rate: Math.pow(2, w++ / 12), k: 'pop' }); }); }
+CUES.push({ t: T.clear, rate: 1, k: 'clear' });
+window.render = render; window.DURATION = DUR; window.CUES = CUES;
+
+// ---------- 播放 ----------
+const SRC = { pop: 'assets/pop.mp3', clear: 'assets/clear.wav' };
+let start = null, last = 0, sound = false;
+function tick(now) {
+  if (start === null) start = now;
+  const t = ((now - start) / 1000) % DUR;
+  if (sound) CUES.forEach(c => { if ((last < c.t && t >= c.t) || (t < last && c.t <= t)) { const a = new Audio(SRC[c.k]); a.preservesPitch = false; a.playbackRate = c.rate; a.volume = 0.6; a.play().catch(() => {}); } });
+  last = t; render(t); requestAnimationFrame(tick);
+}
+document.getElementById('play').addEventListener('click', e => { sound = true; start = null; last = 0; e.target.textContent = '↻ 重播'; });
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

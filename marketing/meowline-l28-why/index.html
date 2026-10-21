@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <!-- Generated from index.template.html by build.py — edit tools/, not index.html. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-latin-400-normal.woff2") format("woff2");
+        unicode-range: U+0000-00FF, U+2000-206F, U+00D7;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Huninn";
+        src: url("assets/fonts/huninn-chinese-traditional-400-normal.woff2") format("woff2");
+        font-display: block;
+      }
+      :root {
+        --cream: #fff6e8;
+        --ink: #33231b;
+        --marker: #e8456f;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Huninn", sans-serif;
+        color: var(--ink);
+        background: var(--cream);
+      }
+      .clip { position: absolute; inset: 0; }
+      #cam { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #cam video { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      .mark { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+      .mark path { fill: none; stroke: var(--marker); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+
+      /* Finger-tap indicator, inside the camera so it tracks zooms. */
+      .tap { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; }
+      .tap-dot { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45); border: 5px solid rgba(51, 35, 27, 0.75); }
+      .tap-ring { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+        border: 5px solid #ffffff; opacity: 0; }
+
+      #scrim {
+        position: absolute;
+        left: 0; right: 0; bottom: 0; height: 600px;
+        background: linear-gradient(to bottom, rgba(30, 18, 12, 0), rgba(30, 18, 12, 0.5));
+      }
+      .who { position: absolute; left: 50%; top: 1440px; transform: translateX(-50%); white-space: nowrap;
+        padding: 8px 30px 12px; border-radius: 14px; background: var(--cream); color: var(--marker); font-size: 46px; }
+      .cap { position: absolute; left: 50px; right: 50px; top: 1540px; text-align: center; }
+      .cap > span {
+        display: inline-block;
+        font-size: 72px;
+        line-height: 1.3;
+        letter-spacing: 0.02em;
+        color: #ffffff;
+        -webkit-text-stroke: 11px var(--ink);
+        paint-order: stroke fill;
+        text-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+      }
+      .cap .hi { color: #ffd56b; }
+
+      #end { background: var(--cream); }
+      .end-stack {
+        position: absolute;
+        left: 0; right: 0; top: 470px;
+        display: flex; flex-direction: column; align-items: center;
+      }
+      .end-q { position: relative; display: block; font-size: 88px; line-height: 1.2; white-space: nowrap; }
+      .end-q .mark { left: 300px; top: 98px; width: 600px; height: 50px; }
+      .end-logo { display: block; width: 500px; height: 500px; object-fit: contain; margin-top: 110px; }
+      .end-name { display: block; margin-top: 30px; font-size: 56px; letter-spacing: 0.08em; }
+      .end-hint { display: block; margin-top: 36px; font-size: 48px; color: var(--marker); }
+      .end-sub { display: block; margin-top: 28px; font-size: 50px; color: #7a5a48; letter-spacing: 0.04em; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="56.52" data-width="1080" data-height="1920">
+
+      <div id="cam">
+        <video id="seg-hook" src="assets/footage/l28slow.mp4" data-start="0.0" data-duration="5.76" data-media-start="20.9" data-playback-rate="0.125" data-track-index="0" playsinline muted></video>
+        <video id="seg-b2" src="assets/footage/l28slow.mp4" data-start="5.76" data-duration="4.25" data-media-start="2.3" data-playback-rate="0.2" data-track-index="0" playsinline muted></video>
+        <video id="seg-b2h" src="assets/footage/l28slow.mp4" data-start="10.01" data-duration="1.923" data-media-start="3.15" data-playback-rate="0.13" data-track-index="0" playsinline muted></video>
+        <video id="seg-b3" src="assets/footage/l28slow.mp4" data-start="11.933" data-duration="4.545" data-media-start="3.4" data-playback-rate="0.22" data-track-index="0" playsinline muted></video>
+        <video id="seg-b4" src="assets/footage/l28slow.mp4" data-start="16.478" data-duration="2.733" data-media-start="4.4" data-playback-rate="3.0" data-track-index="0" playsinline muted></video>
+        <video id="seg-b5" src="assets/footage/l28slow.mp4" data-start="19.211" data-duration="4.722" data-media-start="12.6" data-playback-rate="0.18" data-track-index="0" playsinline muted></video>
+        <video id="seg-b6" src="assets/footage/l28slow.mp4" data-start="23.933" data-duration="7.143" data-media-start="13.45" data-playback-rate="0.21" data-track-index="0" playsinline muted></video>
+        <video id="seg-b7" src="assets/footage/l28slow.mp4" data-start="31.076" data-duration="3.45" data-media-start="14.95" data-playback-rate="1.0" data-track-index="0" playsinline muted></video>
+        <video id="seg-b7b" src="assets/footage/l28slow.mp4" data-start="34.526" data-duration="1.286" data-media-start="18.4" data-playback-rate="1.4" data-track-index="0" playsinline muted></video>
+        <video id="seg-b8" src="assets/footage/l28slow.mp4" data-start="35.812" data-duration="7.045" data-media-start="20.2" data-playback-rate="0.22" data-track-index="0" playsinline muted></video>
+        <video id="seg-b9" src="assets/footage/l28slow.mp4" data-start="42.857" data-duration="6.061" data-media-start="22.0" data-playback-rate="0.33" data-track-index="0" playsinline muted></video>
+        <svg class="mark" viewBox="0 0 1080 1920" aria-hidden="true">
+          <path id="m-hook" pathLength="1" d="M 162 1341 C 162 1261, 537 1255, 562 1341 C 574 1421, 266 1443, 172 1391 C 147 1361, 177 1281, 242 1269" />
+          <path id="m-blue" pathLength="1" d="M 290 1220 C 290 1158, 434 1152, 436 1230 C 434 1302, 300 1306, 286 1238 C 284 1200, 342 1150, 372 1152" />
+          <path id="m-row" pathLength="1" d="M 162 978 C 162 898, 537 892, 562 978 C 574 1058, 266 1080, 172 1028 C 147 998, 177 918, 242 906" />
+          <path id="m-arr-r" pathLength="1" d="M 561 948 C 555 1038.0, 567 1038.0, 561 1128 M 535 1094 L 561 1128 L 587 1094" />
+          <path id="m-col2" pathLength="1" d="M 324 1041 L 410 1045 C 430 1049, 434 1071, 430 1091 L 426 1399 C 424 1419, 400 1423, 314 1419 C 294 1415, 290 1389, 296 1369 L 294 1065 C 296 1045, 308 1041, 334 1039" />
+          <path id="m-arr-m" pathLength="1" d="M 298 948 C 292 1159.5, 304 1159.5, 298 1371 M 272 1337 L 298 1371 L 324 1337" />
+          <path id="m-final" pathLength="1" d="M 162 1341 C 162 1261, 537 1255, 562 1341 C 574 1421, 266 1443, 172 1391 C 147 1361, 177 1281, 242 1269" />
+        </svg>
+        <div class="tap" id="tap"><div class="tap-ring" id="tap-ring"></div><div class="tap-dot" id="tap-dot"></div></div>
+      </div>
+
+      <div id="scrim"></div>
+
+      <div id="lbl-rw" class="clip" data-start="5.76" data-duration="10.718" data-track-index="5"><span class="who">◀◀ 倒回第 2 步</span></div>
+      <div id="lbl-ff" class="clip" data-start="16.478" data-duration="2.733" data-track-index="5"><span class="who">▶▶ 快轉</span></div>
+      <div id="lbl-go" class="clip" data-start="19.211" data-duration="23.646" data-track-index="5"><span class="who">開始結算</span></div>
+      <div id="c00" class="clip" data-start="0.1" data-duration="2.8" data-track-index="3"><div class="cap"><span>第 28 關最後一下<br>消掉的是這三隻白貓</span></div></div>
+      <div id="c01" class="clip" data-start="2.9" data-duration="2.86" data-track-index="3"><div class="cap"><span>可是牠們一開始<br>根本不在這裡</span></div></div>
+      <div id="c02" class="clip" data-start="5.91" data-duration="2.7" data-track-index="3"><div class="cap"><span>第 2 步：藍貓放最下面</span></div></div>
+      <div id="c03" class="clip" data-start="8.61" data-duration="3.323" data-track-index="3"><div class="cap"><span>第 3 步：白貓放中間<br>跟左右連成一排</span></div></div>
+      <div id="c04" class="clip" data-start="12.033" data-duration="2.0" data-track-index="3"><div class="cap"><span>看起來馬上就會消，對吧？</span></div></div>
+      <div id="c05" class="clip" data-start="14.033" data-duration="2.445" data-track-index="3"><div class="cap"><span>其實，這排一結算<br>就會被拆散</span></div></div>
+      <div id="c06" class="clip" data-start="16.478" data-duration="2.733" data-track-index="3"><div class="cap"><span>其他貓照解法放好</span></div></div>
+      <div id="c07" class="clip" data-start="19.411" data-duration="2.6" data-track-index="3"><div class="cap"><span>第一波：右邊白貓底下的<br>咖啡貓先消掉</span></div></div>
+      <div id="c08" class="clip" data-start="22.011" data-duration="1.922" data-track-index="3"><div class="cap"><span>右邊這隻就掉下去了</span></div></div>
+      <div id="c09" class="clip" data-start="24.033" data-duration="3.3" data-track-index="3"><div class="cap"><span>第 2 步那隻藍貓<br>跟整串藍貓一起消掉</span></div></div>
+      <div id="c10" class="clip" data-start="27.333" data-duration="3.743" data-track-index="3"><div class="cap"><span>中間一次少了三隻<br>白貓直接掉到最底</span></div></div>
+      <div id="c11" class="clip" data-start="31.376" data-duration="4.436" data-track-index="3"><div class="cap"><span>右邊這隻又掉了兩次<br>跟中間會合</span></div></div>
+      <div id="c12" class="clip" data-start="36.412" data-duration="2.2" data-track-index="3"><div class="cap"><span>最後，左邊這隻也掉下來</span></div></div>
+      <div id="c13" class="clip" data-start="38.612" data-duration="4.245" data-track-index="3"><div class="cap"><span>三隻剛好在最底排<br>重新連成一排</span></div></div>
+      <div id="c14" class="clip" data-start="43.157" data-duration="2.0" data-track-index="3"><div class="cap"><span><span class='hi'>13</span> 連鎖，全部清光</span></div></div>
+      <div id="c15" class="clip" data-start="45.157" data-duration="3.761" data-track-index="3"><div class="cap"><span>原來第 2、3 步<br>是在幫最後一步鋪路</span></div></div>
+
+      <div id="end" class="clip" data-start="48.918" data-duration="7.6" data-track-index="4">
+        <div class="end-stack">
+          <span class="end-q" id="end-q">第 28 關，你看出來了嗎？
+            <svg class="mark" viewBox="0 0 600 50" aria-hidden="true"><path id="underline" pathLength="1" d="M 12 30 C 160 18, 330 16, 480 24 C 530 26, 562 30, 588 26" /></svg>
+          </span>
+          <img class="end-logo" id="end-logo" src="assets/img/meowlogo.webp" alt="MEOW LINE" />
+          <span class="end-name" id="end-name">MEOW LINE｜貓咪落下連線</span>
+          <span class="end-hint" id="end-hint">卡關也不怕・每關都有一次提示</span>
+          <span class="end-sub" id="end-sub">App Store 免費下載</span>
+        </div>
+      </div>
+
+      <audio id="bgm" src="assets/audio/geoffharvey-excuse-me-cat-150613.mp3" data-start="0" data-duration="56.52" data-volume="1" data-track-index="10"
+        data-automation='{"version": 1, "lanes": [{"target": "volume", "points": [{"t": 0, "v": 0.28}, {"t": 16.48, "v": 0.28}, {"t": 16.78, "v": 0.6}, {"t": 19.01, "v": 0.6}, {"t": 19.31, "v": 0.28}, {"t": 34.43, "v": 0.28}, {"t": 34.73, "v": 0.6}, {"t": 36.11, "v": 0.6}, {"t": 36.41, "v": 0.28}, {"t": 55.32, "v": 0.28}, {"t": 56.52, "v": 0}]}]}'></audio>
+      <audio id="vo-v01" src="assets/vo/v01.wav" data-start="0.1" data-duration="5.45" data-volume="1" data-track-index="20"></audio>
+      <audio id="vo-v02" src="assets/vo/v02.wav" data-start="5.91" data-duration="5.95" data-volume="1" data-track-index="21"></audio>
+      <audio id="vo-v03" src="assets/vo/v03.wav" data-start="12.033" data-duration="4.47" data-volume="1" data-track-index="22"></audio>
+      <audio id="vo-v04" src="assets/vo/v04.wav" data-start="19.411" data-duration="4.41" data-volume="1" data-track-index="23"></audio>
+      <audio id="vo-v05" src="assets/vo/v05.wav" data-start="24.033" data-duration="6.72" data-volume="1" data-track-index="24"></audio>
+      <audio id="vo-v06" src="assets/vo/v06.wav" data-start="31.376" data-duration="3.17" data-volume="1" data-track-index="25"></audio>
+      <audio id="vo-v07" src="assets/vo/v07.wav" data-start="36.412" data-duration="4.77" data-volume="1" data-track-index="26"></audio>
+      <audio id="vo-v08" src="assets/vo/v08.wav" data-start="43.157" data-duration="1.73" data-volume="1" data-track-index="27"></audio>
+      <audio id="vo-v09" src="assets/vo/v09.wav" data-start="45.157" data-duration="3.09" data-volume="1" data-track-index="28"></audio>
+      <audio id="vo-v10" src="assets/vo/v10.wav" data-start="49.218" data-duration="6.94" data-volume="1" data-track-index="29"></audio>
+      <audio id="pop0" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="6.53" data-duration="0.35" data-volume="0.7" data-track-index="12"></audio>
+      <audio id="pop1" src="assets/audio/andressamd-pop-click-576326.mp3" data-start="9.805" data-duration="0.35" data-volume="0.7" data-track-index="13"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const END = 48.918;
+
+      document.querySelectorAll(".cap, .who").forEach(cap => {
+        const clip = cap.parentElement;
+        tl.fromTo(clip, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, Number(clip.dataset.start));
+      });
+
+      tl.set("#cam", { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.to("#cam", { scale: 1.9, x: -147.8, y: -1606.9, duration: 0.01, ease: "power2.inOut" }, 0);
+      tl.to("#cam", { scale: 2.0, x: -184.0, y: -1742.0, duration: 5.66, ease: "none" }, 0.05);
+      tl.to("#cam", { scale: 1.7, x: -75.4, y: -1007.0, duration: 0.01, ease: "power2.inOut" }, 5.76);
+      tl.to("#cam", { scale: 1.0, x: 0, y: 0, duration: 0.5, ease: "power2.inOut" }, 16.478);
+      tl.to("#cam", { scale: 1.8, x: -270.0, y: -1010.0, duration: 0.6, ease: "power2.inOut" }, 19.211);
+      tl.to("#cam", { scale: 1.45, x: 0, y: -816.5, duration: 0.6, ease: "power2.inOut" }, 23.933);
+      tl.to("#cam", { scale: 1.0, x: 0, y: 0, duration: 0.4, ease: "power2.inOut" }, 42.857);
+
+      tl.set("#m-hook", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-hook", { opacity: 1 }, 0.99);
+      tl.to("#m-hook", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 0.99);
+      tl.to("#m-hook", { opacity: 0, duration: 0.15, ease: "none" }, 5.61);
+      tl.set("#m-blue", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-blue", { opacity: 1 }, 6.83);
+      tl.to("#m-blue", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 6.83);
+      tl.to("#m-blue", { opacity: 0, duration: 0.15, ease: "none" }, 16.328);
+      tl.set("#m-row", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-row", { opacity: 1 }, 10.305);
+      tl.to("#m-row", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 10.305);
+      tl.to("#m-row", { opacity: 0, duration: 0.15, ease: "none" }, 16.328);
+      tl.set("#m-arr-r", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-arr-r", { opacity: 1 }, 22.367);
+      tl.to("#m-arr-r", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 22.367);
+      tl.to("#m-arr-r", { opacity: 0, duration: 0.15, ease: "none" }, 24.383);
+      tl.set("#m-col2", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-col2", { opacity: 1 }, 27.381);
+      tl.to("#m-col2", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 27.381);
+      tl.to("#m-col2", { opacity: 0, duration: 0.15, ease: "none" }, 29.435);
+      tl.set("#m-arr-m", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-arr-m", { opacity: 1 }, 29.535);
+      tl.to("#m-arr-m", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 29.535);
+      tl.to("#m-arr-m", { opacity: 0, duration: 0.15, ease: "none" }, 31.726);
+      tl.set("#m-final", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#m-final", { opacity: 1 }, 39.967);
+      tl.to("#m-final", { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" }, 39.967);
+      tl.to("#m-final", { opacity: 0, duration: 0.15, ease: "none" }, 42.707);
+
+      // Tap cursor follows the recorder's tap log, mapped into composition time.
+      const TAPS = [{"t": 6.53, "x": 359, "y": 1230}, {"t": 9.805, "x": 359, "y": 988}];
+      tl.set("#tap", { x: TAPS[0].x, y: TAPS[0].y + 160, opacity: 0 }, 0);
+      let prevEnd = 0;
+      TAPS.forEach((tp, i) => {
+        const lead = Math.min(0.45, Math.max(0.12, tp.t - prevEnd - 0.05));
+        const from = tp.t - lead;
+        tl.to("#tap", { opacity: 1, duration: 0.1, ease: "none" }, from);
+        tl.to("#tap", { x: tp.x, y: tp.y, duration: lead, ease: "power2.inOut" }, from);
+        tl.fromTo("#tap-dot", { scale: 1 }, { scale: 0.8, duration: 0.07, yoyo: true, repeat: 1, ease: "power1.inOut", immediateRender: false }, tp.t);
+        tl.fromTo("#tap-ring", { scale: 1, opacity: 0.9 }, { scale: 2, opacity: 0, duration: 0.4, ease: "power2.out", immediateRender: false }, tp.t);
+        const next = TAPS[i + 1];
+        if (!next || next.t - tp.t > 1.6) tl.to("#tap", { opacity: 0, duration: 0.2, ease: "none" }, tp.t + 0.6);
+        prevEnd = tp.t + 0.1;
+      });
+
+      tl.fromTo("#end", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "none" }, END);
+      tl.fromTo("#end-q", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, END + 0.1);
+      tl.set("#underline", { strokeDasharray: 1, strokeDashoffset: 1, opacity: 0 }, 0);
+      tl.set("#underline", { opacity: 1 }, END + 0.55);
+      tl.to("#underline", { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, END + 0.55);
+      tl.fromTo("#end-logo", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, END + 0.7);
+      tl.fromTo("#end-name", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.1);
+      tl.fromTo("#end-hint", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.3);
+      tl.fromTo("#end-sub", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, END + 1.5);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
