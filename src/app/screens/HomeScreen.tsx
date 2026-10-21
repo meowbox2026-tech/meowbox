@@ -1,8 +1,13 @@
+import { Capacitor } from '@capacitor/core'
 import { ArtworkButton } from '../components/ArtworkButton'
 import { GameImage } from '../components/GameImage'
 import { TopBar } from '../components/TopBar'
-import { useStrings } from '../../i18n'
+import { useLocale, useStrings } from '../../i18n'
 import { HomeSocial } from '../leaderboard/HomeSocial'
+
+// Static zh-TW pages in public/; plain links give crawlers and visitors a way in from the game shell.
+const SITE_LINKS = [['/about', '遊戲介紹'], ['/guide', '玩法與攻略'], ['/privacy', '隱私權政策'], ['/terms', '服務條款'], ['/support', '客服支援']] as const
+const SITE_NAV_LABEL = { 'zh-TW': '網站資訊', en: 'Site information', ja: 'サイト情報' }
 
 interface HomeScreenProps {
   onStart: () => void
@@ -11,6 +16,7 @@ interface HomeScreenProps {
 
 export function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
   const strings = useStrings()
+  const locale = useLocale()
 
   return (
     <main className="screen screen--home">
@@ -25,6 +31,9 @@ export function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
       <nav className="home-nav" aria-label={strings.home.mainNav}>
         <ArtworkButton asset="levelmap" className="home-nav__button" onClick={() => onNavigate('levels')}>{strings.home.levels}</ArtworkButton>
       </nav>
+      {!Capacitor.isNativePlatform() && <nav className="home-site-links" aria-label={SITE_NAV_LABEL[locale]}>
+        {SITE_LINKS.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
+      </nav>}
     </main>
   )
 }

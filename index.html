@@ -4,13 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#fff8e8" />
+    <meta name="description" content="Meow Line 喵序是一款免費的貓咪落下連線解謎遊戲：安排貓咪的放置順序，利用消除後的掉落讓同款貓咪連成一線，把 90 關裡的貓咪全部救回家。" />
     <meta name="google-adsense-account" content="ca-pub-6662722631869742" />
+    <link rel="canonical" href="https://meowbox.pages.dev/" />
     <link rel="icon" type="image/png" href="/app-icon.png" />
     <link rel="apple-touch-icon" href="/app-icon.png" />
     <title>MEOW LINE｜貓咪落下連線</title>
+    <script>
+      // AdSense only on the production web host; the iOS app (capacitor://localhost) uses AdMob instead.
+      (function () {
+        if (location.hostname !== 'meowbox.pages.dev') return
+        var w = window
+        w.adsbygoogle = w.adsbygoogle || []
+        w.adBreak = w.adConfig = function (o) { w.adsbygoogle.push(o) }
+        var s = document.createElement('script')
+        s.id = 'meowbox-adsense'
+        s.async = true
+        s.crossOrigin = 'anonymous'
+        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6662722631869742'
+        s.setAttribute('data-ad-frequency-hint', '30s')
+        document.head.appendChild(s)
+      })()
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Crawlable intro shown until React mounts and replaces it. -->
+    <div id="root"><main style="max-width:640px;margin:0 auto;padding:32px 16px;color:#633c2f;font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC',sans-serif;line-height:1.7">
+      <h1>Meow Line 喵序｜貓咪落下連線解謎</h1>
+      <p>依照順序把貓咪放進 8 × 8 棋盤，按下「開始救援」後，三隻以上同款貓咪連成一線就會消除，上方的貓咪落下後還能再連鎖。想清楚每一次掉落的位置，把 90 關裡的貓咪全部救回家。</p>
+      <p>遊戲載入中…</p>
+      <nav aria-label="網站導覽"><a href="/about">遊戲介紹</a> · <a href="/guide">玩法與攻略</a> · <a href="/support">客服支援</a> · <a href="/privacy">隱私權政策</a> · <a href="/terms">服務條款</a></nav>
+    </main></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

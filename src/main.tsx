@@ -17,6 +17,7 @@ import './styles/native-assets.css'
 import './styles/player-status.css'
 import './styles/theme.css'
 import './styles/leaderboard.css'
+import './styles/home-site-links.css'
 
 applyGameTheme(bundledTheme)
 

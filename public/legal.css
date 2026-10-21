@@ -11,7 +11,10 @@ section:first-of-type { border-top: 0; }
 h2 { margin: 0 0 8px; color: #713d2b; font-size: 20px; }
 p, li { color: #87583f; font-size: 15px; line-height: 1.75; }
 p { margin: 0 0 8px; }
-ul { margin: 0; padding-left: 22px; }
+ul, ol { margin: 0; padding-left: 22px; }
 li + li { margin-top: 4px; }
 a { color: #a1435a; font-weight: 800; }
 footer { margin-top: 16px; color: #fff6df; font-size: 12px; text-align: center; }
+.site-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.site-nav a { padding: 6px 12px; border-radius: 999px; color: #713d2b; font-size: 13px; text-decoration: none; background: rgba(255,249,239,.88); }
+.site-nav a[aria-current="page"] { color: #fff6df; background: #a1435a; }

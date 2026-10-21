@@ -53,6 +53,7 @@ interface AdSenseWindow {
 }
 
 const SCRIPT_ID = 'meowbox-adsense'
+const configuredWindows = new WeakSet<object>()
 /** Safety net: a stuck provider must never freeze the game. */
 const BREAK_TIMEOUT_MS = 90000
 
@@ -65,16 +66,21 @@ export function loadAdSenseScript(config: WebAdSenseConfig, doc: Document = docu
   const queue = (options: unknown) => { win.adsbygoogle!.push(options) }
   win.adBreak = win.adBreak ?? queue
   win.adConfig = win.adConfig ?? queue
-  if (doc.getElementById(SCRIPT_ID)) return true
-  const script = doc.createElement('script')
-  script.id = SCRIPT_ID
-  script.async = true
-  script.crossOrigin = 'anonymous'
-  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(config.client)}`
-  script.dataset.adFrequencyHint = '30s'
-  if (config.isTesting) script.dataset.adbreakTest = 'on'
-  doc.head.appendChild(script)
-  win.adConfig?.({ preloadAdBreaks: 'on', sound: 'on' })
+  // index.html already injects the tag on the production host so reviewers see it before the game starts.
+  if (!doc.getElementById(SCRIPT_ID)) {
+    const script = doc.createElement('script')
+    script.id = SCRIPT_ID
+    script.async = true
+    script.crossOrigin = 'anonymous'
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(config.client)}`
+    script.dataset.adFrequencyHint = '30s'
+    if (config.isTesting) script.dataset.adbreakTest = 'on'
+    doc.head.appendChild(script)
+  }
+  if (!configuredWindows.has(win)) {
+    configuredWindows.add(win)
+    win.adConfig?.({ preloadAdBreaks: 'on', sound: 'on' })
+  }
   return true
 }
 

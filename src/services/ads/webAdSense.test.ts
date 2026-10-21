@@ -31,6 +31,18 @@ describe('web AdSense config', () => {
     expect((scripts[0] as HTMLScriptElement).dataset.adbreakTest).toBe('on')
   })
 
+  it('reuses the tag index.html injected and still configures ad breaks once', () => {
+    const existing = document.createElement('script')
+    existing.id = 'meowbox-adsense'
+    document.head.appendChild(existing)
+    const win = { adConfig: vi.fn() }
+    const doc = { defaultView: win, getElementById: (id: string) => document.getElementById(id), head: document.head } as unknown as Document
+    expect(loadAdSenseScript(config, doc)).toBe(true)
+    expect(loadAdSenseScript(config, doc)).toBe(true)
+    expect(document.querySelectorAll('script#meowbox-adsense')).toHaveLength(1)
+    expect(win.adConfig).toHaveBeenCalledTimes(1)
+  })
+
   it('does nothing without a client id', () => {
     expect(createWebAdSenseGateways({ ...config, client: '' })).toBeUndefined()
   })
