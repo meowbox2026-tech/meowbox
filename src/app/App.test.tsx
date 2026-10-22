@@ -75,6 +75,18 @@ describe('App game loading', () => {
     expect(screen.getByText('資料尚未接入')).toBeInTheDocument()
   })
 
+  it('keeps the player status dashboard out of production builds', () => {
+    vi.stubEnv('DEV', false)
+    window.history.pushState({}, '', '/player-status')
+
+    try {
+      render(<App />)
+      expect(screen.queryByRole('heading', { name: '玩家狀態' })).not.toBeInTheDocument()
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('opens the game without a full-screen loading interstitial', () => {
     render(<App />)
 

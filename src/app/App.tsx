@@ -28,8 +28,11 @@ import { LeaderboardScreen } from './leaderboard/LeaderboardScreen'
 
 type Screen = 'home' | 'levels' | 'game' | 'settings' | 'legal' | 'profile' | 'leaderboard'
 
+// The analytics dashboard is a local tool; production builds drop the route.
 function isPlayerStatusRoute() {
-  return typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/player-status'
+  return import.meta.env.DEV
+    && typeof window !== 'undefined'
+    && window.location.pathname.replace(/\/+$/, '') === '/player-status'
 }
 
 export function App() {
